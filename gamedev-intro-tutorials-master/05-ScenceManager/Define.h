@@ -8,4 +8,6 @@ enum ObjType
 	GROUND = 4,
 	WARPPIPE = 5,
 	BLOCK = 6,
+	QUESTIONBRICK = 7,
+	MUSHROOM = 8,
 };

@@ -59,8 +59,10 @@ public:
 
 	DWORD dt; 
 
+	bool IsMovingObject;
 	LPANIMATION_SET animation_set;
 
+	int Health;
 	int ObjType;
 public: 
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
@@ -69,7 +71,14 @@ public:
 	void GetSpeed(float &vx, float &vy) { vx = this->vx; vy = this->vy; }
 
 	int GetState() { return this->state; }
-
+	void SubHealth()
+	{
+		Health--;
+	}
+		int GetHealth()
+	{
+		return Health;
+	}
 	void RenderBoundingBox();
 
 	void SetAnimationSet(LPANIMATION_SET ani_set) { animation_set = ani_set; }

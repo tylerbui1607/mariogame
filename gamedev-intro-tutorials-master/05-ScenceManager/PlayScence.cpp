@@ -9,7 +9,9 @@
 #include"Ground.h"
 #include "WarpPipe.h"
 #include "Block.h"
-
+#include "QuestionBrick.h"
+#include"MushRoom.h"
+#include "Item.h"
 using namespace std;
 bool IsKeyUp;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
@@ -30,14 +32,18 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
 
-#define OBJECT_TYPE_MARIO	0
-#define OBJECT_TYPE_BRICK	1
-#define OBJECT_TYPE_GOOMBA	2
-#define OBJECT_TYPE_KOOPAS	3
-#define OBJECT_TYPE_GROUND	4
-#define OBJECT_TYPE_WARPPIPE	5
-#define OBJECT_TYPE_BLOCK	6
+#define OBJECT_TYPE_MARIO			0
+#define OBJECT_TYPE_BRICK			1
+#define OBJECT_TYPE_GOOMBA			2
+#define OBJECT_TYPE_KOOPAS			3
+#define OBJECT_TYPE_GROUND			4
+#define OBJECT_TYPE_WARPPIPE		5
+#define OBJECT_TYPE_BLOCK			6
+#define OBJECT_TYPE_QUESTIONBRICK	7
+#define OBJECT_TYPE_ITEM			8
 
+
+#define MUSHROOM_ANISET_ID	8
 
 #define OBJECT_TYPE_PORTAL	50
 
@@ -141,25 +147,19 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	float x = atof(tokens[1].c_str());
 	float y = atof(tokens[2].c_str());
 	int ani_set_id;
-	/*if (object_type != ObjType::WARPPIPE)
-	{*/
+
 	if (object_type == ObjType::GROUND || object_type == ObjType::WARPPIPE || object_type == ObjType::BLOCK)
 		{
 			width = atof(tokens[4].c_str());
 			height = atof(tokens[5].c_str());
 		}
-		ani_set_id = atoi(tokens[3].c_str());
-	/*}*/
-	/*else
-	{
-		width = atof(tokens[3].c_str());
-		height = atof(tokens[4].c_str());
-	}*/
+	ani_set_id = atoi(tokens[3].c_str());
+	
 
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
 	CGameObject *obj = NULL;
-
+	Item* item = NULL;
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
@@ -179,6 +179,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_GROUND: obj = new Ground(width,height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
+	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(); break;
+	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 		{	
 			float r = atof(tokens[4].c_str());
@@ -194,12 +196,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 	// General object setup
 	obj->SetPosition(x, y);
-	//if (obj->ObjType != ObjType::WARPPIPE)
-
-	//{
-		LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
-		obj->SetAnimationSet(ani_set);
-	//}
+	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
+	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
 }
 
@@ -257,15 +255,40 @@ void CPlayScene::Update(DWORD dt)
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
+	vector<LPGAMEOBJECT> coMovingObjects;
+	vector<LPGAMEOBJECT> coNotMoveObjects;
 	vector<LPGAMEOBJECT> coObjects;
+
+
 	for (size_t i = 1; i < objects.size(); i++)
 	{
-		coObjects.push_back(objects[i]);
+		if (objects[i]->GetHealth() != 0)
+		{
+			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
+			{
+				MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
+				mushroom->CaclVx(player->x);
+				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+				LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+				mushroom->SetAnimationSet(ani_set);
+				objects[i]->SubHealth();
+				objects.push_back(mushroom);
+			}
+			coObjects.push_back(objects[i]);
+			if (objects[i]->IsMovingObject)
+				coMovingObjects.push_back(objects[i]);
+			else
+				coNotMoveObjects.push_back(objects[i]);
+		}
 	}
-
+	DebugOut(L"hello%d\n", coObjects.at(coObjects.size()-1)->ObjType);
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		objects[i]->Update(dt, &coObjects);
+	
+		if (objects[i]->ObjType == ObjType::MARIO)
+			objects[i]->Update(dt, &coObjects);
+		else
+			objects[i]->Update(dt, &coNotMoveObjects);
 	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
@@ -274,18 +297,19 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
+	
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
-	cy -= game->GetScreenHeight() / 2;
+
 	if (cx < 0)
 		cx = 0;
 	if (cx > 2816)
 		cx = 2816;
 	if (cy < 0)
 		cy = 0;
-	if (cy > 250)
-		cy = 250;
+	if (player->y >= 240)
+		cy = 240;
+		
 	CGame::GetInstance()->SetCamPos(cx, cy);
 }
 
@@ -324,6 +348,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetPosition(50.0f, 0.0f);
 		mario->SetSpeed(0, 0);
 		break;
+	case DIK_E:
+		mario->SetLevel(MARIO_LEVEL_BIG);
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
 		mario->SetState(MARIO_STATE_FLY);

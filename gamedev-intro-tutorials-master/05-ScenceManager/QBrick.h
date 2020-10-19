@@ -1,21 +1,22 @@
 #pragma once
 #include "GameObject.h"
+
 #define ANI_BRICK 0
 #define	ANI_BRICK_TWO	1
 
 #define BRICK_SPEED_Y	0.05
-#define MAX_HIGH	5
+#define MAX_HIGH	18
 #define BRICK_STATE_COLISSION 1
 #define BRICK_STATE_NOTHINGLEFT 2
-class QuestionBrick :
+
+class QBrick :
 	public CGameObject
 {
 	float StartY;
 public:
 	bool Check;
-	QuestionBrick()
+	QBrick()
 	{
-		Health = 3;
 		ObjType = 7;
 		Check = false;
 	}
@@ -29,6 +30,5 @@ public:
 		right = x + 16;
 		bottom = y + 16;
 	}
-	~QuestionBrick();
 };
 

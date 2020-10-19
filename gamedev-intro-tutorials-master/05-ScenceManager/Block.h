@@ -20,8 +20,6 @@ public:
 		right = left + Width;
 		bottom = top + Height;
 	}
-	virtual void Render() {
-		RenderBoundingBox();
-	}
+	virtual void Render();
 };
 

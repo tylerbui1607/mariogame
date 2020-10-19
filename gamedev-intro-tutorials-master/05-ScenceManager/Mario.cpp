@@ -8,6 +8,8 @@
 #include"Ground.h"
 #include "Goomba.h"
 #include "Portal.h"
+#include"QuestionBrick.h"
+#include "MushRoom.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -20,12 +22,13 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->x = x; 
 	this->y = y; 
 	CounterSpeed = 0;
+	IsMovingObject = true;
 	IsFalling = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	DebugOut(L"VX%f\n", vx);
+
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
 
@@ -57,7 +60,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		TCanFly = GetTickCount64();
 	}
-	if (GetTickCount64() - TCanFly >= 3000)
+	if (GetTickCount64() - TCanFly >= MARIO_CANFLY_TIME)
 	{
 		IsFlying = false;
 		TCanFly = 0;
@@ -66,7 +69,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		TRollBack = GetTickCount64();
 	}
-	if (GetTickCount64() - TRollBack >= 100)
+	if (GetTickCount64() - TRollBack >= MARIO_ROLLBACK_TIME)
 	{
 		IsRollBack = false;
 		TRollBack = 0;
@@ -75,7 +78,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
-	//DebugOut(L"Stack %d\n", CounterSpeed);
 	// turn off collision when die 
 	if (state != MARIO_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
@@ -101,7 +103,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-		
+		x += min_tx * dx + nx * 0.4f;
+		y += min_ty * dy + ny * 0.4f;
 		
 		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
@@ -111,10 +114,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				IsOnPlatForm = true;
 			}
+			if (e->obj->ObjType == ObjType::MUSHROOM)
+			{
+				e->obj->SubHealth();
+				this->level++;
+			}
 			if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
 			{
-				//CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
-
 				// jump on top >> kill Goomba and deflect a bit 
 				if (e->ny < 0)
 				{
@@ -124,6 +130,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						vy = -MARIO_JUMP_DEFLECT_SPEED;
 					}
 				}
+				
 				else if (e->nx != 0)
 				{
 					if (untouchable == 0)
@@ -146,22 +153,26 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CPortal* p = dynamic_cast<CPortal*>(e->obj);
 				CGame::GetInstance()->SwitchScene(p->GetSceneId());
 			}
+			else if (e->obj->ObjType == ObjType::QUESTIONBRICK)
+			{
+				if (e->ny > 0)
+				{
+					e->obj->SetState(BRICK_STATE_COLISSION);
+				}
+			}
+		
 			if (e->obj->ObjType == ObjType::BLOCK)
 			{
 				x += dx;
 			}
-			else
-			{
-				if (nx != 0) vx = 0;
-				x += min_tx * dx + nx * 0.5f;
-			}
-			y += min_ty * dy + ny * 0.5f;
 			if (ny != 0) vy = 0;
+
 		}
+		
 	}
-	DebugOut(L"VelocityX%f\n", vx);
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	/*DebugOut(L"currentLEVEL%d\n", level);*/
 	}
 void CMario::Render()
 {
@@ -379,7 +390,7 @@ void CMario::SetState(int state)
 
 			if (IsOnPlatForm)
 			{
-				vy = -0.5;
+				vy = -MARIO_JUMP_SPEED_Y;
 				IsOnPlatForm = false;
 			}
 		break;
@@ -409,7 +420,10 @@ void CMario::SetState(int state)
 		if (CounterSpeed == 7 && level == MARIO_LEVEL_RACOON)
 		{
 			vy = -MARIO_FLY_SPEED;
-			IsFlying = true;
+			if (!IsFlying)
+			{
+				IsFlying = true;
+			}
 		}
 		break;
 	case MARIO_STATE_FALLING:

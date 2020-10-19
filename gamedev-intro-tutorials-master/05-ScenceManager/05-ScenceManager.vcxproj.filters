@@ -31,6 +31,9 @@
     <Filter Include="Resource\Map">
       <UniqueIdentifier>{b05ce7dc-87d8-459c-9dc6-2764724ab1df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Item">
+      <UniqueIdentifier>{86fe38e1-7b6f-4d98-97e5-31c7b198509f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,6 +96,12 @@
     <ClCompile Include="QuestionBrick.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="MushRoom.cpp">
+      <Filter>Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Object\Item</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -154,6 +163,12 @@
     </ClInclude>
     <ClInclude Include="QuestionBrick.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="MushRoom.h">
+      <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Object\Item</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

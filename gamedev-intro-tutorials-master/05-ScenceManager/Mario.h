@@ -2,10 +2,9 @@
 #include "GameObject.h"
 
 #define MARIO_WALKING_SPEED			0.15f 
-//0.1f
-#define MARIO_JUMP_SPEED_Y			0.15f
+#define MARIO_JUMP_SPEED_Y			0.3f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
-#define MARIO_GRAVITY				0.0015f
+#define MARIO_GRAVITY				0.0007f
 #define MARIO_DIE_DEFLECT_SPEED		0.45f
 #define MARIO_ACCLERATION			0.004f
 #define MARIO_MAX_SPEED				0.15f
@@ -52,7 +51,7 @@
 #define	MARIO_ANI_SMALL_ROLLBACKLEFT		24
 #define MARIO_ANI_SMALL_FASTESTRUNRIGHT		25
 #define MARIO_ANI_SMALL_FASTESTRUNLEFT		26	
-
+/*MARIO_LEVEL*/
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
 #define MARIO_LEVEL_RACOON	3
@@ -64,7 +63,9 @@
 #define MARIO_SMALL_BBOX_HEIGHT 15
 
 #define MARIO_UNTOUCHABLE_TIME 5000
-
+#define MARIO_CANFLY_TIME 3000
+#define MARIO_ROLLBACK_TIME 100
+#define MARIO_PLUSSTACK_TIME 200
 
 class CMario : public CGameObject
 {
@@ -108,7 +109,7 @@ public:
 	}
 	void IncreaseStack()
 	{
-		if (CounterSpeed < 7 && (GetTickCount64() - TPlusStack >= 200))
+		if (CounterSpeed < 7 && (GetTickCount64() - TPlusStack >= MARIO_PLUSSTACK_TIME))
 		{
 			TPlusStack = 0;
 			CounterSpeed++;
