@@ -12,8 +12,11 @@
 #include "QuestionBrick.h"
 #include"MushRoom.h"
 #include "Item.h"
+#include "FirePiranhaPlant.h"
+#include "FireBullet.h"
+#define MAP_MAX_WIDTH	2816
 using namespace std;
-bool IsKeyUp;
+
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
@@ -40,7 +43,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_WARPPIPE		5
 #define OBJECT_TYPE_BLOCK			6
 #define OBJECT_TYPE_QUESTIONBRICK	7
-#define OBJECT_TYPE_ITEM			8
+#define OBJECT_TYPE_FIREPIRANHAPLANT	8
 
 
 #define MUSHROOM_ANISET_ID	8
@@ -180,6 +183,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(); break;
+	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(); break;
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 		{	
@@ -246,7 +250,7 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 	map = new Map();
-	map->DrawMap();
+	//map->DrawMap();
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
@@ -272,7 +276,8 @@ void CPlayScene::Update(DWORD dt)
 				LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
 				mushroom->SetAnimationSet(ani_set);
 				objects[i]->SubHealth();
-				objects.push_back(mushroom);
+				objects.push_back(objects[i]);
+				objects[i] = mushroom;
 			}
 			coObjects.push_back(objects[i]);
 			if (objects[i]->IsMovingObject)
@@ -281,14 +286,34 @@ void CPlayScene::Update(DWORD dt)
 				coNotMoveObjects.push_back(objects[i]);
 		}
 	}
-	DebugOut(L"hello%d\n", coObjects.at(coObjects.size()-1)->ObjType);
+	
+	/*DebugOut(L"hello%d\n", coObjects.size());*/
 	for (size_t i = 0; i < objects.size(); i++)
 	{
 	
-		if (objects[i]->ObjType == ObjType::MARIO)
-			objects[i]->Update(dt, &coObjects);
-		else
-			objects[i]->Update(dt, &coNotMoveObjects);
+		if (objects[i]->GetHealth() != 0)
+		{
+			if (objects[i]->ObjType == ObjType::MARIO)
+				objects[i]->Update(dt, &coObjects);
+			else 
+			{
+				if (dynamic_cast<FirePiranhaPlant*>(objects[i]))
+				{
+					FirePiranhaPlant* plant = dynamic_cast<FirePiranhaPlant *>(objects[i]);
+					plant->GetEnemyPos(player->x, player->y);
+					if (plant->IsAttack && plant->count == 1)
+					{
+						plant->CalcAtkPos();
+						FireBullet* Firebullet = new FireBullet(plant->VxBullet, plant->VyBullet);
+						Firebullet->SetPosition(plant->x, plant->y);
+						objects.push_back(Firebullet);
+						plant->count--;
+					}
+					DebugOut(L"hello%f\n", plant->VyBullet);
+				}
+				objects[i]->Update(dt, &coNotMoveObjects);
+			}
+		}
 	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
@@ -303,8 +328,8 @@ void CPlayScene::Update(DWORD dt)
 
 	if (cx < 0)
 		cx = 0;
-	if (cx > 2816)
-		cx = 2816;
+	if (cx > MAP_MAX_WIDTH)
+		cx = MAP_MAX_WIDTH;
 	if (cy < 0)
 		cy = 0;
 	if (player->y >= 240)
@@ -317,7 +342,10 @@ void CPlayScene::Render()
 {
 	//map->DrawMap();
 	for (int i = 0; i < objects.size(); i++)
-		objects[i]->Render();
+	{
+		if (objects[i]->GetHealth() != 0)
+			objects[i]->Render();
+	}
 }
 
 /*
@@ -352,10 +380,15 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetLevel(MARIO_LEVEL_BIG);
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
-		mario->SetState(MARIO_STATE_FLY);
 		if (mario->level == MARIO_LEVEL_RACOON)
-			mario->SetState(MARIO_STATE_FALLING);
+		{
+			mario->SetState(MARIO_STATE_SLOWFALLING);
+			mario->SetState(MARIO_STATE_FLY);
+		}
 		break;
+	case DIK_A:
+		if (mario->level == MARIO_LEVEL_RACOON)
+			mario->SetState(MARIO_STATE_ATTACK);
 	}
 }
 
@@ -368,10 +401,9 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		mario->StopRunning();
 		break;
 	case DIK_SPACE:
-		mario->IsFalling = false; 
+		mario->IsSlowFalling = false; 
 		if (mario->vy < 0)
 			mario->vy = 0;
-		IsKeyUp = true;
 		break;
 	}
 }

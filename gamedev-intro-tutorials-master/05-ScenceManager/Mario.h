@@ -7,10 +7,16 @@
 #define MARIO_GRAVITY				0.0007f
 #define MARIO_DIE_DEFLECT_SPEED		0.45f
 #define MARIO_ACCLERATION			0.004f
+#define MARIO_DECLERATION			0.007f
 #define MARIO_MAX_SPEED				0.15f
-#define MARIO_FRICTION				0.002f
+#define MARIO_FRICTION				0.003f
 #define MARIO_FLY_SPEED				0.25f
 #define MARIO_MAX_HIGH_JUMP			70
+#define MARIO_SET_LEVEL_Y			19
+#define MARIO_SET_IDLE_Y			9
+#define MARIO_SET_SITTING_Y			18
+
+
 
 #define MARIO_STATE_IDLE			0
 #define MARIO_STATE_WALKING_RIGHT	1
@@ -20,7 +26,9 @@
 #define MARIO_STATE_SIT				5
 #define MARIO_STATE_RUN				6
 #define MARIO_STATE_FLY				7
-#define MARIO_STATE_FALLING         8
+#define MARIO_STATE_SLOWFALLING     8
+#define MARIO_STATE_ATTACK          9
+
 
 /*ANI_MARIO_BIG*/
 #define MARIO_ANI_DIE					0	
@@ -51,6 +59,28 @@
 #define	MARIO_ANI_SMALL_ROLLBACKLEFT		24
 #define MARIO_ANI_SMALL_FASTESTRUNRIGHT		25
 #define MARIO_ANI_SMALL_FASTESTRUNLEFT		26	
+	
+#define MARIO_ANI_RACOON_IDLE_RIGHT			27
+#define MARIO_ANI_RACOON_IDLE_LEFT			28
+#define MARIO_ANI_RACOON_WALKING_RIGHT		29
+#define MARIO_ANI_RACOON_WALKING_LEFT		30
+#define MARIO_ANI_RACOON_RBWALKINGRIGHT		31
+#define MARIO_ANI_RACOON_RBWALKINGLEFT		32
+#define MARIO_ANI_RACOON_JUMPINGRIGHT		33
+#define MARIO_ANI_RACOON_JUMPINGLEFT		34
+#define MARIO_ANI_RACOON_FALLINGRIGHT		35
+#define MARIO_ANI_RACOON_FALLINGLEFT		36
+#define MARIO_ANI_RACOON_FASTESTRUNRIGHT	37
+#define MARIO_ANI_RACOON_FASTESTRUNLEFT		38	
+#define MARIO_ANI_RACOON_SITTINGRIGHT		39
+#define MARIO_ANI_RACOON_SITTINGLEFT		40
+#define MARIO_ANI_RACOON_FLYRIGHT			41
+#define MARIO_ANI_RACOON_FLYLEFT			42
+#define MARIO_ANI_RACOON_SLOWFALLRIGHT		43
+#define MARIO_ANI_RACOON_SLOWFALLLEFT		44
+#define MARIO_ANI_RACOON_ATTACKRIGHT		45
+
+
 /*MARIO_LEVEL*/
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
@@ -58,6 +88,10 @@
 
 #define MARIO_BIG_BBOX_WIDTH  15
 #define MARIO_BIG_BBOX_HEIGHT 27
+
+#define MARIO_RACOON_BBOX_WIDTH 21
+#define MARIO_RACOON_BBOX_HEIGHT 29
+
 
 #define MARIO_SMALL_BBOX_WIDTH  13
 #define MARIO_SMALL_BBOX_HEIGHT 15
@@ -76,7 +110,7 @@ class CMario : public CGameObject
 	float StartJump;
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
-
+	float LastVx;
 
 public:
 	int level;
@@ -85,12 +119,16 @@ public:
 		IsSitting,
 		IsRunning,
 		IsFlying,
-		IsFalling;
+		IsEndRollBack,
+		IsSlowFalling,
+		IsAttack;
 
 	int ani;
 	DWORD TRollBack = 0;
 	DWORD TPlusStack = 0;
 	DWORD TCanFly = 0;
+	DWORD TAttack = 0;
+
 public: 
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);

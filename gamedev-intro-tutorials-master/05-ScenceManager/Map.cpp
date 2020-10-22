@@ -9,7 +9,7 @@ Map::Map()
 void Map::ReadMap()
 {
 	ifstream ifs("textures/map1.txt", ios::in);
-	ifs >> row >> collum /*>> TileRow >> TiledCollum*/;
+	ifs >> row >> collum >> TileRow >> TileCollum>>TileWidth;
 	for (int i = 0; i < row; i++)
 	{
 		for (int j = 0; j < collum; j++)
@@ -26,13 +26,13 @@ void Map::DrawMap()
 		{
 			int Id = TiledID[i][j];
 			RECT r;
-			r.left = (Id - 1) % 11 * 16;
-			if (Id % 11 == 0)
-				r.top = (Id / 11 - 1) * 16;
+			r.left = (Id - 1) % TileCollum * TileWidth;
+			if (Id % TileRow == 0)
+				r.top = (Id / TileRow - 1) * TileWidth;
 			else
-				r.top = Id / 11 * 16;
-			r.right = r.left + 16;
-			r.bottom = r.top + 16;
+				r.top = Id /TileRow * 16;
+			r.right = r.left + TileWidth;
+			r.bottom = r.top + TileWidth;
 			//DebugOut(L"%d\n",Id);
 			CGame::GetInstance()->Draw(j * 16, i * 16, CTextures::GetInstance()->Get(300), r.left, r.top, r.right, r.bottom);
 		}

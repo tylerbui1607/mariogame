@@ -102,6 +102,12 @@
     <ClCompile Include="Item.cpp">
       <Filter>Object\Item</Filter>
     </ClCompile>
+    <ClCompile Include="FirePiranhaPlant.cpp">
+      <Filter>Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="FireBullet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -169,6 +175,12 @@
     </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="FirePiranhaPlant.h">
+      <Filter>Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="FireBullet.h">
+      <Filter>GameEgine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,9 @@ class Map
 {
 	int collum;
 	int row;
-	int TiledWidth;
+	int TileWidth;
+	int TileRow;
+	int TileCollum;
 	int TiledID[200][200];
 	CTextures* textures = new CTextures();
 public:
