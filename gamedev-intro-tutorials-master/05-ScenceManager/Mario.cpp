@@ -13,7 +13,7 @@
 
 CMario::CMario(float x, float y) : CGameObject()
 {
-	level = MARIO_LEVEL_RACOON;
+	level = MARIO_LEVEL_FIRE;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	ObjType = 0;
@@ -24,6 +24,11 @@ CMario::CMario(float x, float y) : CGameObject()
 	CounterSpeed = 0;
 	IsMovingObject = true;
 	IsEndRollBack = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
+	AmountofFirebullet = 2;
+	FireBullet* fb1 = new FireBullet(0, 0);
+	FireBullet* fb2 = new FireBullet(0, 0);
+	firebullet.push_back(fb1);
+	firebullet.push_back(fb2);
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -35,9 +40,34 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// Simple fall down
 	// Simple fall down
 	vy += MARIO_GRAVITY * dt;
-	
-	if (IsAttack && GetTickCount64() - TAttack >= 500)
+
+	for (int i = 0; i < 2; i++)
 	{
+		if (firebullet[i]->GetHealth() == 0 && IsAttack)
+		{
+			AmountofFirebullet = i+1;
+		}
+	}
+	if (IsAttack && level == MARIO_LEVEL_FIRE)
+	{
+		if (AmountofFirebullet > 0)
+		{
+			FireBullet* fb=new FireBullet(0,0);
+			fb->SetSpeed(0.1 * nx, 0);
+			fb->SetPosition(x + 5, y);
+			fb->FireMario = true;
+			firebullet[AmountofFirebullet - 1] = fb;
+			AmountofFirebullet--;
+		}
+		IsAttack = false;
+	}
+	for (int i = 0; i < 2; i++)
+		firebullet[i]->Update(dt, coObjects);
+
+	if (IsAttack && GetTickCount64() - TAttack >= MARIO_RACOON_ATKTIME)
+	{
+		//animation_set->at(ani)->currentFrame = 0;
+		//DebugOut(L"ATTACK\n");
 		IsAttack = false;
 	}
 	if (nx * vx >= 0 && IsRollBack)
@@ -84,6 +114,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		IsRollBack = false;
 		TRollBack = 0;
 	}
+	
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
@@ -104,6 +135,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		x += dx;
 		y += dy;
+		
 	}
 	else
 	{
@@ -124,10 +156,14 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				IsOnPlatForm = true;
 			}
+			else
+			{
+				IsOnPlatForm = false;
+			}
 			if (e->obj->ObjType == ObjType::MUSHROOM)
 			{
 				e->obj->SubHealth();
-				if (level < MARIO_LEVEL_RACOON)
+				if (level < MARIO_LEVEL_FIRE)
 				{
 					Health++;
 					this->level++;
@@ -177,14 +213,18 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (e->obj->ObjType == ObjType::FIREPIRANHAPLANT)
 			{
-				level--;
-				SubHealth();
-				if (ny != 0) vy = 0;
-				if (nx != 0) vx = 0;
+				if (level > 0)
+					level--;
+				if (e->ny != 0) vy = 0;
+				if (e->nx != 0) vx = 0;
 			}
 			if (e->obj->ObjType == ObjType::BLOCK)
 			{
 				x += dx;
+			}
+			else
+			{
+				if (e->nx != 0) vx = 0;
 			}
 			if (ny != 0) vy = 0;
 
@@ -197,6 +237,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	}
 void CMario::Render()
 {
+	int alpha = 255;
+	if (untouchable) alpha = 128;
+	if (!IsAttack && (ani == MARIO_ANI_RACOON_ATTACKRIGHT|| ani == MARIO_ANI_RACOON_ATTACKLEFT))
+		animation_set->at(ani)->Reset();
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
 	else
@@ -310,7 +354,10 @@ void CMario::Render()
 			{
 				if (IsAttack)
 				{
-					ani = MARIO_ANI_RACOON_ATTACKRIGHT;
+					if (nx > 0)
+						ani = MARIO_ANI_RACOON_ATTACKRIGHT;
+					else
+						ani = MARIO_ANI_RACOON_ATTACKLEFT;
 				}
 				else
 				{
@@ -325,7 +372,7 @@ void CMario::Render()
 						{
 							if (IsRollBack)
 							{
-								ani = MARIO_ANI_RACOON_RBWALKINGLEFT;
+								ani = MARIO_ANI_RACOON_RBWALKINGRIGHT;
 							}
 							else
 							{
@@ -336,7 +383,7 @@ void CMario::Render()
 						{
 							if (IsRollBack)
 							{
-								ani = MARIO_ANI_RACOON_RBWALKINGRIGHT;
+								ani = MARIO_ANI_RACOON_RBWALKINGLEFT;
 							}
 							else
 							{
@@ -373,11 +420,72 @@ void CMario::Render()
 			}
 
 		}
-	int alpha = 255;
-	if (untouchable) alpha = 128;
-	//DebugOut(L"\n%d",ani);
+		else if (level == MARIO_LEVEL_FIRE)
+		{
+			if (IsSitting)
+			{
+				if (nx >= 0)
+					ani = MARIO_ANI_FIRE_SITTINGRIGHT;
+				else
+					ani = MARIO_ANI_FIRE_SITTINGLEFT;
+			}
+			else
+			{
+				if (IsOnPlatForm)
+				{
+					if (vx == 0)
+					{
+						if (nx > 0) ani = MARIO_ANI_FIRE_IDLE_RIGHT;
+						else ani = MARIO_ANI_FIRE_IDLE_LEFT;
+					}
+					else if (vx > 0)
+					{
+						if (IsRollBack)
+						{
+							ani = MARIO_ANI_FIRE_RBWALKINGRIGHT;
+						}
+						else
+						{
+							ani = MARIO_ANI_FIRE_WALKING_RIGHT;
+						}
+					}
+					else if (vx < 0)
+					{
+						if (IsRollBack)
+						{
+							ani = MARIO_ANI_FIRE_RBWALKINGLEFT;
+						}
+						else
+						{
+							ani = MARIO_ANI_FIRE_WALKING_LEFT;
+						}
+					}
+				}
+				else
+				{
+					if (nx < 0)
+					{
+						if (CounterSpeed == 7)
+							ani = MARIO_ANI_FIRE_FLYJUMPLEFT;
+						else if (vy < 0)
+							ani = MARIO_ANI_FIRE_JUMPINGLEFT;
+						else
+							ani = MARIO_ANI_FIRE_FALLINGLEFT;
+					}
+					else
+					{
+						if (CounterSpeed == 7)
+							ani = MARIO_ANI_FIRE_FLYJUMPRIGHT;
+						else if (vy < 0)
+							ani = MARIO_ANI_FIRE_JUMPINGRIGHT;
+						else
+							ani = MARIO_ANI_FIRE_FALLINGRIGHT;
+					}
+				}
+			}
+		}
 	if (IsRunning && IsOnPlatForm)
-	{	
+	{
 		if (CounterSpeed == 7 && abs(vx) == MARIO_MAX_SPEED * 2)
 		{
 			if (level == MARIO_LEVEL_BIG)
@@ -404,15 +512,27 @@ void CMario::Render()
 					ani = MARIO_ANI_RACOON_FASTESTRUNLEFT;
 				animation_set->at(ani)->Render(x, y);
 			}
-		}
-		else 
+			else if (level == MARIO_LEVEL_FIRE)
 			{
-				animation_set->at(ani)->RenderFTime(x, y, 20);
+				if (vx > 0)
+					ani = MARIO_ANI_FIRE_FASTESTRUNRIGHT;
+				else
+					ani = MARIO_ANI_FIRE_FASTESTRUNLEFT;
+				animation_set->at(ani)->Render(x, y);
 			}
+		}
+		else
+		{
+			animation_set->at(ani)->RenderFTime(x, y, 20);
+		}
 	}
+	else if (ani == MARIO_ANI_RACOON_ATTACKLEFT)
+		animation_set->at(ani)->RenderATK(x, y);
 	else
 		animation_set->at(ani)->Render(x, y);
-	/*RenderBoundingBox();*/
+	for (int i = 0; i < 2; i++)
+		firebullet[i]->Render();
+	RenderBoundingBox();
 }
 
 void CMario::SetState(int state)
@@ -521,7 +641,10 @@ void CMario::SetState(int state)
 			if (!IsSitting)
 				y = y + MARIO_SET_IDLE_Y;
 			IsSitting = true;
-			vx -= min(abs(vx), MARIO_FRICTION) * nx;
+			if (IsRollBack)
+				vx += min(abs(vx), MARIO_FRICTION) * nx;
+			else
+				vx -= min(abs(vx), MARIO_FRICTION) * nx;
 		}
 		break;
 	case MARIO_STATE_RUN:
@@ -564,7 +687,7 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 			bottom = y + MARIO_SET_SITTING_Y;
 			right = x + MARIO_BIG_BBOX_WIDTH;
 		}
-		else if (level == MARIO_LEVEL_BIG)
+		else if (level != MARIO_LEVEL_RACOON)
 		{
 			bottom = y + MARIO_BIG_BBOX_HEIGHT;
 			right = x + MARIO_BIG_BBOX_WIDTH;

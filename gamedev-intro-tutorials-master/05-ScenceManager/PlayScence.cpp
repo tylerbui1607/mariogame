@@ -309,7 +309,6 @@ void CPlayScene::Update(DWORD dt)
 						objects.push_back(Firebullet);
 						plant->count--;
 					}
-					DebugOut(L"hello%f\n", plant->VyBullet);
 				}
 				objects[i]->Update(dt, &coNotMoveObjects);
 			}
@@ -386,8 +385,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->SetState(MARIO_STATE_FLY);
 		}
 		break;
-	case DIK_A:
-		if (mario->level == MARIO_LEVEL_RACOON)
+	case DIK_Z:
+		if (mario->level >= MARIO_LEVEL_RACOON)
 			mario->SetState(MARIO_STATE_ATTACK);
 	}
 }

@@ -13,7 +13,7 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		CalcAtkTime = GetTickCount64();
 	}
-	if (GetTickCount64() - CalcAtkTime >= 2000)
+	if (IsAttack && GetTickCount64() - CalcAtkTime >= 2000)
 	{
 		IsAttack = false;
 		CalcAtkTime = 0;
@@ -54,6 +54,20 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void FirePiranhaPlant::Render()
 {
+	if (EnemyX > x)
+	{
+		if (EnemyY < y)
+			animation_set->at(0)->Render(x, y);
+		else
+			animation_set->at(1)->Render(x, y);
+	}
+	else
+	{
+		if (EnemyY < y)
+			animation_set->at(3)->Render(x, y);
+		else
+			animation_set->at(2)->Render(x, y);
+	}
 	RenderBoundingBox();
 }
 
