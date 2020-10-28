@@ -12,9 +12,15 @@
 #define FIREPIRANHAPLANT_HIDDEN		3
 #define FIREPIRANHAPLANT_ATTACK		4
 
+#define FIREPIRANHAPLANT_UPRIGHT	0
+#define FIREPIRANHAPLANT_DOWNRIGHT	1
+#define FIREPIRANHAPLANT_UPLEFT		3
+#define FIREPIRANHAPLANT_DOWNLEFT	2
+#include "FireBullet.h"
 class FirePiranhaPlant :
 	public CGameObject
 {
+	FireBullet* Firebullet;
 public:
 	float Startposy;
 	DWORD CalcAtkTime;
@@ -34,6 +40,7 @@ public:
 	{
 		ObjType = 8;
 		INIT = IsAttack = IsMovingObject = false;
+		Firebullet = new FireBullet(0, 0);
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
@@ -53,7 +60,7 @@ public:
 	}
 	void CalcAtkPos()
 	{
-		if (abs(x - EnemyX) <= 64)
+		if (abs(x - EnemyX) <= 200)
 		{
 			if (EnemyY < y)
 				VyBullet = -0.03;

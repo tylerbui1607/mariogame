@@ -1,4 +1,5 @@
 #include "FireBullet.h"
+#define	FIREBULLET_GRAVITY		0.0007f
 
 void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
@@ -7,7 +8,7 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		CGameObject::Update(dt);
 		if (FireMario)
 		{
-			vy += 0.0007 * dt;
+			vy += FIREBULLET_GRAVITY * dt;
 			vector<LPCOLLISIONEVENT> coEvents;
 			vector<LPCOLLISIONEVENT> coEventsResult;
 

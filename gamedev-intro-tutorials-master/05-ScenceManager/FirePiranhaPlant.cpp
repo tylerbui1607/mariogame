@@ -1,5 +1,8 @@
 #include "FirePiranhaPlant.h"
 #include "Utils.h"
+#define MAXHEIGHT_APPEAR	31
+#define MAXHEIGHT_HIDDEN	16
+
 void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (!INIT)
@@ -23,10 +26,8 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		AppearTime = GetTickCount64();
 	}
 	
-	if (Startposy - y >= 31)
+	if (Startposy - y >= MAXHEIGHT_APPEAR)
 		{
-			if (IsAttack)
-				SetState(FIREPIRANHAPLANT_ATTACK);
 			vy = 0;
 			if (!IsAttack && GetTickCount64() - AppearTime >= 3000)
 			{
@@ -35,9 +36,8 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			}
 			if (vy <= 0)
 				CalcAtkzone();
-
 		}
-	if (Startposy - y <=-16 )
+	if (Startposy - y <=-MAXHEIGHT_HIDDEN )
 		{
 			vy = 0;
 			if (GetTickCount64() - AppearTime >= 3000)
@@ -46,10 +46,17 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				SetState(FIREPIRANHAPLANT_APPEAR);
 			}
 		}
-	
-	//CalcAtkzone();
+	if (IsAttack && count == 1)
+	{
+		CalcAtkPos();
+		Firebullet = new FireBullet(VxBullet, VyBullet);
+		Firebullet->SetPosition(x,y);
+		count--;
+	}
+	Firebullet->Update(dt,coObjects);
 	CGameObject::Update(dt);
 	y += dy;
+	DebugOut(L"hello%f\n", VyBullet);
 }
 
 void FirePiranhaPlant::Render()
@@ -57,17 +64,18 @@ void FirePiranhaPlant::Render()
 	if (EnemyX > x)
 	{
 		if (EnemyY < y)
-			animation_set->at(0)->Render(x, y);
+			animation_set->at(FIREPIRANHAPLANT_UPRIGHT)->Render(x, y);
 		else
-			animation_set->at(1)->Render(x, y);
+			animation_set->at(FIREPIRANHAPLANT_DOWNRIGHT)->Render(x, y);
 	}
 	else
 	{
 		if (EnemyY < y)
-			animation_set->at(3)->Render(x, y);
+			animation_set->at(FIREPIRANHAPLANT_UPLEFT)->Render(x, y);
 		else
-			animation_set->at(2)->Render(x, y);
+			animation_set->at(FIREPIRANHAPLANT_DOWNLEFT)->Render(x, y);
 	}
+	Firebullet->Render();
 	RenderBoundingBox();
 }
 
@@ -80,9 +88,5 @@ void FirePiranhaPlant::SetState(int state)
 		break;
 	case FIREPIRANHAPLANT_HIDDEN:
 		vy = FIREPIRANHAPLANT_SPEED_Y;
-		
-	case FIREPIRANHAPLANT_ATTACK:
-		CalcAtkPos();
-		break;
 	}
 }

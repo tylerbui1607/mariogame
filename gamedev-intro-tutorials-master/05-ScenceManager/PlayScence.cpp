@@ -250,7 +250,7 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 	map = new Map();
-	//map->DrawMap();
+
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
@@ -297,18 +297,9 @@ void CPlayScene::Update(DWORD dt)
 				objects[i]->Update(dt, &coObjects);
 			else 
 			{
-				if (dynamic_cast<FirePiranhaPlant*>(objects[i]))
+				if (objects[i]->ObjType == ObjType::FIREPIRANHAPLANT)
 				{
-					FirePiranhaPlant* plant = dynamic_cast<FirePiranhaPlant *>(objects[i]);
-					plant->GetEnemyPos(player->x, player->y);
-					if (plant->IsAttack && plant->count == 1)
-					{
-						plant->CalcAtkPos();
-						FireBullet* Firebullet = new FireBullet(plant->VxBullet, plant->VyBullet);
-						Firebullet->SetPosition(plant->x, plant->y);
-						objects.push_back(Firebullet);
-						plant->count--;
-					}
+					objects[i]->GetEnemyPos(player->x, player->y);
 				}
 				objects[i]->Update(dt, &coNotMoveObjects);
 			}

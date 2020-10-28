@@ -2,7 +2,7 @@
 
 void WarpPipe::Render()
 {
-	/*int drawy = y + TileSize;
+	int drawy = y + TileSize;
 	for (int i = 0; i < (Height / TileSize)*2; i++)
 	{
 		if (i < 2)
@@ -17,6 +17,6 @@ void WarpPipe::Render()
 			animation_set->at(Ani_Body_Left)->Render(x + TileSize, drawy);
 			drawy += TileSize;
 		}
-	}*/
+	}
 	RenderBoundingBox();
 }
