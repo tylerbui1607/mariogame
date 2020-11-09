@@ -24,13 +24,6 @@
     <Filter Include="Define">
       <UniqueIdentifier>{3bdc7554-2e6f-4953-a17a-a3365da0e494}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Resource\Map">
-      <UniqueIdentifier>{b05ce7dc-87d8-459c-9dc6-2764724ab1df}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Object\Item">
       <UniqueIdentifier>{86fe38e1-7b6f-4d98-97e5-31c7b198509f}</UniqueIdentifier>
     </Filter>
@@ -50,9 +43,6 @@
     </ClCompile>
     <ClCompile Include="Brick.cpp">
       <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>Resource\Map</Filter>
     </ClCompile>
     <ClCompile Include="Mario.cpp">
       <Filter>Player</Filter>
@@ -106,6 +96,9 @@
       <Filter>Enemy</Filter>
     </ClCompile>
     <ClCompile Include="FireBullet.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Coin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -139,9 +132,6 @@
     </ClInclude>
     <ClInclude Include="Ground.h">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>Resource\Map</Filter>
     </ClInclude>
     <ClInclude Include="Mario.h">
       <Filter>Player</Filter>
@@ -180,17 +170,10 @@
       <Filter>Enemy</Filter>
     </ClInclude>
     <ClInclude Include="FireBullet.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Coin.h">
       <Filter>GameEgine</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="textures\map1.png">
-      <Filter>Resource</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="textures\map1.txt">
-      <Filter>Resource</Filter>
-    </Text>
   </ItemGroup>
 </Project>

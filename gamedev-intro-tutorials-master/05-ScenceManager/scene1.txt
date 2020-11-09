@@ -5,6 +5,7 @@
 10	textures\enemies.png	3	26	110
 30	textures\mario2.png	240	182	171
 40	textures\enemies3.png	153	209	223
+50	textures\enemies-2.png	0	128	128
 # id	left	top	right	bottom	texture_id
 [SPRITES]
 # BIG MARIO 
@@ -183,6 +184,20 @@
 30002	25	14	41	29	10
 #die
 30003	45	21	61	29	10
+#KOOPAS
+#walk left
+50001	205	192	221	218	50
+50002	222	192	238	218	50
+#walk right
+50011	187	192	202	218	50
+50012	170	192	185	218	50
+#hidden move
+50013	239	202	255	218	50
+50014	256	202	272	218	50
+50015	273	202	289	218	50
+50016	290	202	306	218	50
+#die
+50031	152	202	168	217	50
 #GROUND
 400	45	21	61	29	0
 #brick with question mark animation
@@ -366,6 +381,17 @@
 901	901	100
 902	902	100
 903	903	100
+# ==== KOOPAS  =========
+#walk left
+801	50001	100	50002	100
+#walk right
+802	50011	100	50012	100
+#HIDDEN
+803	50013	100
+#HIDDEN MOVE
+804	50013	100	50014	100	50015	100	50016	100
+#die
+#804	50031	100
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
 # MARIO
@@ -388,11 +414,13 @@
 8	800
 #FirePlant
 9	900	901	902	903
+#KOOPAS
+4	801	802	803	804
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba , 3 = Koopas , 4 = Ground , 5 = WarpPipe , 6 = Block
 # MARIO
-0	50.0	300	1
+0	660	200	1
 
 #----Brick----
 1	1504	336	2
@@ -453,10 +481,14 @@
 4	1408	192	400	64	16
 4	1488	176	400	208	16
 #----QuestionBrick----
-7	176	352	7
-7	192	352	7
-7	224	304	7
-7	240	304	7
-7	416	320	7
-7	656	384	7
-7	704	352	7
+7	176	352	7	0
+7	192	352	7	0
+7	224	304	7	0
+7	240	304	7	18
+7	416	320	7	18
+7	656	384	7	18
+7	944	384	7	18
+7	704	352	7	18
+#----GoomBa----
+#2	200	370	3
+3	672	370	4

@@ -18,7 +18,7 @@ public:
 	virtual void Unload() = 0;
 	virtual void Update(DWORD dt) = 0;
 	virtual void Render() = 0; 
-	virtual void DrawMap() = 0;
+
 
 };
 typedef CScene * LPSCENE;

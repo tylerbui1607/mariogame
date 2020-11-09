@@ -5,13 +5,14 @@
 
 void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	//Intiate FirePiranhaPlant
 	if (!INIT)
 	{
 		Startposy = y;
 		SetState(FIREPIRANHAPLANT_HIDDEN);
 		INIT = true;
 	}
-
+	//Calculate atk time
 	if (IsAttack && CalcAtkTime == 0)
 	{
 		CalcAtkTime = GetTickCount64();
@@ -56,7 +57,7 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	Firebullet->Update(dt,coObjects);
 	CGameObject::Update(dt);
 	y += dy;
-	DebugOut(L"hello%f\n", VyBullet);
+	//DebugOut(L"hello%f\n", VyBullet);
 }
 
 void FirePiranhaPlant::Render()

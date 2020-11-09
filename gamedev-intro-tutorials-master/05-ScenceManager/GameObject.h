@@ -7,6 +7,8 @@
 #include "Sprites.h"
 #include "Animations.h"
 #include "Define.h"
+#define GRAVITY				0.0007f
+
 using namespace std;
 
 #define ID_TEX_BBOX -100		// special texture to draw object bounding box

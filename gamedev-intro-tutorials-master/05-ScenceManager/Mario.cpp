@@ -7,6 +7,7 @@
 
 #include"Ground.h"
 #include "Goomba.h"
+#include "Koopas.h"
 #include "Portal.h"
 #include"QuestionBrick.h"
 #include "MushRoom.h"
@@ -16,7 +17,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	level = MARIO_LEVEL_SMALL;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
-	ObjType = 0;
+	ObjType = ObjType::MARIO;
 	start_x = x; 
 	start_y = y; 
 	this->x = x; 
@@ -39,7 +40,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// Simple fall down
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
+	vy += GRAVITY * dt;
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -146,7 +147,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 		x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
+		
 		
 		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
@@ -160,7 +161,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				IsOnPlatForm = false;
 			}
-			if (e->obj->ObjType == ObjType::MUSHROOM)
+			if (e->obj->ObjType == ItemType::MUSHROOM)
 			{
 				e->obj->SubHealth();
 				if (level < MARIO_LEVEL_FIRE)
@@ -188,17 +189,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						if (e->obj->GetState() != GOOMBA_STATE_DIE)
 						{
-							if (level > MARIO_LEVEL_SMALL)
-							{
-								level = MARIO_LEVEL_SMALL;
-								StartUntouchable();
-							}
-							else
-								SetState(MARIO_STATE_DIE);
+							Calclevel();
+							//StartUntouchable();
 						}
 					}
 				}
 			}
+			
 			else if (dynamic_cast<CPortal*>(e->obj))
 			{
 				CPortal* p = dynamic_cast<CPortal*>(e->obj);
@@ -213,21 +210,48 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (e->obj->ObjType == ObjType::FIREPIRANHAPLANT)
 			{
-				if (level > 0)
-					level--;
+				Calclevel();
 				if (e->ny != 0) vy = 0;
 				if (e->nx != 0) vx = 0;
+			}
+			if (e->obj->ObjType == ObjType::GROUND)
+			{
+				y += min_ty * dy + ny * 0.4f;
 			}
 			if (e->obj->ObjType == ObjType::BLOCK)
 			{
 				x += dx;
+				y += min_ty * dy + ny * 0.4f;
 			}
 			else
 			{
 				if (e->nx != 0) vx = 0;
 			}
-			if (ny != 0) vy = 0;
+			
+			if (e->ny)vy = 0;
+			if (e->obj->ObjType == ObjType::KOOPAS) // if e->obj is Goomba 
+			{
+				// jump on top >> kill Goomba and deflect a bit 
+				if (e->ny < 0)
+				{
+					if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
+						e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+					if (e->obj->state == KOOPAS_STATE_WALKING)
+						e->obj->SetState(KOOPAS_STATE_HIDDEN);
+					vy = -MARIO_DIE_DEFLECT_SPEED;
+					y += min_ty * dy + ny * 0.6f;
+				}
 
+				else if (e->nx != 0&&e->obj->state!=KOOPAS_STATE_HIDDEN)
+				{
+					if (untouchable == 0)
+					{
+						Calclevel();
+						StartUntouchable();
+					}
+				}
+				if (e->nx != 0) vx = 0;
+			}
 		}
 		
 	}
@@ -664,7 +688,7 @@ void CMario::SetState(int state)
 	case MARIO_STATE_SLOWFALLING:
 		if (vy > 0 && !IsOnPlatForm && !IsFlying)
 		{
-			vy = 0.02;
+			vy = 0.01;
 			IsSlowFalling = true;
 		}
 		break;
@@ -703,6 +727,16 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
 	}
+}
+
+void CMario::Calclevel()
+{
+	if (level == MARIO_LEVEL_RACOON || level == MARIO_LEVEL_FIRE)
+		SetLevel(MARIO_LEVEL_BIG);
+	else if (level == MARIO_LEVEL_BIG)
+		SetLevel(MARIO_LEVEL_SMALL);
+	else if (level == MARIO_LEVEL_SMALL)
+		SetState(MARIO_STATE_DIE);
 }
 
 /*

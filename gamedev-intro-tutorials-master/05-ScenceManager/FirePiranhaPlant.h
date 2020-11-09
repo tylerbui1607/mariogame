@@ -60,7 +60,7 @@ public:
 	}
 	void CalcAtkPos()
 	{
-		if (abs(x - EnemyX) <= 200)
+		if (abs(x - EnemyX) <= 100)
 		{
 			if (EnemyY < y)
 				VyBullet = -0.03;

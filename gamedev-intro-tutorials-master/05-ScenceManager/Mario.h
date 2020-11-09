@@ -4,8 +4,7 @@
 #define MARIO_WALKING_SPEED			0.15f 
 #define MARIO_JUMP_SPEED_Y			0.3f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
-#define MARIO_GRAVITY				0.0007f
-#define MARIO_DIE_DEFLECT_SPEED		0.45f
+#define MARIO_DIE_DEFLECT_SPEED		0.2f
 #define MARIO_ACCLERATION			0.004f
 #define MARIO_DECLERATION			0.007f
 #define MARIO_MAX_SPEED				0.15f
@@ -158,7 +157,7 @@ public:
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
-
+	void Calclevel();
 	void Reset();
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);

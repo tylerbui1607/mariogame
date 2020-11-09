@@ -10,5 +10,9 @@ enum ObjType
 	BLOCK = 6,
 	QUESTIONBRICK = 7,
 	FIREPIRANHAPLANT = 8,
+
+};
+enum ItemType
+{
 	MUSHROOM = 18,
 };

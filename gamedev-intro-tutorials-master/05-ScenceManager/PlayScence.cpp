@@ -34,6 +34,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATIONS 4
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
+#define SCENE_SECTION_MAP	7
 
 #define OBJECT_TYPE_MARIO			0
 #define OBJECT_TYPE_BRICK			1
@@ -67,7 +68,6 @@ void CPlayScene::_ParseSection_TEXTURES(string line)
 
 	CTextures::GetInstance()->Add(texID, path.c_str(), D3DCOLOR_XRGB(R, G, B));
 }
-
 void CPlayScene::_ParseSection_SPRITES(string line)
 {
 	vector<string> tokens = split(line);
@@ -149,6 +149,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	int object_type = atoi(tokens[0].c_str());
 	float x = atof(tokens[1].c_str());
 	float y = atof(tokens[2].c_str());
+	int ItemType;
 	int ani_set_id;
 
 	if (object_type == ObjType::GROUND || object_type == ObjType::WARPPIPE || object_type == ObjType::BLOCK)
@@ -156,6 +157,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			width = atof(tokens[4].c_str());
 			height = atof(tokens[5].c_str());
 		}
+	if (object_type == ObjType::QUESTIONBRICK)
+	{
+		ItemType = atof(tokens[4].c_str());
+	}
 	ani_set_id = atoi(tokens[3].c_str());
 	
 
@@ -182,7 +187,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_GROUND: obj = new Ground(width,height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
-	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(); break;
+	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(); break;
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
@@ -203,6 +208,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
+}
+
+void CPlayScene::_ParseSection_MAP(string line)
+{
+
 }
 
 void CPlayScene::Load()
@@ -231,6 +241,9 @@ void CPlayScene::Load()
 			section = SCENE_SECTION_ANIMATION_SETS; continue; }
 		if (line == "[OBJECTS]") { 
 			section = SCENE_SECTION_OBJECTS; continue; }
+		if (line == "[MAP]") {
+			section = SCENE_SECTION_MAP; continue;
+		}
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
 
 		//
@@ -243,14 +256,11 @@ void CPlayScene::Load()
 			case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
+			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
 		}
 	}
-
 	f.close();
-
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
-	map = new Map();
-
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
@@ -262,6 +272,7 @@ void CPlayScene::Update(DWORD dt)
 	vector<LPGAMEOBJECT> coMovingObjects;
 	vector<LPGAMEOBJECT> coNotMoveObjects;
 	vector<LPGAMEOBJECT> coObjects;
+	vector<LPGAMEOBJECT> coMarioObjects;
 
 
 	for (size_t i = 1; i < objects.size(); i++)
@@ -270,23 +281,29 @@ void CPlayScene::Update(DWORD dt)
 		{
 			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
 			{
-				MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
-				mushroom->CaclVx(player->x);
-				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-				LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
-				mushroom->SetAnimationSet(ani_set);
-				objects[i]->SubHealth();
-				objects.push_back(objects[i]);
-				objects[i] = mushroom;
+				QuestionBrick* qb = dynamic_cast<QuestionBrick*>(objects[i]);
+				if (qb->ItemType == ItemType::MUSHROOM)
+				{
+					MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
+					mushroom->CaclVx(player->x);
+					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+					LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+					mushroom->SetAnimationSet(ani_set);
+					qb->SubHealth();
+					objects.push_back(qb);
+					objects[i] = mushroom;
+				}
 			}
 			coObjects.push_back(objects[i]);
 			if (objects[i]->IsMovingObject)
 				coMovingObjects.push_back(objects[i]);
 			else
 				coNotMoveObjects.push_back(objects[i]);
+
+			//DebugOut(L"CoNotMoveObject%d\n", coNotMoveObjects.size());
 		}
 	}
-	
+	coMarioObjects.push_back(player);
 	/*DebugOut(L"hello%d\n", coObjects.size());*/
 	for (size_t i = 0; i < objects.size(); i++)
 	{
@@ -300,8 +317,10 @@ void CPlayScene::Update(DWORD dt)
 				if (objects[i]->ObjType == ObjType::FIREPIRANHAPLANT)
 				{
 					objects[i]->GetEnemyPos(player->x, player->y);
+					objects[i]->Update(dt, &coMarioObjects);
 				}
-				objects[i]->Update(dt, &coNotMoveObjects);
+				else
+					objects[i]->Update(dt, &coNotMoveObjects);
 			}
 		}
 	}
@@ -330,7 +349,6 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-	//map->DrawMap();
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->GetHealth() != 0)

@@ -1,4 +1,6 @@
 #include "FireBullet.h"
+#include "Mario.h"
+
 #define	FIREBULLET_GRAVITY		0.0007f
 
 void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -8,7 +10,8 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		CGameObject::Update(dt);
 		if (FireMario)
 		{
-			vy += FIREBULLET_GRAVITY * dt;
+			vy += GRAVITY * dt;
+		}
 			vector<LPCOLLISIONEVENT> coEvents;
 			vector<LPCOLLISIONEVENT> coEventsResult;
 
@@ -24,37 +27,37 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				float min_tx, min_ty, nx = 0, ny;
 				float rdx = 0;
 				float rdy = 0;
-
-
 				FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
-
 				// Collision logic with Goombas
 				for (UINT i = 0; i < coEventsResult.size(); i++)
 				{
 					LPCOLLISIONEVENT e = coEventsResult[i];
-					if (e->ny < 0)
+					if (e->obj->ObjType != ObjType::MARIO)
 					{
-						vy = -0.15;
+						if (e->ny < 0)
+						{
+							vy = -0.15;
+						}
+						if (e->nx && e->obj->ObjType != ObjType::BLOCK)
+						{
+							SubHealth();
+							vx = 0;
+							vy = 0;
+						}
+						else 
+						{
+							x += dx;
+						}
+						y += min_ty * dy + ny * 0.5f;
 					}
-					if (e->nx && e->obj->ObjType != ObjType::BLOCK)
+					else
 					{
-						SubHealth();
-						vx = 0;
-						vy = 0;
-					}
-					else if (e->obj->ObjType == ObjType::BLOCK)
-					{
+						CMario* p = dynamic_cast<CMario*>(e->obj);
+						p->Calclevel();
 						x += dx;
+						y += dy;
 					}
-					y += min_ty * dy + ny * 0.5f;
 				}
 			}
-		}
-		else
-		{
-			x += dx;
-			y += dy;
-		}
 	}
 }

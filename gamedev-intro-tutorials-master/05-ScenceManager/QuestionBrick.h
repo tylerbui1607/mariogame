@@ -10,14 +10,18 @@
 class QuestionBrick :
 	public CGameObject
 {
+public:
 	float StartY;
+	int ItemType;
+	bool IsCollision;
 public:
 	bool Check;
-	QuestionBrick()
+	QuestionBrick(int itemType)
 	{
 		Health = 3;
 		ObjType = 7;
 		Check = false;
+		ItemType = itemType;
 	}
 	void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
