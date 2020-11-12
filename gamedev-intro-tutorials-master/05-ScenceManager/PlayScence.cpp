@@ -14,9 +14,10 @@
 #include "Item.h"
 #include "FirePiranhaPlant.h"
 #include "FireBullet.h"
+#include "Camera.h"
 #define MAP_MAX_WIDTH	2816
 using namespace std;
-
+Camera* camera;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
@@ -208,6 +209,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
+	camera = new Camera();
 }
 
 void CPlayScene::_ParseSection_MAP(string line)
@@ -310,6 +312,12 @@ void CPlayScene::Update(DWORD dt)
 	
 		if (objects[i]->GetHealth() != 0)
 		{
+			if (objects[i]->ObjType == ObjType::KOOPAS)
+			{
+				CKoopas* KP = dynamic_cast<CKoopas*>(objects[i]);
+				if (KP->IsAttack)
+					objects[i]->Update(dt, &coObjects);
+			}
 			if (objects[i]->ObjType == ObjType::MARIO)
 				objects[i]->Update(dt, &coObjects);
 			else 
@@ -331,7 +339,10 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-	
+	//player->GetSpeed(cx, cy);
+	//camera->IsFollowingMario = true;
+	//camera->SetCamSpeed(cx, 0);
+	//camera->cam_y = 240;
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 
@@ -385,7 +396,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetSpeed(0, 0);
 		break;
 	case DIK_E:
-		mario->SetLevel(MARIO_LEVEL_BIG);
+		mario->SetLevel(MARIO_LEVEL_FIRE);
 	case DIK_SPACE:
 		mario->SetState(MARIO_STATE_JUMP);
 		if (mario->level == MARIO_LEVEL_RACOON)

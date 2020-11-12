@@ -27,6 +27,9 @@
     <Filter Include="Object\Item">
       <UniqueIdentifier>{86fe38e1-7b6f-4d98-97e5-31c7b198509f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{babb2b31-0dd4-4a98-95d2-ebab2643c110}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -101,6 +104,9 @@
     <ClCompile Include="Coin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -173,6 +179,9 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Coin.h">
+      <Filter>GameEgine</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
       <Filter>GameEgine</Filter>
     </ClInclude>
   </ItemGroup>

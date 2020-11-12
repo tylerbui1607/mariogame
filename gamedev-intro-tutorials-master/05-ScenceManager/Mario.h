@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "FireBullet.h"
+#include "Koopas.h"
 #define MARIO_WALKING_SPEED			0.15f 
 #define MARIO_JUMP_SPEED_Y			0.3f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
@@ -140,7 +141,9 @@ public:
 		IsFlying,
 		IsEndRollBack,
 		IsSlowFalling,
-		IsAttack;
+		IsAttack,
+		IsHoldingKoopas;
+	CKoopas* KP;
 	vector<FireBullet*> firebullet;
 	int AmountofFirebullet;
 	int ani;
@@ -159,11 +162,18 @@ public:
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 	void Calclevel();
 	void Reset();
-
+	void AdoptPosHolding()
+	{
+		if (nx < 0)
+			KP->SetPosition(x-12, y);
+		else
+			KP->SetPosition(x + 12, y);
+	}
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	void StopRunning()
 	{
 		IsRunning = false;
+		IsHoldingKoopas = false;
 	}
 	void IncreaseStack()
 	{

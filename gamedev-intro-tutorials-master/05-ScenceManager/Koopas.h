@@ -22,13 +22,19 @@
 
 class CKoopas : public CGameObject
 {
+public:
 	bool IsHidden,
-		 IsJumpUp;
+		 IsJumpUp,
+		 IsHolding,
+		 IsAttack;
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
-
+	void ChkIsHolding(bool isHolding=false)
+	{
+		IsHolding = isHolding;
+	}
 public:
 	CKoopas();
 	virtual void SetState(int state);

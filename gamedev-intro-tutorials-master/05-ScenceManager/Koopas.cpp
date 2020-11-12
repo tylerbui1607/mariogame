@@ -1,5 +1,7 @@
 #include "Koopas.h"
 #include "QuestionBrick.h"
+#include "Goomba.h"
+#include "Utils.h"
 CKoopas::CKoopas()
 {
 	ObjType = ObjType::KOOPAS;
@@ -21,55 +23,66 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	CGameObject::Update(dt, coObjects);
-	//
-	// TO-DO: make sure Goomba can interact with the world and to each of them too!
-	// 
-	if (state != KOOPAS_STATE_DIE)
-		vy += GRAVITY * dt;
-	vector<LPCOLLISIONEVENT> coEvents;
-	vector<LPCOLLISIONEVENT> coEventsResult;
-
-	coEvents.clear();
-	CalcPotentialCollisions(coObjects, coEvents);
-	if (coEvents.size() == 0)
+	if (!IsHolding)
 	{
-		x += dx;
-		y += dy;
-	}
-	else
-	{
-		float min_tx, min_ty, nx = 0, ny;
-		float rdx = 0;
-		float rdy = 0;
+		CGameObject::Update(dt, coObjects);
+		//
+		// TO-DO: make sure Goomba can interact with the world and to each of them too!
+		// 
+		if (state != KOOPAS_STATE_DIE)
+			vy += GRAVITY * dt;
+		vector<LPCOLLISIONEVENT> coEvents;
+		vector<LPCOLLISIONEVENT> coEventsResult;
 
-
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
-
-		// Collision logic with Goombas
-		for (UINT i = 0; i < coEventsResult.size(); i++)
+		coEvents.clear();
+		CalcPotentialCollisions(coObjects, coEvents);
+		if (coEvents.size() == 0)
 		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
-			
-			if (e->obj->ObjType == ObjType::QUESTIONBRICK)
-			{
-				if (e->nx)
-				{
-					if (IsHidden)
-						e->obj->SetState(BRICK_STATE_COLISSION);
-				}
-			}
-			if (e->nx && e->obj->ObjType != ObjType::BLOCK)
-			{
-				vx = -vx;
-			}
 			x += dx;
-			if (ny != 0) vy = 0;
-			y += min_ty * dy + ny * 0.4f;
+			y += dy;
+		}
+		else
+		{
+			float min_tx, min_ty, nx = 0, ny;
+			float rdx = 0;
+			float rdy = 0;
+
+
+			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
+
+
+			// Collision logic with Goombas
+			for (UINT i = 0; i < coEventsResult.size(); i++)
+			{
+				LPCOLLISIONEVENT e = coEventsResult[i];
+
+				if (e->obj->ObjType == ObjType::QUESTIONBRICK)
+				{
+					if (e->nx)
+					{
+						if (IsHidden)
+							e->obj->SetState(BRICK_STATE_COLISSION);
+					}
+				}
+				if (e->obj->ObjType == ObjType::GOOMBA )
+				{
+					if (e->nx)
+					{
+						DebugOut(L"Goomba\n");
+						e->obj->SetState(GOOMBA_STATE_DIE);
+					}
+				}
+				else if (e->nx)
+				{
+					vx = -vx;
+				}
+				
+				x += dx;
+				if (ny != 0) vy = 0;
+				y += min_ty * dy + ny * 0.4f;
+			}
 		}
 	}
-
 }
 
 void CKoopas::Render()
@@ -110,9 +123,11 @@ void CKoopas::SetState(int state)
 			y += 9;
 		vx = 0;
 		IsHidden = true;
+		IsAttack = false;
 		break;
 	case KOOPAS_STATE_HIDDEN_MOVE:
-		vx = 0.2f;
+		IsAttack = true;
+		vx = nx*0.1;
 		break;
 	}
 

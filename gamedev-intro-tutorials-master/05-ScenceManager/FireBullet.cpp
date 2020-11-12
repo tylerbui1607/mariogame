@@ -1,10 +1,10 @@
 #include "FireBullet.h"
 #include "Mario.h"
-
 #define	FIREBULLET_GRAVITY		0.0007f
 
 void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+
 	if (GetHealth() != 0)
 	{
 		CGameObject::Update(dt);

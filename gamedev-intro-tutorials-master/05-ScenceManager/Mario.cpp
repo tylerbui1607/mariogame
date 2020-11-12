@@ -30,6 +30,8 @@ CMario::CMario(float x, float y) : CGameObject()
 	FireBullet* fb2 = new FireBullet(0, 0);
 	firebullet.push_back(fb1);
 	firebullet.push_back(fb2);
+	IsHoldingKoopas = false;
+	KP = new CKoopas();
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -41,7 +43,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// Simple fall down
 	// Simple fall down
 	vy += GRAVITY * dt;
-
 	for (int i = 0; i < 2; i++)
 	{
 		if (firebullet[i]->GetHealth() == 0 && IsAttack)
@@ -115,7 +116,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		IsRollBack = false;
 		TRollBack = 0;
 	}
-	
+	if (IsHoldingKoopas)
+	{
+		AdoptPosHolding();
+	}
+	KP->ChkIsHolding(IsHoldingKoopas);
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
@@ -146,13 +151,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-		x += min_tx * dx + nx * 0.4f;
-		
+		x += min_tx * dx + nx * 0.5f;
 		
 		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
+			if (e->obj->ObjType != ObjType::BLOCK)
+			{
+				if (e->nx != 0) vx = 0;
+			}
 			if (e->ny < 0)
 			{
 				IsOnPlatForm = true;
@@ -190,7 +198,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (e->obj->GetState() != GOOMBA_STATE_DIE)
 						{
 							Calclevel();
-							//StartUntouchable();
 						}
 					}
 				}
@@ -223,34 +230,49 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				x += dx;
 				y += min_ty * dy + ny * 0.4f;
 			}
-			else
-			{
-				if (e->nx != 0) vx = 0;
-			}
 			
-			if (e->ny)vy = 0;
-			if (e->obj->ObjType == ObjType::KOOPAS) // if e->obj is Goomba 
+			if (e->ny) vy = 0;
+			if (e->obj->ObjType == ObjType::KOOPAS) 
 			{
-				// jump on top >> kill Goomba and deflect a bit 
+				e->obj->nx = this->nx;
+				//Mario jump on the koopas
 				if (e->ny < 0)
 				{
-					if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
-						e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
-					if (e->obj->state == KOOPAS_STATE_WALKING)
+					switch (e->obj->state)
+					{
+					case(KOOPAS_STATE_WALKING):
 						e->obj->SetState(KOOPAS_STATE_HIDDEN);
+						break;
+					case(KOOPAS_STATE_HIDDEN):
+						e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+						break;
+					case(KOOPAS_STATE_HIDDEN_MOVE):
+						e->obj->SetState(KOOPAS_STATE_HIDDEN);
+						break;
+					}
 					vy = -MARIO_DIE_DEFLECT_SPEED;
 					y += min_ty * dy + ny * 0.6f;
 				}
-
-				else if (e->nx != 0&&e->obj->state!=KOOPAS_STATE_HIDDEN)
+				else if (e->nx != 0)
 				{
-					if (untouchable == 0)
+					if (e->obj->state == KOOPAS_STATE_HIDDEN_MOVE)
 					{
-						Calclevel();
-						StartUntouchable();
+							Calclevel();
+					}
+					else
+					{
+						if (IsRunning)
+						{
+							IsHoldingKoopas = true;
+						}	
+						else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
+						{
+							e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+						}
 					}
 				}
-				if (e->nx != 0) vx = 0;
+				KP = dynamic_cast<CKoopas*>(e->obj);
+				KP->ChkIsHolding(IsHoldingKoopas);
 			}
 		}
 		
@@ -313,19 +335,25 @@ void CMario::Render()
 				{
 					if (nx < 0)
 					{
-						if (CounterSpeed == 7)
-							ani = MARIO_ANI_FLYJUMPLEFT;
-						else if (vy < 0)
-							ani = MARIO_ANI_JUMPINGLEFT;
+						 if (vy < 0)
+						{
+							 if (CounterSpeed == 7)
+								ani = MARIO_ANI_FLYJUMPLEFT;
+							 else
+								ani = MARIO_ANI_JUMPINGLEFT;
+						}
 						else
 							ani = MARIO_ANI_FALLINGLEFT;
 					}
 					else
 					{
-						if (CounterSpeed == 7)
-							ani = MARIO_ANI_FLYJUMPRIGHT;
-						else if (vy < 0)
-							ani = MARIO_ANI_JUMPINGRIGHT;
+						if (vy < 0)
+						{
+							if (CounterSpeed == 7)
+								ani = MARIO_ANI_FLYJUMPRIGHT;
+							else
+								ani = MARIO_ANI_JUMPINGRIGHT;
+						}
 						else
 							ani = MARIO_ANI_FALLINGRIGHT;
 					}
@@ -556,7 +584,7 @@ void CMario::Render()
 		animation_set->at(ani)->Render(x, y);
 	for (int i = 0; i < 2; i++)
 		firebullet[i]->Render();
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CMario::SetState(int state)

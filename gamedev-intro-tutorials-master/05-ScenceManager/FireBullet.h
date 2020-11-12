@@ -6,7 +6,10 @@ class FireBullet :
 {
 	
 public:
-	bool FireMario;
+	bool FireMario,
+		 Disable;
+	FireBullet() {
+	}
 	FireBullet(float Vx, float Vy)
 	{
 		DebugOut(L"CreatePublic\n");
