@@ -6,9 +6,12 @@
 
 class CBrick : public CGameObject
 {
-	
 public:
-
+	CBrick()
+	{
+		ObjType = ObjType::BRICK;
+	};
+	bool Check;
 	virtual void Render();
 	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);
 };

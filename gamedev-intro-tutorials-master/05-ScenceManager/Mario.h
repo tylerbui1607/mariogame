@@ -2,8 +2,9 @@
 #include "GameObject.h"
 #include "FireBullet.h"
 #include "Koopas.h"
+#include "Tail.h"
 #define MARIO_WALKING_SPEED			0.15f 
-#define MARIO_JUMP_SPEED_Y			0.3f
+#define MARIO_JUMP_SPEED_Y			0.25f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
 #define MARIO_DIE_DEFLECT_SPEED		0.2f
 #define MARIO_ACCLERATION			0.004f
@@ -28,6 +29,9 @@
 #define MARIO_STATE_FLY				7
 #define MARIO_STATE_SLOWFALLING     8
 #define MARIO_STATE_ATTACK          9
+#define MARIO_STATE_GO_HIDDENMAP	10
+#define MARIO_STATE_GO_OUT_HIDDENMAP	11
+
 
 
 /*ANI_MARIO_BIG*/
@@ -108,7 +112,7 @@
 #define MARIO_BIG_BBOX_WIDTH  15
 #define MARIO_BIG_BBOX_HEIGHT 27
 
-#define MARIO_RACOON_BBOX_WIDTH 21
+#define MARIO_RACOON_BBOX_WIDTH  14
 #define MARIO_RACOON_BBOX_HEIGHT 29
 
 
@@ -151,7 +155,12 @@ public:
 	DWORD TPlusStack = 0;
 	DWORD TCanFly = 0;
 	DWORD TAttack = 0;
-
+	Tail* tail = new Tail();
+	bool IsCollision,IsCollisionBackUp;
+	bool GoHiddenMap,
+		 GoOutHiddenMap,
+		 StopUpdate;
+	float StartYgoHiddenMap;
 public: 
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
@@ -164,16 +173,17 @@ public:
 	void Reset();
 	void AdoptPosHolding()
 	{
-		if (nx < 0)
-			KP->SetPosition(x-12, y);
-		else
-			KP->SetPosition(x + 12, y);
+			KP->SetSpeed(vx, 0);
 	}
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	void StopRunning()
 	{
 		IsRunning = false;
-		IsHoldingKoopas = false;
+		if (IsHoldingKoopas) {
+			KP->nx = this->nx;
+			KP->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+			IsHoldingKoopas = false;
+		}
 	}
 	void IncreaseStack()
 	{

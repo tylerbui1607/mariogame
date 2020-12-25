@@ -1,5 +1,8 @@
 #pragma once
-
+#include "Koopas.h"
+#include "QuestionBrick.h"
+#include "Goomba.h"
+#include "Utils.h"
 #include "GameObject.h"
 
 #define KOOPAS_WALKING_SPEED 0.03f;
@@ -13,6 +16,7 @@
 #define KOOPAS_STATE_DIE 200
 #define KOOPAS_STATE_HIDDEN_MOVE 400
 #define KOOPAS_STATE_HIDDEN 300
+#define KOOPAS_STATE_REBORN	500	
 
 
 #define KOOPAS_ANI_WALKING_LEFT 0
@@ -23,11 +27,14 @@
 class CKoopas : public CGameObject
 {
 public:
-	bool IsHidden,
+	bool IsWalking, 
+		 IsHidden,
 		 IsJumpUp,
 		 IsHolding,
-		 IsAttack;
-
+		 IsAttack,
+		 IsReborning;
+	DWORD TimeReborn,
+		  TimeStartReborn;
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();

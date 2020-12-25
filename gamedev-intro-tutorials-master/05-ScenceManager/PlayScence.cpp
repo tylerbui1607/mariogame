@@ -15,9 +15,19 @@
 #include "FirePiranhaPlant.h"
 #include "FireBullet.h"
 #include "Camera.h"
-#define MAP_MAX_WIDTH	2816
+#include "Coin.h"
+#include "Leaf.h"
+#include "Hud.h"
+#include "Map.h"
+#include "RedKoopas.h"
+#include "Button.h"
+#define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
+Hud* hud;
+Map* map;
+bool DoneLoad;
+vector<LPGAMEOBJECT>Cbricks;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
@@ -36,7 +46,8 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
 #define SCENE_SECTION_MAP	7
-
+#define SCENE_SECTION_HUD	8
+#define SCENE_SECTION_HUD_TIME	9
 #define OBJECT_TYPE_MARIO			0
 #define OBJECT_TYPE_BRICK			1
 #define OBJECT_TYPE_GOOMBA			2
@@ -46,6 +57,10 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_BLOCK			6
 #define OBJECT_TYPE_QUESTIONBRICK	7
 #define OBJECT_TYPE_FIREPIRANHAPLANT	8
+#define UNKNOW_ITEM	18
+#define OBJECT_TYPE_RED_KOOPAS			9
+#define OBJECT_TYPE_BUTTON		10
+
 
 
 #define MUSHROOM_ANISET_ID	8
@@ -152,7 +167,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	float y = atof(tokens[2].c_str());
 	int ItemType;
 	int ani_set_id;
-
+	float MinX, MaxX;
 	if (object_type == ObjType::GROUND || object_type == ObjType::WARPPIPE || object_type == ObjType::BLOCK)
 		{
 			width = atof(tokens[4].c_str());
@@ -163,7 +178,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		ItemType = atof(tokens[4].c_str());
 	}
 	ani_set_id = atoi(tokens[3].c_str());
-	
+	if (object_type == ObjType::REDKOOPAS)
+	{
+		MinX = atof(tokens[4].c_str());
+		MaxX = atof(tokens[5].c_str());
+	}
 
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
@@ -190,6 +209,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(); break;
+	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX,MaxX); break;
+	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 		{	
@@ -209,14 +230,71 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
+	if (object_type == OBJECT_TYPE_BRICK)
+	{
+		Cbricks.push_back(obj);
+	}
+	if (object_type == OBJECT_TYPE_BUTTON)
+	{
+		Button* button = dynamic_cast<Button*>(obj);
+		button->Bricks = Cbricks;
+	}
 	camera = new Camera();
 }
 
 void CPlayScene::_ParseSection_MAP(string line)
 {
 
-}
+	vector<string> tokens = split(line);
 
+	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
+
+	if (tokens.size() < 9) return; // skip invalid lines - an object set must have at least id, x, y
+
+	int ID = atoi(tokens[0].c_str());
+
+
+	wstring FilePath_data = ToWSTR(tokens[1]);
+
+	int Map_width = atoi(tokens[2].c_str());
+	int Map_height = atoi(tokens[3].c_str());
+	int Num_row_read = atoi(tokens[4].c_str());
+	int Num_col_read = atoi(tokens[5].c_str());
+	int Tile_width = atoi(tokens[6].c_str());
+	int Tile_height = atoi(tokens[7].c_str());
+	int A = atoi(tokens[8].c_str());
+	map = new Map(ID, FilePath_data.c_str(), Map_width, Map_height, Num_row_read, Num_col_read, Tile_width, Tile_height);
+	if (A == 1)
+	{
+		map->IsWorldMap = true;
+	}
+}
+void CPlayScene::_ParseSection_HUD(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 3) return; // skip invalid lines - an animation set must at least id and one animation id
+
+	 int SpriteID = atof(tokens[2].c_str());
+	 float HUDX = atof(tokens[0].c_str());
+	 float HUDY = atof(tokens[1].c_str());
+	 hud = new Hud(HUDX, HUDY, SpriteID);
+}
+void CPlayScene::_ParseSection_HUD_TIME(string line)
+{
+	vector<string> tokens = split(line);
+
+	 // skip invalid lines - an animation set must at least id and one animation id
+
+	float x = atof(tokens[10].c_str());
+	float y = atof(tokens[11].c_str());
+	int arr[10];
+	for (int i = 0; i < 10; i++)
+	{
+		arr[i] = atof(tokens[i].c_str());
+	}
+	hud->hudTime = new HUD_Time(x, y, arr);
+}
 void CPlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
@@ -246,6 +324,12 @@ void CPlayScene::Load()
 		if (line == "[MAP]") {
 			section = SCENE_SECTION_MAP; continue;
 		}
+		if (line == "[HUD]") {
+			section = SCENE_SECTION_HUD; continue;
+		}
+		if (line == "[HUD_TIME]") {
+			section = SCENE_SECTION_HUD_TIME; continue;
+		}
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
 
 		//
@@ -259,11 +343,15 @@ void CPlayScene::Load()
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
+			case SCENE_SECTION_HUD: _ParseSection_HUD(line); break;
+			case SCENE_SECTION_HUD_TIME: _ParseSection_HUD_TIME(line); break;
+
 		}
 	}
 	f.close();
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
+	Camera::GetInstance()->cam_y = 240;
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -276,7 +364,7 @@ void CPlayScene::Update(DWORD dt)
 	vector<LPGAMEOBJECT> coObjects;
 	vector<LPGAMEOBJECT> coMarioObjects;
 
-
+	hud->Update(dt);
 	for (size_t i = 1; i < objects.size(); i++)
 	{
 		if (objects[i]->GetHealth() != 0)
@@ -284,16 +372,37 @@ void CPlayScene::Update(DWORD dt)
 			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
 			{
 				QuestionBrick* qb = dynamic_cast<QuestionBrick*>(objects[i]);
-				if (qb->ItemType == ItemType::MUSHROOM)
+				if (qb->ItemType == UNKNOW_ITEM)
 				{
-					MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
-					mushroom->CaclVx(player->x);
+					if (player->level == MARIO_LEVEL_SMALL)
+					{
+						MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
+						mushroom->CaclVx(player->x);
+						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+						mushroom->SetAnimationSet(ani_set);
+						qb->SubHealth();
+						objects.push_back(qb);
+						objects[i] = mushroom;
+					}
+					else
+					{
+						Leaf* leaf = new Leaf(objects[i]->x, objects[i]->y);
+						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						qb->SubHealth();
+						objects.push_back(qb);
+						objects[i] = leaf;
+					}
+				}
+				else if(qb->ItemType== ItemType::COIN)
+				{
+					Coin* coin = new Coin(objects[i]->x, objects[i]->y);
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-					LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
-					mushroom->SetAnimationSet(ani_set);
+					LPANIMATION_SET ani_set = animation_sets->Get(10);
+					coin->SetAnimationSet(ani_set);
 					qb->SubHealth();
 					objects.push_back(qb);
-					objects[i] = mushroom;
+					objects[i] = coin;
 				}
 			}
 			coObjects.push_back(objects[i]);
@@ -318,6 +427,12 @@ void CPlayScene::Update(DWORD dt)
 				if (KP->IsAttack)
 					objects[i]->Update(dt, &coObjects);
 			}
+			if (objects[i]->ObjType == ObjType::REDKOOPAS)
+			{
+				RedKoopas* KP = dynamic_cast<RedKoopas*>(objects[i]);
+				if (KP->IsAttack)
+					objects[i]->Update(dt, &coObjects);
+			}
 			if (objects[i]->ObjType == ObjType::MARIO)
 				objects[i]->Update(dt, &coObjects);
 			else 
@@ -337,34 +452,38 @@ void CPlayScene::Update(DWORD dt)
 	if (player == NULL) return; 
 
 	// Update camera to follow mario
-	float cx, cy;
-	player->GetPosition(cx, cy);
-	//player->GetSpeed(cx, cy);
-	//camera->IsFollowingMario = true;
-	//camera->SetCamSpeed(cx, 0);
-	//camera->cam_y = 240;
-	CGame *game = CGame::GetInstance();
-	cx -= game->GetScreenWidth() / 2;
+	
 
-	if (cx < 0)
-		cx = 0;
-	if (cx > MAP_MAX_WIDTH)
-		cx = MAP_MAX_WIDTH;
-	if (cy < 0)
-		cy = 0;
-	if (player->y >= 240)
-		cy = 240;
-		
-	CGame::GetInstance()->SetCamPos(cx, cy);
+	if (player->y <= 270)
+	{
+		if (player->IsOnPlatForm == false) {
+			Camera::GetInstance()->Mariovy = player->vy;
+			Camera::GetInstance()->IsFollowingMario = true;
+		}
+		else
+		{
+			Camera::GetInstance()->IsFollowingMario = false;
+		}
+	}
+	Camera::GetInstance()->cam_x = player->x;
+	Camera::GetInstance()->Update(dt);
+	CGame *game = CGame::GetInstance();
+	Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
+	if (Camera::GetInstance()->cam_x < 0)
+		Camera::GetInstance()->cam_x = 0;
+	if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
+		Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
 }
 
 void CPlayScene::Render()
 {
+	map->Draw();
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->GetHealth() != 0)
 			objects[i]->Render();
 	}
+	hud->Render();
 }
 
 /*
@@ -388,16 +507,22 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-
 	case DIK_B: // reset
 		mario->SetState(MARIO_STATE_IDLE);
 		mario->SetLevel(MARIO_LEVEL_BIG);
 		mario->SetPosition(50.0f, 0.0f);
 		mario->SetSpeed(0, 0);
 		break;
-	case DIK_E:
+	case DIK_1:
+		mario->SetLevel(MARIO_LEVEL_BIG);
+		break;
+	case DIK_2:
+		mario->SetLevel(MARIO_LEVEL_RACOON);
+		break;
+	case DIK_3:
 		mario->SetLevel(MARIO_LEVEL_FIRE);
-	case DIK_SPACE:
+		break;
+	case DIK_S:
 		mario->SetState(MARIO_STATE_JUMP);
 		if (mario->level == MARIO_LEVEL_RACOON)
 		{
@@ -405,9 +530,16 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->SetState(MARIO_STATE_FLY);
 		}
 		break;
-	case DIK_Z:
+	case DIK_A:
 		if (mario->level >= MARIO_LEVEL_RACOON)
 			mario->SetState(MARIO_STATE_ATTACK);
+		break;
+	case DIK_DOWN:
+		mario->GoHiddenMap = true;
+		break;
+	case DIK_UP :
+		mario->GoOutHiddenMap = true;
+		break;
 	}
 }
 
@@ -419,10 +551,16 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_A:
 		mario->StopRunning();
 		break;
-	case DIK_SPACE:
+	case DIK_S:
 		mario->IsSlowFalling = false; 
 		if (mario->vy < 0)
 			mario->vy = 0;
+		break;
+	case DIK_DOWN:
+		mario->GoHiddenMap = false;
+		break;
+	case DIK_UP:
+		mario->GoOutHiddenMap = false;
 		break;
 	}
 }

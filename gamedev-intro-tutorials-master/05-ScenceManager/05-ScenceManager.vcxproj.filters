@@ -30,6 +30,9 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{babb2b31-0dd4-4a98-95d2-ebab2643c110}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HUD">
+      <UniqueIdentifier>{e6282089-8f3e-4581-a5d6-d5481a105f92}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -101,10 +104,40 @@
     <ClCompile Include="FireBullet.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="Tail.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
     <ClCompile Include="Coin.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Leaf.cpp">
+      <Filter>Object\Item</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hud.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="HUD_Time.cpp">
+      <Filter>HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="RedKoopas.cpp">
+      <Filter>Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldMapScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MarioWM.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -179,9 +212,39 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Coin.h">
-      <Filter>GameEgine</Filter>
+      <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Leaf.h">
+      <Filter>Object\Item</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Tail.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>GameEgine</Filter>
+    </ClInclude>
+    <ClInclude Include="Hud.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="HUD_Time.h">
+      <Filter>HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="RedKoopas.h">
+      <Filter>Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>GameEgine</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldMapScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioWM.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
       <Filter>GameEgine</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "Sprites.h"
 #include "Animations.h"
 #include "Define.h"
-#define GRAVITY				0.0007f
+#define GRAVITY				0.0005f
 
 using namespace std;
 
@@ -79,7 +79,7 @@ public:
 	{
 		Health--;
 	}
-		int GetHealth()
+	int GetHealth()
 	{
 		return Health;
 	}
@@ -106,7 +106,13 @@ public:
 	virtual void Render() = 0;
 	virtual void SetState(int state) { this->state = state; }
 	void GetEnemyPos(float eX, float eY) { EnemyX = eX; EnemyY = eY; }
-
+	bool CheckAABB(LPGAMEOBJECT obj)
+	{
+		float b1left, b1top, b1right, b1bottom, b2left, b2top, b2right, b2bottom;
+		this->GetBoundingBox(b1left, b1top, b1right, b1bottom);
+		obj->GetBoundingBox(b2left, b2top, b2right, b2bottom);
+		return !(b1right < b2left || b1left > b2right || b1top > b2bottom || b1bottom < b2top);
+	}
 
 	~CGameObject();
 };

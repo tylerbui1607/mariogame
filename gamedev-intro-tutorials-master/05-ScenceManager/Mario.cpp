@@ -11,6 +11,9 @@
 #include "Portal.h"
 #include"QuestionBrick.h"
 #include "MushRoom.h"
+#include "RedKoopas.h"
+#include "Button.h"
+#include "Camera.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -26,261 +29,348 @@ CMario::CMario(float x, float y) : CGameObject()
 	IsMovingObject = true;
 	IsEndRollBack = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
 	AmountofFirebullet = 2;
-	FireBullet* fb1 = new FireBullet(0, 0);
-	FireBullet* fb2 = new FireBullet(0, 0);
+	FireBullet* fb1 = new FireBullet(0, -50);
+	FireBullet* fb2 = new FireBullet(0, -50);
 	firebullet.push_back(fb1);
 	firebullet.push_back(fb2);
 	IsHoldingKoopas = false;
 	KP = new CKoopas();
 }
 
-void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
+void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
-
 	// Simple fall down
 	// Simple fall down
-	vy += GRAVITY * dt;
-	for (int i = 0; i < 2; i++)
+	if (!StopUpdate)
 	{
-		if (firebullet[i]->GetHealth() == 0 && IsAttack)
+		vy += GRAVITY * dt;
+		for (int i = 0; i < 2; i++)
 		{
-			AmountofFirebullet = i+1;
+			if (firebullet[i]->GetHealth() == 0 && IsAttack)
+			{
+				AmountofFirebullet = i + 1;
+			}
 		}
-	}
-	if (IsAttack && level == MARIO_LEVEL_FIRE)
-	{
-		if (AmountofFirebullet > 0)
+		if (IsAttack && level == MARIO_LEVEL_RACOON)
 		{
-			FireBullet* fb=new FireBullet(0,0);
-			fb->SetSpeed(0.1 * nx, 0);
-			fb->SetPosition(x + 5, y);
-			fb->FireMario = true;
-			firebullet[AmountofFirebullet - 1] = fb;
-			AmountofFirebullet--;
+			tail->IsActivated = true;
+			if (tail->IsActivated)
+			{
+				tail->AdoptPos(x, y, nx);
+				tail->Update(dt, coObjects);
+			}
 		}
-		IsAttack = false;
-	}
-	for (int i = 0; i < 2; i++)
-		firebullet[i]->Update(dt, coObjects);
-
-	if (IsAttack && GetTickCount64() - TAttack >= MARIO_RACOON_ATKTIME)
-	{
-		//animation_set->at(ani)->currentFrame = 0;
-		//DebugOut(L"ATTACK\n");
-		IsAttack = false;
-	}
-	if (nx * vx >= 0 && IsRollBack)
-	{
-		IsEndRollBack = true;
-		vx = 0;
-	}
-	if (TPlusStack == 0)
-	{
-		TPlusStack = GetTickCount64();
-	}
-	if (IsRunning)
-	{
-		IncreaseStack();
-	}
-	else
-	{
-		if (level != MARIO_LEVEL_RACOON)
+		if (IsAttack && level == MARIO_LEVEL_FIRE)
 		{
-			if (IsOnPlatForm)
-				DecreaseStack();
+			if (AmountofFirebullet > 0)
+			{
+				FireBullet* fb = new FireBullet(0, 0);
+				fb->SetSpeed(0.1 * nx, 0);
+				fb->SetPosition(x + 5, y);
+				fb->FireMario = true;
+				firebullet[AmountofFirebullet - 1] = fb;
+				AmountofFirebullet--;
+			}
+			IsAttack = false;
+		}
+		for (int i = 0; i < 2; i++)
+			firebullet[i]->Update(dt, coObjects);
+		if (y <= 0)
+		{
+			y = 0;
+		}
+		if (IsAttack && GetTickCount64() - TAttack >= MARIO_RACOON_ATKTIME)
+		{
+			//animation_set->at(ani)->currentFrame = 0;
+			//DebugOut(L"ATTACK\n");
+			tail->IsActivated = false;
+			IsAttack = false;
+		}
+		if (nx * vx >= 0 && IsRollBack)
+		{
+			IsEndRollBack = true;
+			vx = 0;
+		}
+		if (TPlusStack == 0)
+		{
+			TPlusStack = GetTickCount64();
+		}
+		if (IsRunning)
+		{
+			IncreaseStack();
 		}
 		else
 		{
-			if (!IsFlying)
-				DecreaseStack();
-		}
-	}
-	if (IsFlying && TCanFly == 0)
-	{
-		TCanFly = GetTickCount64();
-	}
-	if (GetTickCount64() - TCanFly >= MARIO_CANFLY_TIME)
-	{
-		IsFlying = false;
-		TCanFly = 0;
-	}
-	if (IsRollBack == true && TRollBack == 0)
-	{
-		TRollBack = GetTickCount64();
-	}
-	if (GetTickCount64() - TRollBack >= 200 && IsEndRollBack)
-	{
-		IsRollBack = false;
-		TRollBack = 0;
-	}
-	if (IsHoldingKoopas)
-	{
-		AdoptPosHolding();
-	}
-	KP->ChkIsHolding(IsHoldingKoopas);
-	vector<LPCOLLISIONEVENT> coEvents;
-	vector<LPCOLLISIONEVENT> coEventsResult;
-
-	coEvents.clear();
-	// turn off collision when die 
-	if (state != MARIO_STATE_DIE)
-		CalcPotentialCollisions(coObjects, coEvents);
-
-	// reset untouchable timer if untouchable time has passed
-	if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
-	{
-		untouchable_start = 0;
-		untouchable = 0;
-	}
-
-	// No collision occured, proceed normally
-	if (coEvents.size() == 0)
-	{
-		x += dx;
-		y += dy;
-		
-	}
-	else
-	{
-		float min_tx, min_ty, nx = 0, ny;
-		float rdx = 0;
-		float rdy = 0;
-		
-
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-		x += min_tx * dx + nx * 0.5f;
-		
-		// Collision logic with Goombas
-		for (UINT i = 0; i < coEventsResult.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (e->obj->ObjType != ObjType::BLOCK)
+			if (level != MARIO_LEVEL_RACOON)
 			{
-				if (e->nx != 0) vx = 0;
-			}
-			if (e->ny < 0)
-			{
-				IsOnPlatForm = true;
+				if (IsOnPlatForm)
+					DecreaseStack();
 			}
 			else
 			{
+				if (!IsFlying)
+					DecreaseStack();
+			}
+		}
+		if (IsFlying && TCanFly == 0)
+		{
+			TCanFly = GetTickCount64();
+		}
+		if (GetTickCount64() - TCanFly >= MARIO_CANFLY_TIME)
+		{
+			IsFlying = false;
+			TCanFly = 0;
+		}
+		if (IsRollBack == true && TRollBack == 0)
+		{
+			TRollBack = GetTickCount64();
+		}
+		if (GetTickCount64() - TRollBack >= 200 && IsEndRollBack)
+		{
+			IsRollBack = false;
+			TRollBack = 0;
+		}
+		if (IsHoldingKoopas)
+		{
+			if (nx > 0)
+				KP->SetPosition(x + 16, y - 5);
+			else
+				KP->SetPosition(x - 18, y - 5);
+			AdoptPosHolding();
+		}
+		KP->ChkIsHolding(IsHoldingKoopas);
+		vector<LPCOLLISIONEVENT> coEvents;
+		vector<LPCOLLISIONEVENT> coEventsResult;
+
+		coEvents.clear();
+		// turn off collision when die 
+		if (state != MARIO_STATE_DIE)
+			CalcPotentialCollisions(coObjects, coEvents);
+
+		// reset untouchable timer if untouchable time has passed
+		if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
+		{
+			untouchable_start = 0;
+			untouchable = 0;
+		}
+		// No collision occured, proceed normally
+		if (coEvents.size() == 0)
+		{
+			x += dx;
+			y += dy;
+			IsCollisionBackUp = IsCollision;
+			IsCollision = false;
+			if (IsCollisionBackUp == IsCollision)
+			{
 				IsOnPlatForm = false;
 			}
-			if (e->obj->ObjType == ItemType::MUSHROOM)
+		}
+		else
+		{
+			float min_tx, min_ty, nx = 0, ny;
+			float rdx = 0;
+			float rdy = 0;
+
+
+			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
+			x += min_tx * dx + nx * 0.5f;
+			// Collision logic with Goombas
+			for (UINT i = 0; i < coEventsResult.size(); i++)
 			{
-				e->obj->SubHealth();
-				if (level < MARIO_LEVEL_FIRE)
+				LPCOLLISIONEVENT e = coEventsResult[i];
+				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::BRICK)
 				{
-					Health++;
-					this->level++;
-					y -= MARIO_SET_LEVEL_Y;
+					if (e->nx != 0) vx = 0;
 				}
-			}
-			if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
-			{
-				// jump on top >> kill Goomba and deflect a bit 
 				if (e->ny < 0)
 				{
-					if (e->obj->GetState() != GOOMBA_STATE_DIE)
+					if (e->obj->ObjType == ObjType::BUTTON)
 					{
-						e->obj->SetState(GOOMBA_STATE_DIE);
-						vy = -MARIO_JUMP_DEFLECT_SPEED;
+						Button* button = dynamic_cast<Button*>(e->obj);
+						button->IsPressed = true;
 					}
+					vy = 0;
+					IsOnPlatForm = true;
+					IsCollision = true;
 				}
-
-				else if (e->nx != 0)
+				else
 				{
-					if (untouchable == 0)
+					IsOnPlatForm = false;
+				}
+				if (e->obj->ObjType == ItemType::MUSHROOM)
+				{
+					e->obj->SubHealth();
+					Health++;
+					level = MARIO_LEVEL_BIG;
+					y -= MARIO_SET_LEVEL_Y;
+				}
+				if (e->obj->ObjType == ItemType::LEAF)
+				{
+					e->obj->SubHealth();
+					level = MARIO_LEVEL_BIG;
+					y -= MARIO_SET_LEVEL_Y;
+				}
+				if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
+				{
+					// jump on top >> kill Goomba and deflect a bit 
+					if (e->ny < 0)
 					{
 						if (e->obj->GetState() != GOOMBA_STATE_DIE)
 						{
-							Calclevel();
+							e->obj->SetState(GOOMBA_STATE_DIE);
+							vy = -MARIO_JUMP_DEFLECT_SPEED;
+						}
+					}
+
+					else if (e->nx != 0)
+					{
+						if (untouchable == 0)
+						{
+							if (e->obj->GetState() != GOOMBA_STATE_DIE)
+							{
+								Calclevel();
+							}
 						}
 					}
 				}
-			}
-			
-			else if (dynamic_cast<CPortal*>(e->obj))
-			{
-				CPortal* p = dynamic_cast<CPortal*>(e->obj);
-				CGame::GetInstance()->SwitchScene(p->GetSceneId());
-			}
-			else if (e->obj->ObjType == ObjType::QUESTIONBRICK)
-			{
-				if (e->ny > 0)
+				else if (e->obj->ObjType == ObjType::QUESTIONBRICK)
 				{
-					e->obj->SetState(BRICK_STATE_COLISSION);
-				}
-			}
-			else if (e->obj->ObjType == ObjType::FIREPIRANHAPLANT)
-			{
-				Calclevel();
-				if (e->ny != 0) vy = 0;
-				if (e->nx != 0) vx = 0;
-			}
-			if (e->obj->ObjType == ObjType::GROUND)
-			{
-				y += min_ty * dy + ny * 0.4f;
-			}
-			if (e->obj->ObjType == ObjType::BLOCK)
-			{
-				x += dx;
-				y += min_ty * dy + ny * 0.4f;
-			}
-			
-			if (e->ny) vy = 0;
-			if (e->obj->ObjType == ObjType::KOOPAS) 
-			{
-				e->obj->nx = this->nx;
-				//Mario jump on the koopas
-				if (e->ny < 0)
-				{
-					switch (e->obj->state)
+					if (e->ny > 0)
 					{
-					case(KOOPAS_STATE_WALKING):
-						e->obj->SetState(KOOPAS_STATE_HIDDEN);
-						break;
-					case(KOOPAS_STATE_HIDDEN):
-						e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
-						break;
-					case(KOOPAS_STATE_HIDDEN_MOVE):
-						e->obj->SetState(KOOPAS_STATE_HIDDEN);
-						break;
+						e->obj->SetState(BRICK_STATE_COLISSION);
 					}
-					vy = -MARIO_DIE_DEFLECT_SPEED;
-					y += min_ty * dy + ny * 0.6f;
 				}
-				else if (e->nx != 0)
+				else if (e->obj->ObjType == ObjType::FIREPIRANHAPLANT)
 				{
-					if (e->obj->state == KOOPAS_STATE_HIDDEN_MOVE)
+					Calclevel();
+					if (e->ny != 0) vy = 0;
+					if (e->nx != 0) vx = 0;
+				}
+				if (e->obj->ObjType == ObjType::GROUND)
+				{
+					y += min_ty * dy + ny * 0.004f;
+				}
+				if (e->obj->ObjType == ObjType::BLOCK)
+				{
+					x += dx;
+					y += min_ty * dy + ny * 0.004f;
+				}
+				if (e->obj->ObjType == ObjType::BRICK)
+				{
+					y += min_ty * dy + ny * 0.004f;
+				}
+				if (e->ny) vy = 0;
+				if (e->obj->ObjType == ObjType::PORTAL)
+				{
+					x += dx;
+					if (e->ny < 0)
+						y += dy;
+				}
+				if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS && IsHoldingKoopas == false)
+				{
+					//Mario jump on the koopas
+					if (e->ny < 0)
 					{
-							Calclevel();
-					}
-					else
-					{
-						if (IsRunning)
+						switch (e->obj->state)
 						{
-							IsHoldingKoopas = true;
-						}	
-						else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
-						{
+						case(KOOPAS_STATE_WALKING):
+							e->obj->SetState(KOOPAS_STATE_HIDDEN);
+							break;
+						case(KOOPAS_STATE_HIDDEN):
+							e->obj->nx = this->nx;
 							e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+							break;
+						case(KOOPAS_STATE_HIDDEN_MOVE):
+							e->obj->SetState(KOOPAS_STATE_HIDDEN);
+							break;
+						}
+						vy = -MARIO_DIE_DEFLECT_SPEED;
+						y += min_ty * dy + ny * 0.6f;
+					}
+					else if (e->nx != 0)
+					{
+						if (e->obj->state != KOOPAS_STATE_HIDDEN)
+						{
+							Calclevel();
+						}
+						else
+						{
+							if (IsRunning)
+							{
+								IsHoldingKoopas = true;
+							}
+							else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
+							{
+								e->obj->nx = this->nx;
+								e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+							}
+						}
+					}
+					if (e->obj->ObjType == ObjType::KOOPAS) {
+						KP = dynamic_cast<CKoopas*>(e->obj);
+						KP->ChkIsHolding(IsHoldingKoopas);
+					}
+					else if (e->obj->ObjType == ObjType::REDKOOPAS) {
+						KP = dynamic_cast<RedKoopas*>(e->obj);
+						KP->ChkIsHolding(IsHoldingKoopas);
+					}
+				}
+			}
+			for (int i = 0; i < coObjects->size(); i++)
+			{
+				if (coObjects->at(i)->ObjType == ObjType::KOOPAS && coObjects->at(i)->state != KOOPAS_STATE_HIDDEN)
+				{
+					if (CheckAABB(coObjects->at(i))) {
+						Calclevel();
+					}
+				}
+				else if (coObjects->at(i)->ObjType == ItemType::LEAF)
+				{
+					coObjects->at(i)->SubHealth();
+					level = MARIO_LEVEL_RACOON;
+					y -= MARIO_SET_LEVEL_Y;
+				}
+				if (coObjects->at(i)->ObjType == ObjType::PORTAL)
+				{
+					if (CheckAABB(coObjects->at(i)))
+					{
+						if (GoHiddenMap)
+						{
+							SetState(MARIO_STATE_GO_HIDDENMAP);
+						}
+						else if (GoOutHiddenMap )
+						{
+							SetState(MARIO_STATE_GO_OUT_HIDDENMAP);
 						}
 					}
 				}
-				KP = dynamic_cast<CKoopas*>(e->obj);
-				KP->ChkIsHolding(IsHoldingKoopas);
 			}
 		}
-		
+		// clean up collision events
+		for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+		/*DebugOut(L"currentLEVEL%d\n", level);*/
 	}
-	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-	/*DebugOut(L"currentLEVEL%d\n", level);*/
+	else
+	{
+		y += dy;
+		if (y - StartYgoHiddenMap >= MARIO_RACOON_BBOX_HEIGHT)
+		{
+			Camera::GetInstance()->cam_y = y = 464;
+			x = 2096;
+			StopUpdate = false;
+		}
+		if (StartYgoHiddenMap - y >= 32)
+		{
+			Camera::GetInstance()->cam_y = 240;
+			y = 352;
+			x = 2330;
+			StopUpdate = false;
+		}
 	}
+}
 void CMario::Render()
 {
 	int alpha = 255;
@@ -579,12 +669,16 @@ void CMario::Render()
 		}
 	}
 	else if (ani == MARIO_ANI_RACOON_ATTACKLEFT)
+	{
 		animation_set->at(ani)->RenderATK(x, y);
+	}
 	else
 		animation_set->at(ani)->Render(x, y);
 	for (int i = 0; i < 2; i++)
 		firebullet[i]->Render();
-	//RenderBoundingBox();
+	RenderBoundingBox();
+	//tail->RenderBoundingBox();
+	//DebugOut(L"vy%f\n", vy);
 }
 
 void CMario::SetState(int state)
@@ -665,7 +759,7 @@ void CMario::SetState(int state)
 				}
 			}
 		}
-			nx = -1;
+		nx = -1;
 		break;
 	case MARIO_STATE_JUMP:
 
@@ -704,25 +798,40 @@ void CMario::SetState(int state)
 			IsRunning = true;
 		break;
 	case MARIO_STATE_FLY:
-		if (CounterSpeed == 7 && level == MARIO_LEVEL_RACOON)
+		if ((CounterSpeed == 7 && level == MARIO_LEVEL_RACOON && abs(vx) == MARIO_MAX_SPEED*2)||IsFlying)
 		{
-			vy = -MARIO_FLY_SPEED;
+			if(!IsOnPlatForm)
+			{
+				vy = -MARIO_FLY_SPEED;
 			if (!IsFlying)
 			{
 				IsFlying = true;
 			}
+			TAttack = GetTickCount64();
+			IsOnPlatForm = false;
+		}
 		}
 		break;
 	case MARIO_STATE_SLOWFALLING:
 		if (vy > 0 && !IsOnPlatForm && !IsFlying)
 		{
-			vy = 0.01;
+			vy = 0.005;
 			IsSlowFalling = true;
 		}
 		break;
 	case MARIO_STATE_ATTACK:
 		IsAttack = true;
 		TAttack = GetTickCount64();
+		break;
+	case MARIO_STATE_GO_HIDDENMAP:
+		vy = 0.05;
+		StopUpdate = true;
+		StartYgoHiddenMap = y;
+		break;
+	case MARIO_STATE_GO_OUT_HIDDENMAP:
+		vy = -0.05;
+		StartYgoHiddenMap = y; 
+		StopUpdate = true;
 		break;
 	}
 }
@@ -746,8 +855,12 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 		}
 		else
 		{
+			if (nx > 0)
+			{
+				left = x + 9;
+			}
 			bottom = y + MARIO_BIG_BBOX_HEIGHT;
-			right = x + MARIO_RACOON_BBOX_WIDTH;
+			right = left + MARIO_RACOON_BBOX_WIDTH;
 		}
 	}
 	else

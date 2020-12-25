@@ -1,10 +1,12 @@
 #pragma once
 #include <Windows.h>
-#define SCREEN_WIDTH 700
-#define SCREEN_HEIGHT 250
+#include "Utils.h"
+#define SCREEN_WIDTH 257
+#define SCREEN_HEIGHT 272
 class Camera
 {
 public:
+	float Mariovx, Mariovy, MarioY;
 	float cam_x, cam_y, cam_vx, cam_vy;
 	bool IsFollowingMario;
 public:
@@ -16,10 +18,25 @@ public:
 		return __instance;
 	}
 	Camera();
-	void SetCamSpeed(float vx, float vy)
+
+	void SetCamSpeed()
 	{
-		cam_vx = vx;
-		cam_vy = vy;
+		if (Mariovy < 0 && cam_y >= 0)
+			cam_vy = Mariovy;
+		else {
+			if (cam_y <= 0)
+				cam_y = 0;
+			cam_vy = Mariovy*0.5;
+		}
+		if (cam_vy > 0)
+		{
+			if (cam_y >= 240)
+			{
+				IsFollowingMario = false;
+				cam_vy = 0;
+				cam_y = 240;
+			}
+		}
 	}
 	bool IsInCam(float objX, float objY)
 	{
@@ -29,6 +46,14 @@ public:
 			return true;
 	}
 	void SetCamPos(float x, float y);
+	float GetCamPosX()
+	{
+		return cam_x;
+	}
+	float GetCamPosY()
+	{
+		return cam_y;
+	}
 	void Update( DWORD dt);
 };
 

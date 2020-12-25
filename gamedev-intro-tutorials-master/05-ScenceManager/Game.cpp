@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Camera.h"
 #include "PlayScence.h"
+#include"WorldMapScene.h"
 
 CGame * CGame::__instance = NULL;
 
@@ -65,7 +66,7 @@ void CGame::Init(HWND hWnd)
 */
 void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha)
 {
-	D3DXVECTOR3 p(floor(x - cam_x),floor( y - cam_y), 0);
+	D3DXVECTOR3 p(floor(x - Camera::GetInstance()->cam_x),floor( y - Camera::GetInstance()->cam_y), 0);
 	RECT r; 
 	r.left = left;
 	r.top = top;
@@ -73,6 +74,17 @@ void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top
 	r.bottom = bottom;
 	spriteHandler->Draw(texture, &r, NULL, &p, D3DCOLOR_ARGB(alpha, 255, 255, 255));
 	
+}
+void CGame::DrawHud(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha)
+{
+	D3DXVECTOR3 p(x, y, 0);
+	RECT r;
+	r.left = left;
+	r.top = top;
+	r.right = right;
+	r.bottom = bottom;
+	spriteHandler->Draw(texture, &r, NULL, &p, D3DCOLOR_ARGB(alpha, 255, 255, 255));
+
 }
 
 int CGame::IsKeyDown(int KeyCode)
@@ -337,9 +349,17 @@ void CGame::_ParseSection_SCENES(string line)
 
 	if (tokens.size() < 2) return;
 	int id = atoi(tokens[0].c_str());
-	LPCWSTR path = ToLPCWSTR(tokens[1]);
-
-	LPSCENE scene = new CPlayScene(id, path);
+	LPSCENE scene;
+	if (id == 1)
+	{
+		LPCWSTR path = ToLPCWSTR(tokens[1]);
+		scene = new WorldMapScene(id, path);
+	}
+	else
+	{
+		LPCWSTR path = ToLPCWSTR(tokens[1]);
+		scene = new CPlayScene(id, path);
+	}
 	scenes[id] = scene;
 }
 
@@ -384,14 +404,13 @@ void CGame::Load(LPCWSTR gameFile)
 
 void CGame::SwitchScene(int scene_id)
 {
-	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
 
-	scenes[current_scene]->Unload();;
+	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
+	DoneLoad = false;
 
 	CTextures::GetInstance()->Clear();
 	CSprites::GetInstance()->Clear();
 	CAnimations::GetInstance()->Clear();
-
 	current_scene = scene_id;
 	LPSCENE s = scenes[scene_id];
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());

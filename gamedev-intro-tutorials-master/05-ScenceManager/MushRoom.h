@@ -16,7 +16,7 @@ class MushRoom :
 	float StartInitPos;
 	bool Initialized;
 public:
-	MushRoom(int X,int Y)
+	MushRoom(float X,float Y)
 	{
 		ObjType = 18;
 		IsMovingObject = true;
