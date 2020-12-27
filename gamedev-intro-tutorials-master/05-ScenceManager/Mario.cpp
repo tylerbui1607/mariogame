@@ -14,6 +14,7 @@
 #include "RedKoopas.h"
 #include "Button.h"
 #include "Camera.h"
+#include "BigCoin.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -44,6 +45,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CGameObject::Update(dt);
 	// Simple fall down
 	// Simple fall down
+	DebugOut(L"MarioVY%f\n", vy);
+
 	if (!StopUpdate)
 	{
 		vy += GRAVITY * dt;
@@ -161,9 +164,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		{
 			x += dx;
 			y += dy;
-			IsCollisionBackUp = IsCollision;
-			IsCollision = false;
-			if (IsCollisionBackUp == IsCollision)
+			if (vy > 0.1)
 			{
 				IsOnPlatForm = false;
 			}
@@ -174,14 +175,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			float rdx = 0;
 			float rdy = 0;
 
-
 			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 			x += min_tx * dx + nx * 0.5f;
 			// Collision logic with Goombas
 			for (UINT i = 0; i < coEventsResult.size(); i++)
 			{
 				LPCOLLISIONEVENT e = coEventsResult[i];
-				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::BRICK)
+				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::PORTAL&&e->obj->ObjType != ItemType::BIGCOIN)
 				{
 					if (e->nx != 0) vx = 0;
 				}
@@ -194,7 +194,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					}
 					vy = 0;
 					IsOnPlatForm = true;
-					IsCollision = true;
 				}
 				else
 				{
@@ -212,6 +211,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					e->obj->SubHealth();
 					level = MARIO_LEVEL_BIG;
 					y -= MARIO_SET_LEVEL_Y;
+				}
+				if (e->obj->ObjType == ItemType::BIGCOIN)
+				{
+					e->obj->SetState(BIGCOIN_STATE_COLLECTED);
 				}
 				if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
 				{
@@ -252,22 +255,23 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->obj->ObjType == ObjType::GROUND)
 				{
 					y += min_ty * dy + ny * 0.004f;
+					if (e->ny) vy = 0;
 				}
 				if (e->obj->ObjType == ObjType::BLOCK)
 				{
 					x += dx;
 					y += min_ty * dy + ny * 0.004f;
+					if (e->ny) vy = 0;
 				}
 				if (e->obj->ObjType == ObjType::BRICK)
 				{
-					y += min_ty * dy + ny * 0.004f;
+					y += min_ty * dy + ny * 0.5f;
+					if (e->ny) vy = 0;
 				}
-				if (e->ny) vy = 0;
 				if (e->obj->ObjType == ObjType::PORTAL)
 				{
 					x += dx;
-					if (e->ny < 0)
-						y += dy;
+					y += dy;
 				}
 				if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS && IsHoldingKoopas == false)
 				{
@@ -341,10 +345,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						{
 							SetState(MARIO_STATE_GO_HIDDENMAP);
 						}
-						else if (GoOutHiddenMap )
+						else if (GoOutHiddenMap)
 						{
 							SetState(MARIO_STATE_GO_OUT_HIDDENMAP);
 						}
+					}
+				}
+				if (coObjects->at(i)->ObjType == ItemType::BIGCOIN)
+				{
+					if (CheckAABB(coObjects->at(i)))
+					{
+						coObjects->at(i)->SetState(BIGCOIN_STATE_COLLECTED);
 					}
 				}
 			}

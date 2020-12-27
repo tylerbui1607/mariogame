@@ -21,6 +21,7 @@
 #include "Map.h"
 #include "RedKoopas.h"
 #include "Button.h"
+#include "BigCoin.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -367,8 +368,18 @@ void CPlayScene::Update(DWORD dt)
 	hud->Update(dt);
 	for (size_t i = 1; i < objects.size(); i++)
 	{
+		
 		if (objects[i]->GetHealth() != 0)
 		{
+			if (objects[i]->ObjType == ObjType::BRICK)
+			{
+				CBrick* brick = dynamic_cast<CBrick*>(objects[i]);
+				if (brick->Check)
+				{
+					BigCoin* bcoin = new BigCoin(brick->x, brick->y);
+					objects[i] = bcoin;
+				}
+			}
 			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
 			{
 				QuestionBrick* qb = dynamic_cast<QuestionBrick*>(objects[i]);
@@ -480,7 +491,7 @@ void CPlayScene::Render()
 	map->Draw();
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->GetHealth() != 0)
+		if (objects[i]->Health != 0)
 			objects[i]->Render();
 	}
 	hud->Render();
@@ -505,6 +516,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	
 	switch (KeyCode)
 	{
 	case DIK_B: // reset
@@ -537,8 +549,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	case DIK_DOWN:
 		mario->GoHiddenMap = true;
 		break;
-	case DIK_UP :
-		mario->GoOutHiddenMap = true;
+	case DIK_H:
+		mario->SetState(MARIO_STATE_GO_HIDDENMAP);
 		break;
 	}
 }
@@ -569,6 +581,10 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	if (game->IsKeyDown(DIK_UP))
+	{
+		mario->GoOutHiddenMap = true;
+	}
 	if (game->IsKeyDown(DIK_A))
 		mario->SetState(MARIO_STATE_RUN);
 	// disable control key when Mario die 

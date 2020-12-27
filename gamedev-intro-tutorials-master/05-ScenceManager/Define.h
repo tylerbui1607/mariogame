@@ -19,5 +19,5 @@ enum ItemType
 	MUSHROOM = 18,
 	COIN = 19,
 	LEAF = 20,
-
+	BIGCOIN = 21,
 };

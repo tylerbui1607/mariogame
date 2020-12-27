@@ -6,6 +6,7 @@
 #include "Sprites.h"
 #include "Textures.h"
 #include "Game.h"
+#include"Score.h"
 class HUD_Time
 {
 public:
@@ -26,12 +27,24 @@ public:
 	void Render()
 	{
 		int n = LimitTime;
+		int ts =15000;
 		for (int i = 2; i >= 0; i--)
 		{
 			int c = n % 10;
-			CSprites::GetInstance()->Get(SpriteID[c])->DrawHUD(HUD_TIMEx+8*i,HUD_TIMEy);
+			CSprites::GetInstance()->Get(SpriteID[c])->DrawHUD(HUD_TIMEx + 8 * i, HUD_TIMEy);
 			if (n != 0)
 				n = n / 10;
+		}
+		for (int i = 6; i >= 0; i--)
+		{
+			if (ts != 0)
+			{
+				int c = ts % 10;
+				CSprites::GetInstance()->Get(SpriteID[c])->DrawHUD(49 + 8 * i, HUD_TIMEy);
+				ts = ts / 10;
+			}
+			else
+				CSprites::GetInstance()->Get(SpriteID[0])->DrawHUD(49 + 8 * i, HUD_TIMEy);
 		}
 	};
 };

@@ -33,6 +33,9 @@
     <Filter Include="HUD">
       <UniqueIdentifier>{e6282089-8f3e-4581-a5d6-d5481a105f92}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Effect">
+      <UniqueIdentifier>{aa83787c-a947-48ee-a65b-166fb9e274d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -116,9 +119,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hud.cpp">
       <Filter>HUD</Filter>
     </ClCompile>
@@ -137,8 +137,20 @@
     <ClCompile Include="MarioWM.cpp">
       <Filter>Player</Filter>
     </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
     <ClCompile Include="Button.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="BigCoin.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Score.cpp">
+      <Filter>Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,9 +235,6 @@
     <ClInclude Include="Tail.h">
       <Filter>Player</Filter>
     </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>GameEgine</Filter>
-    </ClInclude>
     <ClInclude Include="Hud.h">
       <Filter>HUD</Filter>
     </ClInclude>
@@ -244,8 +253,20 @@
     <ClInclude Include="MarioWM.h">
       <Filter>Player</Filter>
     </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
     <ClInclude Include="Button.h">
-      <Filter>GameEgine</Filter>
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="BigCoin.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Score.h">
+      <Filter>Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
