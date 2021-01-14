@@ -194,13 +194,12 @@ void WorldMapScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
-	case OBJECT_TYPE_BRICK: obj = new CBrick(); break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_GROUND: obj = new Ground(width, height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
-	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(); break;
+	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX, MaxX); break;
 		/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
@@ -370,7 +369,7 @@ void WorldMapSceneKeyHandler::OnKeyDown(int KeyCode)
 	MarioWM* mario = ((WorldMapScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-	case DIK_W:
+	case DIK_S:
 		mario->Choosen = true;
 		break;
 	case DIK_LEFT:

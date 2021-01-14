@@ -2,5 +2,5 @@
 
 void Block::Render()
 {
-	RenderBoundingBox();
+
 }

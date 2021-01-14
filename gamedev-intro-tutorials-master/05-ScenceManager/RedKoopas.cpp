@@ -1,6 +1,7 @@
 #include "RedKoopas.h"
 #include "Block.h"
 #include "Brick.h"
+#include "Ground.h"
 void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if ((MINx >= x || x + KOOPAS_BBOX_WIDTH >= MAXx) && IsWalking)
@@ -8,7 +9,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = -vx;
 		nx = -nx;
 		if (nx < 0)
-			x = MAXx - KOOPAS_BBOX_WIDTH - 0.01;
+			x = MAXx - KOOPAS_BBOX_WIDTH - 1;
 		else
 			x = MINx+0.01;
 	}
@@ -89,7 +90,13 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					MINx = block->x;
 					MAXx = block->x + block->GetWidth();
 				}
-				else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK)
+				if (e->ny && e->obj->ObjType == ObjType::GROUND)
+				{
+					Ground* ground = dynamic_cast<Ground*>(e->obj);
+					MINx = ground->x;
+					MAXx = ground->x + ground->GetWidth();
+				}
+				if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK)
 				{
 					vx = -vx;
 				}

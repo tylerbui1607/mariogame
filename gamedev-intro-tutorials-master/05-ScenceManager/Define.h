@@ -13,6 +13,8 @@ enum ObjType
 	REDKOOPAS = 9,
 	PORTAL = 10,
 	BUTTON = 11,
+	UNBREAKABLEBRICK = 12,
+	LSPORTAL = 14,
 };
 enum ItemType
 {
@@ -20,4 +22,8 @@ enum ItemType
 	COIN = 19,
 	LEAF = 20,
 	BIGCOIN = 21,
+};
+enum EffectType
+{
+	SCORE = 40,
 };

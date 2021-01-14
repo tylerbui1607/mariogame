@@ -1,5 +1,6 @@
 #include "Tail.h"
 #include"QuestionBrick.h"
+#include "Brick.h"
 void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (IsActivated)
@@ -12,6 +13,16 @@ void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					coObjects->at(i)->SubHealth();
 				}
 			}
+			if (coObjects->at(i)->ObjType == ObjType::BRICK)
+			{
+				if (CheckAABB(coObjects->at(i))) {
+					CBrick* brick = dynamic_cast<CBrick*>(coObjects->at(i));
+					if (brick->ItemType != ObjType::BUTTON)
+						coObjects->at(i)->SubHealth();
+					else
+						brick->SetState(BRICK_STATE_COLLISION);
+				}
+			}
 			if (coObjects->at(i)->ObjType == ObjType::QUESTIONBRICK)
 			{
 				if (CheckAABB(coObjects->at(i))) {
@@ -20,12 +31,58 @@ void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			}
 		}
 	}
-	
 }
 
 
 void Tail::Render()
 {
-	if (IsActivated)
-		RenderBoundingBox();
+	if (!StopRender && !Attacking)
+	{
+		if (Idling)
+		{
+			if (nx > 0)
+				ani = 4;
+			else
+				ani = 5;
+		}
+		else if (Walking)
+		{
+			if (nx > 0)
+				ani = 6;
+			else
+				ani = 7;
+		}
+		else if (Jumping)
+		{
+			if (nx > 0)
+				ani = 2;
+			else
+				ani = 3;
+		}
+		else if (Falling)
+		{
+			if (nx > 0)
+				ani = 0;
+			else
+				ani = 1;
+		}
+		else if (SlowFalling)
+		{
+			if (nx > 0)
+				ani = 10;
+			else
+				ani = 11;
+		}
+		if (Attacking)
+		{
+			if (nx > 0)
+				ani = 8;
+			else
+				ani = 9;
+		}
+		if (ani == 9)
+			animation_set->at(ani)->RenderATK(x, y);
+		else
+			animation_set->at(ani)->Render(x, y);
+	}
 }

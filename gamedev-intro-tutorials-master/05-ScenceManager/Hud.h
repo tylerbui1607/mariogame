@@ -12,14 +12,19 @@ class Hud
 public:
 	float HUDx, HUDy;
 	int SpriteHUD;
+	int SpriteStack;
+	int SpritePower;
+	int MarioStack;
 	HUD_Time* hudTime;
-	Hud(float x, float y, int SpriteID) {
+	Hud(float x, float y, int SpriteID,int spriteStackID,int SpritePowerID) {
 		HUDx = x;
 		HUDy = y;
 		SpriteHUD = SpriteID;
+		SpriteStack = spriteStackID;
+		SpritePower = SpritePowerID;
 	};
 	void Update(DWORD dt);
-	void Render();
+	void Render(int Score);
 
 };
 

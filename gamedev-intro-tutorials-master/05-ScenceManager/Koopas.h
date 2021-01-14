@@ -38,6 +38,14 @@ public:
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
+	void AdaptPos(float MarioX, float MarioY, int MarioNx)
+	{
+		if (MarioNx > 0)
+			x = MarioX + 12;
+		else if (MarioNx < 0)
+			x = MarioX - 14;
+		y = MarioY + 5;
+	}
 	void ChkIsHolding(bool isHolding=false)
 	{
 		IsHolding = isHolding;

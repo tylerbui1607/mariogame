@@ -20,7 +20,7 @@ public:
 		right = left + Width;
 		bottom = top + Height;
 	}
-	int GetWidth() { return Width; };
+	virtual int GetWidth() { return Width; };
 	virtual void Render();
 };
 

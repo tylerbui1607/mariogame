@@ -1,63 +1,63 @@
 #include "FirePiranhaPlant.h"
 #include "Utils.h"
-#define MAXHEIGHT_APPEAR	31
+#include "WarpPipe.h"
+#define MAXHEIGHT_APPEAR	30
 #define MAXHEIGHT_HIDDEN	16
-
 void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	//Intiate FirePiranhaPlant
-	if (!INIT)
+	if (IsAttack && GetTickCount64() - CalcAtkTime >= 10000)
 	{
-		Startposy = y;
-		SetState(FIREPIRANHAPLANT_HIDDEN);
-		INIT = true;
-	}
-	//Calculate atk time
-	if (IsAttack && CalcAtkTime == 0)
-	{
-		CalcAtkTime = GetTickCount64();
+		IsAttack = false;
 	}
 	if (IsAttack && GetTickCount64() - CalcAtkTime >= 2000)
 	{
 		IsAttack = false;
-		CalcAtkTime = 0;
 	}
-	if ( AppearTime == 0)
+	if (y <= Max)
 	{
-		AppearTime = GetTickCount64();
+		 vy = 0;
+		 y = Max + 0.01;
+		 if (vy < 0)
+			CalcAtkzone();
+		if (!IsAttack)
+		{
+			SetState(FIREPIRANHAPLANT_HIDDEN);
+		}
 	}
-	
-	if (Startposy - y >= MAXHEIGHT_APPEAR)
+	if ( y >= Min)
+	{
+		vy = 0;
+		y = Min - 0.01;
+		if (!StopMove)
 		{
-			vy = 0;
-			if (!IsAttack && GetTickCount64() - AppearTime >= 3000)
-			{
-				SetState(FIREPIRANHAPLANT_HIDDEN);
-				AppearTime = 0;
-			}
-			if (vy <= 0)
-				CalcAtkzone();
+			SetState(FIREPIRANHAPLANT_APPEAR);
 		}
-	if (Startposy - y <=-MAXHEIGHT_HIDDEN )
-		{
-			vy = 0;
-			if (GetTickCount64() - AppearTime >= 3000)
-			{
-				AppearTime = 0;
-				SetState(FIREPIRANHAPLANT_APPEAR);
-			}
-		}
+	}
 	if (IsAttack && count == 1)
 	{
 		CalcAtkPos();
-		Firebullet = new FireBullet(VxBullet, VyBullet);
-		Firebullet->SetPosition(x,y);
+		FireBullet*bullet = new FireBullet(VxBullet, VyBullet, x, y);
+		FireBullets.push_back(bullet);
 		count--;
 	}
-	Firebullet->Update(dt,coObjects);
+	for (int i = 0; i < FireBullets.size(); i++)
+	{
+		if (FireBullets.at(i)->Health != 0)
+			FireBullets.at(i)->Update(dt, coObjects);
+	}
 	CGameObject::Update(dt);
 	y += dy;
-	//DebugOut(L"hello%f\n", VyBullet);
+	for (int i = 0; i < coObjects->size(); i++)
+	{
+		if (coObjects->at(i)->ObjType == ObjType::WARPPIPE)
+		{
+			if (CheckAABB(coObjects->at(i)))
+			{
+				WarpPipe* wp = dynamic_cast<WarpPipe*>(coObjects->at(i));
+				StopMove = wp->MarioOn;
+			}
+		}
+	}
 }
 
 void FirePiranhaPlant::Render()
@@ -76,7 +76,11 @@ void FirePiranhaPlant::Render()
 		else
 			animation_set->at(FIREPIRANHAPLANT_DOWNLEFT)->Render(x, y);
 	}
-	Firebullet->Render();
+	for (int i = 0; i < FireBullets.size(); i++)
+	{
+		if (FireBullets.at(i)->Health != 0)
+			FireBullets.at(i)->Render();
+	}
 	RenderBoundingBox();
 }
 
@@ -85,9 +89,16 @@ void FirePiranhaPlant::SetState(int state)
 	switch (state)
 	{
 	case FIREPIRANHAPLANT_APPEAR:
+		Appear= false;
 		vy = -FIREPIRANHAPLANT_SPEED_Y;
 		break;
 	case FIREPIRANHAPLANT_HIDDEN:
+		Hidden = false;
 		vy = FIREPIRANHAPLANT_SPEED_Y;
+		CalcAtkTime = GetTickCount64();
+		break;
+	case FIREPIRANHAPLANT_ATTACK:
+		CalcAtkTime = GetTickCount64();
+		break;
 	}
 }

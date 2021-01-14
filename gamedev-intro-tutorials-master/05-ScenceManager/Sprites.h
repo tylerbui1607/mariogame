@@ -20,6 +20,7 @@ public:
 
 	void Draw(float x, float y, int alpha = 255);
 	void DrawHUD(float x, float y, int alpha = 255);
+	void DrawCo(float x, float y, int alpha = 255);
 };
 
 typedef CSprite * LPSPRITE;

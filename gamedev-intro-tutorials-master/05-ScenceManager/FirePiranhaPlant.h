@@ -20,7 +20,6 @@
 class FirePiranhaPlant :
 	public CGameObject
 {
-	FireBullet* Firebullet;
 public:
 	float Startposy;
 	DWORD CalcAtkTime;
@@ -33,14 +32,22 @@ public:
 	float VxBullet;
 	float VyBullet;
 
+	float Max, Min;
 	bool IsAttack,
 		INIT;
+	bool Appear, Hidden;
+	bool StopMove;
+	vector<FireBullet*>FireBullets;
 public:
-	FirePiranhaPlant()
+	FirePiranhaPlant(float X, float Y)
 	{
 		ObjType = 8;
 		INIT = IsAttack = IsMovingObject = false;
-		Firebullet = new FireBullet(0, 0);
+		x = X;
+		y = Y;
+		Max = y - 48;
+		Min = y;
+		SetState(FIREPIRANHAPLANT_APPEAR);
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
@@ -52,6 +59,7 @@ public:
 			if (!IsAttack)
 				count = 1;
 			IsAttack = true;
+			SetState(FIREPIRANHAPLANT_ATTACK);
 		}
 		else
 		{
@@ -63,28 +71,29 @@ public:
 		if (abs(x - EnemyX) <= 100)
 		{
 			if (EnemyY < y)
-				VyBullet = -0.03;
+				VyBullet = -0.1;
 			else
-				VyBullet = 0.03;
+				VyBullet = 0.1;
 		}
 		else
 		{
 			if (EnemyY < y)
-				VyBullet = -0.01;
+				VyBullet = -0.08;
 			else
-				VyBullet = 0.01;
+				VyBullet = 0.08;
 		}
 		if (EnemyX > x)
 		{
-			VxBullet = 0.03;
+			VxBullet = 0.1;
 			nx = 1;
 		}
 		else
 		{
-			VxBullet = -0.03;
+			VxBullet = -0.1;
 			nx = -1;
 		}
 	}
+
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	{
 		if (Health != 0)

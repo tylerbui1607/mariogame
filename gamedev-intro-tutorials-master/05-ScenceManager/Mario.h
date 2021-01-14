@@ -3,6 +3,9 @@
 #include "FireBullet.h"
 #include "Koopas.h"
 #include "Tail.h"
+#include "Score.h"
+#include "Effect.h"
+#include "WarpPipe.h"
 #define MARIO_WALKING_SPEED			0.15f 
 #define MARIO_JUMP_SPEED_Y			0.25f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
@@ -40,8 +43,8 @@
 #define MARIO_ANI_BIG_IDLE_LEFT			2
 #define MARIO_ANI_BIG_WALKING_RIGHT			5
 #define MARIO_ANI_BIG_WALKING_LEFT			6
-#define MARIO_RB_WALKINGRIGHT				7
-#define MARIO_RB_WALKINGLEFT				8
+#define MARIO_RB_WALKINGRIGHT				8
+#define MARIO_RB_WALKINGLEFT				7
 #define MARIO_ANI_JUMPINGRIGHT				9
 #define MARIO_ANI_JUMPINGLEFT				10
 #define MARIO_ANI_FALLINGRIGHT				11
@@ -52,6 +55,13 @@
 #define MARIO_ANI_SITTINGLEFT				16
 #define MARIO_ANI_FLYJUMPRIGHT				17
 #define MARIO_ANI_FLYJUMPLEFT				18
+#define MARIO_ANI_BIG_IDLE_HOLDKPRIGHT		63
+#define MARIO_ANI_BIG_WALKING_HOLDKP_RIGHT	64	
+#define MARIO_ANI_BIG_KICKKP_RIGHT			65
+#define MARIO_ANI_BIG_IDLE_HOLDKPLEFT		66
+#define MARIO_ANI_BIG_WALKING_HOLDKP_LEFT	67
+#define MARIO_ANI_BIG_KICKKP_LEFT			68
+
 /*ANI_MARIO_SMALL*/
 #define MARIO_ANI_SMALL_IDLE_RIGHT		3
 #define MARIO_ANI_SMALL_IDLE_LEFT		4
@@ -125,19 +135,24 @@
 #define MARIO_PLUSSTACK_TIME 200
 #define MARIO_RACOON_ATKTIME 250
 
+#define HIDDEN_MAP_X	2096
+#define HIDDEN_MAP_Y	464
+#define GO_OUT_HIDDEN_MAP_X	2330
+#define GO_OUT_HIDDEN_MAP_Y	352
+
 class CMario : public CGameObject
 {
 	
 	int untouchable;
 	DWORD untouchable_start;
-	int CounterSpeed;
 	float StartJump;
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
 	float LastVx;
-
 public:
+	//Score* s = new Score();
 	int level;
+	int CounterSpeed;
 	bool IsOnPlatForm,
 		IsRollBack,
 		IsSitting,
@@ -161,6 +176,9 @@ public:
 		 GoOutHiddenMap,
 		 StopUpdate;
 	float StartYgoHiddenMap;
+	Score * score;
+	vector<Effect*> effects;
+	WarpPipe* WP = new WarpPipe();
 public: 
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);

@@ -10,13 +10,16 @@ void Button::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vy = 0;
 		y = StartY - 16;
 	}
-	if (IsPressed)
-		SetBrickToCoin();
 }
 
 void Button::Render()
 {
-	RenderBoundingBox();
+	if (IsPressed)
+	{
+		animation_set->at(1)->Render(x, y);
+	}
+	else
+		animation_set->at(0)->Render(x, y);
 }
 
 void Button::SetState(int state)
@@ -25,6 +28,15 @@ void Button::SetState(int state)
 	{
 	case BUTTON_STATE_INNIT:
 		vy = -0.2;
+		break;
+	case BUTTON_STATE_ISPRESSED:
+		if (!IsPressed)
+		{
+			DebugOut(L"HelloButton\n");
+			IsPressed = true;
+			y += BBOX_HEIGHT - BBOX_HEIGHT_ISPRESSED;
+			SetBrickToCoin();
+		}
 		break;
 	}
 }

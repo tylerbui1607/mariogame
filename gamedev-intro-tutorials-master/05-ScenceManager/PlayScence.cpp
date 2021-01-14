@@ -61,15 +61,18 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define UNKNOW_ITEM	18
 #define OBJECT_TYPE_RED_KOOPAS			9
 #define OBJECT_TYPE_BUTTON		10
-
+#define OBJECT_TYPE_UNBREAK_BRICK	11
 
 
 #define MUSHROOM_ANISET_ID	8
 
 #define OBJECT_TYPE_PORTAL	50
 
+#define OBJECT_TYPE_PORTAL_LASTSCENE	500
+
 #define MAX_SCENE_LINE 1024
 
+#define BIGCOIN_ANISET_ID	21
 
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
@@ -184,7 +187,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		MinX = atof(tokens[4].c_str());
 		MaxX = atof(tokens[5].c_str());
 	}
-
+	if (object_type == ObjType::BRICK)
+	{
+		ItemType = atof(tokens[4].c_str());
+	}
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
 	CGameObject *obj = NULL;
@@ -203,13 +209,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
-	case OBJECT_TYPE_BRICK: obj = new CBrick(); break;
+	case OBJECT_TYPE_BRICK: obj = new CBrick(ItemType); break;
+	case OBJECT_TYPE_UNBREAK_BRICK: { obj = new CBrick(0); obj->ObjType = ObjType::UNBREAKABLEBRICK; break; }
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_GROUND: obj = new Ground(width,height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
-	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(); break;
+	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX,MaxX); break;
 	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
@@ -221,8 +228,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			obj = new CPortal(x, y, r, b, scene_id);
 		}
 		break;
+	case OBJECT_TYPE_PORTAL_LASTSCENE:
+	{
+		float r = atof(tokens[4].c_str());
+		float b = atof(tokens[5].c_str());
+		int scene_id = atoi(tokens[6].c_str());
+		obj = new CPortal(x, y, r, b, scene_id);
+		obj->ObjType = ObjType::LSPORTAL;
+		break;
+	}
 	default:
-		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
 	}
 
@@ -277,9 +292,11 @@ void CPlayScene::_ParseSection_HUD(string line)
 	if (tokens.size() < 3) return; // skip invalid lines - an animation set must at least id and one animation id
 
 	 int SpriteID = atof(tokens[2].c_str());
+	 int SpriteStack = atof(tokens[3].c_str());
+	 int SpritePower = atof(tokens[4].c_str());
 	 float HUDX = atof(tokens[0].c_str());
 	 float HUDY = atof(tokens[1].c_str());
-	 hud = new Hud(HUDX, HUDY, SpriteID);
+	 hud = new Hud(HUDX, HUDY, SpriteID,SpriteStack,SpritePower);
 }
 void CPlayScene::_ParseSection_HUD_TIME(string line)
 {
@@ -368,16 +385,24 @@ void CPlayScene::Update(DWORD dt)
 	hud->Update(dt);
 	for (size_t i = 1; i < objects.size(); i++)
 	{
-		
+		if (objects[i]->ObjType == ObjType::WARPPIPE)
+		{
+			coMarioObjects.push_back(objects[i]);
+		}
 		if (objects[i]->GetHealth() != 0)
 		{
-			if (objects[i]->ObjType == ObjType::BRICK)
+			if (objects[i]->ObjType == ObjType::BRICK && objects[i]->GetHealth() == 2)
 			{
 				CBrick* brick = dynamic_cast<CBrick*>(objects[i]);
-				if (brick->Check)
+				if (brick->IsCollision)
 				{
-					BigCoin* bcoin = new BigCoin(brick->x, brick->y);
-					objects[i] = bcoin;
+					Button* btn = new Button(brick->x, brick->y - 16);
+					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+					LPANIMATION_SET ani_set = animation_sets->Get(11);
+					btn->SetAnimationSet(ani_set);
+					btn->Bricks = Cbricks;
+					objects.push_back(btn);
+					brick->SubHealth();
 				}
 			}
 			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
@@ -421,7 +446,6 @@ void CPlayScene::Update(DWORD dt)
 				coMovingObjects.push_back(objects[i]);
 			else
 				coNotMoveObjects.push_back(objects[i]);
-
 			//DebugOut(L"CoNotMoveObject%d\n", coNotMoveObjects.size());
 		}
 	}
@@ -484,17 +508,29 @@ void CPlayScene::Update(DWORD dt)
 		Camera::GetInstance()->cam_x = 0;
 	if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
 		Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
+	hud->MarioStack = player->CounterSpeed;
 }
 
 void CPlayScene::Render()
 {
 	map->Draw();
-	for (int i = 0; i < objects.size(); i++)
+	for (int i = 1; i < objects.size(); i++)
 	{
-		if (objects[i]->Health != 0)
-			objects[i]->Render();
+		if (objects[i]->ObjType != ObjType::WARPPIPE)
+		{
+			if (objects[i]->Health != 0)
+				objects[i]->Render();
+		}
 	}
-	hud->Render();
+	objects[0]->Render();
+	for (int i = 1; i < objects.size(); i++)
+	{
+		if (objects[i]->ObjType == ObjType::WARPPIPE)
+		{
+				objects[i]->Render();
+		}
+	}
+	hud->Render(player->score->TotalScore);
 }
 
 /*

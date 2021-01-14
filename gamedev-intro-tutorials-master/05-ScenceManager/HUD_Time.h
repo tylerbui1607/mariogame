@@ -6,7 +6,6 @@
 #include "Sprites.h"
 #include "Textures.h"
 #include "Game.h"
-#include"Score.h"
 class HUD_Time
 {
 public:
@@ -24,10 +23,10 @@ public:
 		LimitTime = 300;
 	};
 	void Update(DWORD dt);
-	void Render()
+	void Render(int Score)
 	{
 		int n = LimitTime;
-		int ts =15000;
+		int ts = Score;
 		for (int i = 2; i >= 0; i--)
 		{
 			int c = n % 10;

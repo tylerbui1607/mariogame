@@ -2,4 +2,5 @@
 
 Score::Score()
 {
+	TotalScore = ScoreEarn = 0;
 }

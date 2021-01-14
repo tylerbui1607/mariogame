@@ -19,8 +19,7 @@ public:
 	};
 	virtual void Render()
 	{
-		//animation_set->at(BIGCOIN_ANI)->Render(x, y);
-		RenderBoundingBox();
+		animation_set->at(BIGCOIN_ANI)->Render(x, y);
 	};
 	void SetState(int state)
 	{

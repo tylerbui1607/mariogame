@@ -8,13 +8,16 @@ CKoopas::CKoopas()
 
 void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	left = x;
-	top = y;
-	right = x + KOOPAS_BBOX_WIDTH;
-	bottom = y+25;
-	if (IsHidden)
+	if (!IsHolding)
 	{
-		bottom = y + 16;
+		left = x;
+		top = y;
+		right = x + KOOPAS_BBOX_WIDTH;
+		bottom = y + 25;
+		if (IsHidden)
+		{
+			bottom = y + 16;
+		}
 	}
 }
 
@@ -105,9 +108,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		}
 		else
 		{
-			x += dx;
-			if (state != KOOPAS_STATE_HIDDEN)
-				SetState(KOOPAS_STATE_HIDDEN);
+			/*if (state != KOOPAS_STATE_HIDDEN)
+				SetState(KOOPAS_STATE_HIDDEN);*/
 		}
 }
 
@@ -154,7 +156,9 @@ void CKoopas::SetState(int state)
 		break;
 	case KOOPAS_STATE_HIDDEN:
 		if (!IsHidden)
+		{
 			y += 9;
+		}
 		vx = 0;
 		IsHidden = true;
 		IsAttack = false;

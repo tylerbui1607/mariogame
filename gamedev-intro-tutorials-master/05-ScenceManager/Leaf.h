@@ -3,6 +3,7 @@
 #define LEAF_BBOX_WIDTH	16
 #define LEAF_BBOX_HEIGHT	14
 
+#define LEAF_STATE_INIT	1	
 class Leaf :
 	public CGameObject
 {
@@ -10,9 +11,9 @@ class Leaf :
 public:
 	Leaf(float X, float Y) {
 		x = X;
-		StartY = y = Y;
-		vy = -0.1;
+		y = Y;
 		ObjType = 20;
+		SetState(LEAF_STATE_INIT);
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
