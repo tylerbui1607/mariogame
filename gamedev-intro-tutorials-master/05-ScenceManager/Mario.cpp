@@ -182,7 +182,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::PORTAL&&e->obj->ObjType != ItemType::BIGCOIN)
 				{
 					if (e->nx != 0) {
-						vx = 0; DecreaseStack();
+						vx = 0; 
+						if (!IsFlying)
+						DecreaseStack();
 					}
 				}
 				if (e->ny < 0)
@@ -284,7 +286,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->obj->ObjType == ObjType::LSPORTAL)
 				{
 					CPortal* portal = dynamic_cast<CPortal*>(e->obj);
-					CGame::GetInstance()->SwitchScene(1);
+					NextSceneID = portal->GetSceneId();
+					IsSwitchScene = true;
 				}
 				if (e->obj->ObjType == ObjType::BLOCK)
 				{

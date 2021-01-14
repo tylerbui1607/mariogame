@@ -400,6 +400,7 @@ void CPlayScene::Update(DWORD dt)
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 					LPANIMATION_SET ani_set = animation_sets->Get(11);
 					btn->SetAnimationSet(ani_set);
+					DebugOut(L"Size: %d\n", Cbricks.size());
 					btn->Bricks = Cbricks;
 					objects.push_back(btn);
 					brick->SubHealth();
@@ -509,6 +510,10 @@ void CPlayScene::Update(DWORD dt)
 	if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
 		Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
 	hud->MarioStack = player->CounterSpeed;
+	if (player->IsSwitchScene)
+	{
+		CGame::GetInstance()->SwitchScene(player->NextSceneID);
+	}
 }
 
 void CPlayScene::Render()
@@ -540,7 +545,7 @@ void CPlayScene::Unload()
 {
 	for (int i = 0; i < objects.size(); i++)
 		delete objects[i];
-
+	Cbricks.clear();
 	objects.clear();
 	player = NULL;
 

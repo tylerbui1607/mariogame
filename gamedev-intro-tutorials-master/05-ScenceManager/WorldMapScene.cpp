@@ -323,6 +323,8 @@ void WorldMapScene::Update(DWORD dt)
 	{
 		objects[i]->Update(dt, &coObjects);
 	}
+	if (player->SwitchScene)
+		CGame::GetInstance()->SwitchScene(player->NextScene);
 }
 
 void WorldMapScene::Render()

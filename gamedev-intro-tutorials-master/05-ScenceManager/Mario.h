@@ -175,6 +175,8 @@ public:
 	bool GoHiddenMap,
 		 GoOutHiddenMap,
 		 StopUpdate;
+	bool IsSwitchScene;
+	int NextSceneID;
 	float StartYgoHiddenMap;
 	Score * score;
 	vector<Effect*> effects;

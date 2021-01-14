@@ -17,6 +17,8 @@ public:
 		 CanGoUp,
 		 CanGoDown;
 	int IdPortal;
+	bool SwitchScene;
+	int NextScene;
 	MarioWM(float X, float Y)
 	{
 		x = X;

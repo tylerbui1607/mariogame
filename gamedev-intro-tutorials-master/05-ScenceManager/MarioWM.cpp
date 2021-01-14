@@ -60,7 +60,8 @@ void MarioWM::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 					if (Choosen)
 					{
-						CGame::GetInstance()->SwitchScene(p->GetSceneId());
+						NextScene = p->GetSceneId();
+						SwitchScene = true;
 					}
 					
 			}

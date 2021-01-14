@@ -415,10 +415,8 @@ void CGame::Load(LPCWSTR gameFile)
 
 void CGame::SwitchScene(int scene_id)
 {
-
+	scenes[current_scene]->Unload();
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
-	DoneLoad = false;
-
 	CTextures::GetInstance()->Clear();
 	CSprites::GetInstance()->Clear();
 	CAnimations::GetInstance()->Clear();
