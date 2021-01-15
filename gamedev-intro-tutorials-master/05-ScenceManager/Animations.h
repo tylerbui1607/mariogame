@@ -36,6 +36,7 @@ public:
 	void RenderATK(float x, float y, int alpha = 255);
 	void RenderWM(float x, float y, int alpha = 255);
 	void RenderHDKP(float x, float y, int alpha = 255);
+	void RenderATKR(float x, float y, int alpha = 255);
 	void Reset() { if (currentFrame != 0) currentFrame = -1; }
 };
 

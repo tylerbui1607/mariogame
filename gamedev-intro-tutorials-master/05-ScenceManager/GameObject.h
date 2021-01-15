@@ -115,17 +115,6 @@ public:
 		float b1left, b1top, b1right, b1bottom, b2left, b2top, b2right, b2bottom;
 		this->GetBoundingBox(b1left, b1top, b1right, b1bottom);
 		obj->GetBoundingBox(b2left, b2top, b2right, b2bottom);
-		if (obj->ObjType == ItemType::BIGCOIN)
-		{
-			DebugOut(L"Left%f\n", b2left);
-			DebugOut(L"Rightt%f\n", b2right);
-			DebugOut(L"Top%f\n", b2top);
-			DebugOut(L"Bottom%f\n", b2bottom);
-			DebugOut(L"Left%f\n", b1left);
-			DebugOut(L"Rightt%f\n", b1right);
-			DebugOut(L"Top%f\n", b1top);
-			DebugOut(L"Bottom%f\n", b1bottom);
-		}
 		return !(b1right < b2left || b1left > b2right || b1top > b2bottom || b1bottom < b2top);
 	}
 	~CGameObject();

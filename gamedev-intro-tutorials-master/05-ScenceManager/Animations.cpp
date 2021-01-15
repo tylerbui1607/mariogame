@@ -43,6 +43,29 @@ void CAnimation::Render(float x, float y, int alpha)
 
 	frames[currentFrame]->GetSprite()->Draw(x, y, alpha);
 }
+void CAnimation::RenderATKR(float x, float y, int alpha)
+{
+	DWORD now = GetTickCount();
+	if (currentFrame == -1)
+	{
+		currentFrame = 0;
+		lastFrameTime = now;
+	}
+	else
+	{
+		DWORD t = frames[currentFrame]->GetTime();
+		if (now - lastFrameTime > t)
+		{
+			currentFrame++;
+			lastFrameTime = now;
+			if (currentFrame == frames.size()) {
+				currentFrame = 0;
+			}
+		}
+	}
+
+	frames[currentFrame]->GetSprite()->Draw(x-5, y, alpha);
+}
 void CAnimation::RenderWM(float x, float y, int alpha)
 {
 	DWORD now = GetTickCount();

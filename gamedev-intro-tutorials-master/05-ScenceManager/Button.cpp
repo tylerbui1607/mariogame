@@ -32,7 +32,6 @@ void Button::SetState(int state)
 	case BUTTON_STATE_ISPRESSED:
 		if (!IsPressed)
 		{
-			DebugOut(L"HelloButton\n");
 			IsPressed = true;
 			y += BBOX_HEIGHT - BBOX_HEIGHT_ISPRESSED;
 			SetBrickToCoin();

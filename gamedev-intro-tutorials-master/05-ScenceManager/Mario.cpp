@@ -58,18 +58,20 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		{
 			if (AmountofFirebullet > 0)
 			{
-				FireBullet* fb = new FireBullet(0, 0);
+				FireBullet* fb = new FireBullet(x + 5, y);
 				fb->SetSpeed(0.2 * nx, 0);
-				fb->SetPosition(x + 5, y);
 				fb->FireMario = true;
 				firebullet.push_back(fb);
 				AmountofFirebullet--;
 			}
+			IsAttack = false;
 		}
 		for (int i = 0; i < firebullet.size(); i++)
 		{
 			if (firebullet[i]->Health != 0)
+			{
 				firebullet[i]->Update(dt, coObjects);
+			}
 		}
 		if (IsHoldingKoopas)
 		{
@@ -156,7 +158,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		// turn off collision when die 
 		if (state != MARIO_STATE_DIE)
 			CalcPotentialCollisions(coObjects, coEvents);
-		
 		// reset untouchable timer if untouchable time has passed
 		if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
 		{
@@ -868,8 +869,8 @@ void CMario::Render()
 		}
 		else if (IsAttack && level == MARIO_LEVEL_RACOON)
 		{
-			if(nx > 0)
-				animation_set->at(ani)->Render(x-5, y);
+			if (nx > 0)
+				animation_set->at(ani)->RenderATKR(x, y);
 			else
 				animation_set->at(ani)->RenderATK(x, y);
 		}
@@ -1018,7 +1019,6 @@ void CMario::SetState(int state)
 		if (vx != 0)
 		{
 			IsRunning = true;
-			DebugOut(L"hELLO\n");
 		}
 		break;
 	case MARIO_STATE_FLY:
@@ -1062,7 +1062,6 @@ void CMario::SetState(int state)
 		vy = -0.05;
 		StartYgoHiddenMap = y; 
 		StopUpdate = true;
-		tail->StopRender = true;
 		break;
 	}
 }

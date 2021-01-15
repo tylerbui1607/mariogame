@@ -6,7 +6,7 @@
 #define BULLET_ANI_SET	13
 
 #define BULLET_ANI_FLY_RIGHT	0
-#define BULLET_ANI_FLY_LEFT	1
+#define BULLET_ANI_FLY_LEFT		1
 class FireBullet :
 	public CGameObject
 {
@@ -16,11 +16,14 @@ public:
 		 Disable;
 	FireBullet()
 	{
-
+		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
+		SetAnimationSet(ani_set);
 	};
 	FireBullet(float X, float Y) {
 		x = X;
 		y = Y;
+		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
+		SetAnimationSet(ani_set);
 	}
 	FireBullet(float Vx, float Vy, float X, float Y)
 	{
