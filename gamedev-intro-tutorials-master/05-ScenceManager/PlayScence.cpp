@@ -73,6 +73,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define MAX_SCENE_LINE 1024
 
 #define BIGCOIN_ANISET_ID	21
+#define LEAF_ANISET_ID		14
 
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
@@ -426,6 +427,8 @@ void CPlayScene::Update(DWORD dt)
 					{
 						Leaf* leaf = new Leaf(objects[i]->x, objects[i]->y);
 						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						LPANIMATION_SET ani_set = animation_sets->Get(LEAF_ANISET_ID);
+						leaf->SetAnimationSet(ani_set);
 						qb->SubHealth();
 						objects.push_back(qb);
 						objects[i] = leaf;

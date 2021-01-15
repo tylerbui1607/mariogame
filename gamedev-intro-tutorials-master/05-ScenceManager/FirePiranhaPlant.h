@@ -37,6 +37,7 @@ public:
 		INIT;
 	bool Appear, Hidden;
 	bool StopMove;
+	bool MarioNextTo;
 	vector<FireBullet*>FireBullets;
 public:
 	FirePiranhaPlant(float X, float Y)
@@ -93,7 +94,13 @@ public:
 			nx = -1;
 		}
 	}
-
+	void CalcMarioNextTo()
+	{
+		if (EnemyX >= x - 25 && EnemyX <= x + 25)
+			MarioNextTo = StopMove = true;
+		else
+			MarioNextTo=false;
+	}
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	{
 		if (Health != 0)

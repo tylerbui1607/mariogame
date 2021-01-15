@@ -9,7 +9,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = -vx;
 		nx = -nx;
 		if (nx < 0)
-			x = MAXx - KOOPAS_BBOX_WIDTH - 1;
+			x = MAXx - KOOPAS_BBOX_WIDTH - 2;
 		else
 			x = MINx+0.01;
 	}

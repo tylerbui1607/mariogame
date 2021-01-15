@@ -87,7 +87,7 @@ void CAnimation::RenderHDKP(float x, float y, int alpha)
 		}
 	}
 
-	frames[currentFrame]->GetSprite()->DrawCo(x, y, alpha);
+	frames[currentFrame]->GetSprite()->DrawCo(x+15, y, alpha);
 }
 void CAnimation::RenderATK(float x, float y, int alpha)
 {

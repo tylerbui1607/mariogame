@@ -65,10 +65,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				firebullet.push_back(fb);
 				AmountofFirebullet--;
 			}
-			IsAttack = false;
 		}
 		for (int i = 0; i < firebullet.size(); i++)
-			firebullet[i]->Update(dt, coObjects);
+		{
+			if (firebullet[i]->Health != 0)
+				firebullet[i]->Update(dt, coObjects);
+		}
+		if (IsHoldingKoopas)
+		{
+			if (!KP->IsHolding)
+				IsHoldingKoopas = false;
+		}
 		if (y <= 0)
 		{
 			y = 0;
@@ -79,8 +86,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		if (IsAttack && GetTickCount64() - TAttack >= MARIO_RACOON_ATKTIME)
 		{
-			//animation_set->at(ani)->currentFrame = 0;
-			//DebugOut(L"ATTACK\n");
 			tail->IsActivated = false;
 			IsAttack = false;
 			tail->Attacking = false;
@@ -132,7 +137,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		if (IsRollBack == true )
 		{
-			tail->StopRender = true;
+			if (!IsHoldingKoopas)
+				tail->StopRender = true;
 			if(TRollBack == 0)
 			TRollBack = GetTickCount64();
 		}
@@ -141,7 +147,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			IsRollBack = false;
 			TRollBack = 0;
 		}
-		
+		if(!KP->IsReborning)
 		KP->ChkIsHolding(IsHoldingKoopas);
 		vector<LPCOLLISIONEVENT> coEvents;
 		vector<LPCOLLISIONEVENT> coEventsResult;
@@ -172,7 +178,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			float min_tx, min_ty, nx = 0, ny;
 			float rdx = 0;
 			float rdy = 0;
-
 			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 			x += min_tx * dx + nx * 0.5f;
 			// Collision logic with Goombas
@@ -215,28 +220,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					Health++;
 					level = MARIO_LEVEL_BIG;
 					y -= MARIO_SET_LEVEL_Y;
-				}
-				if (e->obj->ObjType == ItemType::BIGCOIN)
-				{
-					score->CalcScoreEarn();
-					e->obj->SetState(BIGCOIN_STATE_COLLECTED);
-					
-					if (score->ScoreEarn == 100)
-						aniID = 0;
-					if (score->ScoreEarn == 200)
-						aniID = 1;
-					if (score->ScoreEarn == 400)
-						aniID = 2;
-					if (score->ScoreEarn == 800)
-						aniID = 3;
-					if (score->ScoreEarn == 1000)
-						aniID = 4;
-					Effect* Ef = new Effect(e->obj->x, e->obj->y, 40, aniID);
-					Ef->SetState(40);
-					effects.push_back(Ef);
-					e->obj->SubHealth();
-					x += dx;
-					y += dy;
 				}
 				if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
 				{
@@ -298,9 +281,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->obj->ObjType == ObjType::BRICK)
 				{
-					if (e->ny < 0)
-						y += min_ty * dy + ny * 0.2f;
-					//if (e->ny) vy = 0;
+					if (e->ny > 0)
+					{
+						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
+						if (brick->ItemType != ObjType::BUTTON)
+							e->obj->SubHealth();
+						else
+							brick->SetState(BRICK_STATE_COLLISION);
+					}
+					else if (e->ny < 0)
+						y += min_ty * dy + ny * 0.15f;
 				}
 				if (e->obj->ObjType == ObjType::PORTAL)
 				{
@@ -349,10 +339,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					}
 					if (e->obj->ObjType == ObjType::KOOPAS) {
 						KP = dynamic_cast<CKoopas*>(e->obj);
+						if(!KP->IsReborning)
 						KP->ChkIsHolding(IsHoldingKoopas);
 					}
 					else if (e->obj->ObjType == ObjType::REDKOOPAS) {
 						KP = dynamic_cast<RedKoopas*>(e->obj);
+						if (!KP->IsReborning)
 						KP->ChkIsHolding(IsHoldingKoopas);
 					}
 				}
@@ -426,9 +418,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			tail->SetState(TAIL_STATE_FALLING);
 		}
 	}
-	if (IsHoldingKoopas)
+	if (KP->IsHolding)
 	{
-		KP->AdaptPos(x, y, nx);
+		if (level != MARIO_LEVEL_SMALL)
+			KP->AdaptPos(x, y, nx);
+		else
+			KP->AdaptPosSmall(x, y, nx);
 	}
 	if (!IsOnPlatForm && vy > 0 && !IsSitting && !IsFlying)
 	{
@@ -436,7 +431,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (IsSitting)
 		tail->StopRender = true;
-	if (CounterSpeed == 7 && abs(vx) == MARIO_MAX_SPEED * 2)
+	if (CounterSpeed == MAX_STACK_POWER  && abs(vx) == MARIO_MAX_SPEED * 2)
 	{
 		tail->StopRender = true;
 	}
@@ -517,7 +512,7 @@ void CMario::Render()
 						{
 								if (vy < 0)
 								{
-									if (CounterSpeed == 7)
+									if (CounterSpeed == MAX_STACK_POWER )
 										ani = MARIO_ANI_FLYJUMPLEFT;
 									else
 										ani = MARIO_ANI_JUMPINGLEFT;
@@ -530,7 +525,7 @@ void CMario::Render()
 						{
 								if (vy < 0)
 								{
-									if (CounterSpeed == 7)
+									if (CounterSpeed == MAX_STACK_POWER )
 										ani = MARIO_ANI_FLYJUMPRIGHT;
 									else
 										ani = MARIO_ANI_JUMPINGRIGHT;
@@ -637,7 +632,7 @@ void CMario::Render()
 					{
 						if (nx < 0)
 						{
-							if (CounterSpeed == 7 && IsFlying)
+							if (CounterSpeed == MAX_STACK_POWER  && IsFlying)
 							{
 								ani = MARIO_ANI_RACOON_FLYLEFT;
 							}
@@ -657,7 +652,7 @@ void CMario::Render()
 						}
 						else
 						{
-							if (CounterSpeed == 7 && IsFlying)
+							if (CounterSpeed == MAX_STACK_POWER  && IsFlying)
 							{
 								ani = MARIO_ANI_RACOON_FLYRIGHT;
 							}
@@ -724,7 +719,7 @@ void CMario::Render()
 				{
 					if (nx < 0)
 					{
-						if (CounterSpeed == 7)
+						if (CounterSpeed == MAX_STACK_POWER )
 							ani = MARIO_ANI_FIRE_FLYJUMPLEFT;
 						else if (vy < 0)
 							ani = MARIO_ANI_FIRE_JUMPINGLEFT;
@@ -733,7 +728,7 @@ void CMario::Render()
 					}
 					else
 					{
-						if (CounterSpeed == 7)
+						if (CounterSpeed == MAX_STACK_POWER )
 							ani = MARIO_ANI_FIRE_FLYJUMPRIGHT;
 						else if (vy < 0)
 							ani = MARIO_ANI_FIRE_JUMPINGRIGHT;
@@ -744,78 +739,141 @@ void CMario::Render()
 			}
 		}
 		if (IsRunning && IsOnPlatForm && !IsAttack && !IsHoldingKoopas)
-	{
-		if (CounterSpeed == 7 && abs(vx) == MARIO_MAX_SPEED * 2)
 		{
-			if (level == MARIO_LEVEL_BIG)
+			if (CounterSpeed == MAX_STACK_POWER  && abs(vx) == MARIO_MAX_SPEED * 2)
 			{
-				if (vx > 0)
-					ani = MARIO_ANI_FASTESTRUNRIGHT;
-				else
-					ani = MARIO_ANI_FASTESTRUNLEFT;
-				animation_set->at(ani)->Render(x, y);
+				if (level == MARIO_LEVEL_BIG)
+				{
+					if (vx > 0)
+						ani = MARIO_ANI_FASTESTRUNRIGHT;
+					else
+						ani = MARIO_ANI_FASTESTRUNLEFT;
+					animation_set->at(ani)->Render(x, y);
+				}
+				else if (level == MARIO_LEVEL_SMALL)
+				{
+					if (vx > 0)
+						ani = MARIO_ANI_SMALL_FASTESTRUNRIGHT;
+					else
+						ani = MARIO_ANI_SMALL_FASTESTRUNLEFT;
+					animation_set->at(ani)->Render(x, y);
+				}
+				else if (level == MARIO_LEVEL_RACOON)
+				{
+					if (vx > 0)
+					{
+						ani = MARIO_ANI_RACOON_FASTESTRUNRIGHT;
+					}
+					else
+					{
+						ani = MARIO_ANI_RACOON_FASTESTRUNLEFT;
+					}
+					animation_set->at(ani)->Render(x, y);
+				}
+				else if (level == MARIO_LEVEL_FIRE)
+				{
+					if (vx > 0)
+						ani = MARIO_ANI_FIRE_FASTESTRUNRIGHT;
+					else
+						ani = MARIO_ANI_FIRE_FASTESTRUNLEFT;
+					animation_set->at(ani)->Render(x, y);
+				}
 			}
-			else if (level == MARIO_LEVEL_SMALL)
+			else
 			{
-				if (vx > 0)
-					ani = MARIO_ANI_SMALL_FASTESTRUNRIGHT;
+				animation_set->at(ani)->RenderFTime(x, y, 20);
+			}
+		}
+		if (IsHoldingKoopas)
+		{
+			if (level == MARIO_LEVEL_SMALL)
+			{
+				if (IsOnPlatForm)
+				{
+					if (vx != 0)
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_SMALL_HOLDKP_WKR)->RenderHDKP(x, y);
+						else
+							animation_set->at(MARIO_ANI_SMALL_HOLDKP_WKL)->Render(x, y);
+					}
+					else
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_SMALL_HOLDKP_IDLER)->Render(x, y);
+						else
+							animation_set->at(MARIO_ANI_SMALL_HOLDKP_IDLEL)->Render(x, y);
+					}
+				}
 				else
-					ani = MARIO_ANI_SMALL_FASTESTRUNLEFT;
-				animation_set->at(ani)->Render(x, y);
+				{
+					if (nx > 0)
+						animation_set->at(MARIO_ANI_SMALL_HOLDKP_JMPR)->Render(x, y);
+					else
+						animation_set->at(MARIO_ANI_SMALL_HOLDKP_JMPL)->Render(x, y);
+				}
+			}
+			else if (level == MARIO_LEVEL_BIG)
+			{
+				if (IsOnPlatForm)
+				{
+					if (vx != 0)
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_BIG_WALKING_HOLDKP_RIGHT)->RenderHDKP(x, y);
+						else
+							animation_set->at(MARIO_ANI_BIG_WALKING_HOLDKP_LEFT)->Render(x, y);
+					}
+					else
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPRIGHT)->Render(x, y);
+						else
+							animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPLEFT)->Render(x, y);
+				}
+				else
+				{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPJMPRIGHT)->Render(x, y);
+						else
+							animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPJMPLEFT)->Render(x, y);
+				}
 			}
 			else if (level == MARIO_LEVEL_RACOON)
 			{
-				if (vx > 0)
+				if (IsOnPlatForm)
 				{
-					ani = MARIO_ANI_RACOON_FASTESTRUNRIGHT;
+					if (vx != 0)
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_RACOON_HOLDKP_WKR)->RenderHDKP(x, y);
+						else
+							animation_set->at(MARIO_ANI_RACOON_HOLDKP_WKL)->Render(x, y);
+					}
+					else
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_RACOON_HOLDKP_IDLER)->Render(x, y);
+						else
+							animation_set->at(MARIO_ANI_RACOON_HOLDKP_IDLEL)->Render(x, y);
+					}
 				}
 				else
 				{
-					ani = MARIO_ANI_RACOON_FASTESTRUNLEFT;
+					if (nx > 0)
+						animation_set->at(MARIO_ANI_RACOON_HOLDKP_JMPR)->Render(x, y);
+					else
+						animation_set->at(MARIO_ANI_RACOON_HOLDKP_JMPL)->Render(x, y);
 				}
-				animation_set->at(ani)->Render(x, y);
 			}
-			else if (level == MARIO_LEVEL_FIRE)
-			{
-				if (vx > 0)
-					ani = MARIO_ANI_FIRE_FASTESTRUNRIGHT;
-				else
-					ani = MARIO_ANI_FIRE_FASTESTRUNLEFT;
-				animation_set->at(ani)->Render(x, y);
-			}
+		}
+		else if (IsAttack && level == MARIO_LEVEL_RACOON)
+		{
+			if(nx > 0)
+				animation_set->at(ani)->Render(x-5, y);
+			else
+				animation_set->at(ani)->RenderATK(x, y);
 		}
 		else
-		{
-			animation_set->at(ani)->RenderFTime(x, y, 20);
-		}
-	}
-		if (IsHoldingKoopas)
-		{
-			if (level == MARIO_LEVEL_BIG)
-			{
-				if (vx != 0)
-				{
-					if (nx > 0)
-						animation_set->at(MARIO_ANI_BIG_WALKING_HOLDKP_RIGHT)->RenderHDKP(x+MARIO_BIG_BBOX_WIDTH, y);
-					else
-						animation_set->at(MARIO_ANI_BIG_WALKING_HOLDKP_LEFT)->Render(x, y);
-				}
-				else
-					if (nx > 0)
-						animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPRIGHT)->Render(x, y);
-					else
-						animation_set->at(MARIO_ANI_BIG_IDLE_HOLDKPLEFT)->Render(x, y);
-			}
-		}
-	else if(ani == MARIO_ANI_RACOON_ATTACKRIGHT)
-	{
-		animation_set->at(ani)->Render(x-5, y);
-	}
-	else if (ani == MARIO_ANI_RACOON_ATTACKLEFT)
-	{
-		animation_set->at(ani)->RenderATK(x, y);
-	}
-	else
 		{
 			animation_set->at(ani)->Render(x , y);
 		}
@@ -823,11 +881,9 @@ void CMario::Render()
 	{
 		firebullet.at(i)->Render();
 	}
-	//RenderBoundingBox();
+	RenderBoundingBox();
 	for (int i = 0; i < effects.size(); i++)
 		effects[i]->Render();
-	
-	//DebugOut(L"vy%f\n", vy);
 }
 
 void CMario::SetState(int state)
@@ -966,7 +1022,7 @@ void CMario::SetState(int state)
 		}
 		break;
 	case MARIO_STATE_FLY:
-		if ((CounterSpeed == 7 && level == MARIO_LEVEL_RACOON && abs(vx) == MARIO_MAX_SPEED*2)||IsFlying)
+		if ((CounterSpeed == MAX_STACK_POWER  && level == MARIO_LEVEL_RACOON && abs(vx) == MARIO_MAX_SPEED*2)||IsFlying)
 		{
 			if(!IsOnPlatForm)
 			{
@@ -991,7 +1047,7 @@ void CMario::SetState(int state)
 	case MARIO_STATE_ATTACK:
 		IsAttack = true;
 		TAttack = GetTickCount64();		
-		if (level == MARIO_LEVEL_RACOON)
+		if (level == MARIO_LEVEL_RACOON && !IsSitting)
 		{
 			tail->IsActivated = true;
 			tail->SetState(TAIL_STATE_ATTACKING);

@@ -28,11 +28,17 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//
 		// TO-DO: make sure Goomba can interact with the world and to each of them too!
 		// 
-		if (IsHidden && !IsAttack && !IsReborning)
+		if (IsHidden && !IsReborning)
 		{
 			if (GetTickCount64() - TimeStartReborn >= 7000)
 			{
-				SetState(KOOPAS_STATE_REBORN);
+				if (IsAttack)
+				{
+					if (IsHolding)
+					SetState(KOOPAS_STATE_REBORN);
+				}
+				else
+					SetState(KOOPAS_STATE_REBORN);
 			}
 		}
 		if (IsReborning)
@@ -91,11 +97,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (e->nx)
 					{
-						DebugOut(L"Goomba\n");
 						e->obj->SetState(GOOMBA_STATE_DIE);
 					}
 				}
-				else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM)
+				else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK)
 				{
 					vx = -vx;
 				}
@@ -174,6 +179,7 @@ void CKoopas::SetState(int state)
 		IsReborning = true;
 		IsWalking = false;
 		TimeReborn = GetTickCount64();
+		IsHolding = false;
 		break;
 	}
 

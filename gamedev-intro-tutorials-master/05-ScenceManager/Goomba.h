@@ -19,7 +19,9 @@ class CGoomba : public CGameObject
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
 
-public: 	
+public: 
+	bool IsDying;
+	DWORD DyingTime;
 	CGoomba();
 	virtual void SetState(int state);
 };

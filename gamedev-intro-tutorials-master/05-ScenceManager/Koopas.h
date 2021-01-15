@@ -46,6 +46,14 @@ public:
 			x = MarioX - 14;
 		y = MarioY + 5;
 	}
+	void AdaptPosSmall(float MarioX, float MarioY, int MarioNx)
+	{
+		if (MarioNx > 0)
+			x = MarioX + 10;
+		else if (MarioNx < 0)
+			x = MarioX - 11;
+		y = MarioY - 5;
+	}
 	void ChkIsHolding(bool isHolding=false)
 	{
 		IsHolding = isHolding;
