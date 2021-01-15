@@ -17,13 +17,14 @@
 #define KOOPAS_STATE_HIDDEN_MOVE 400
 #define KOOPAS_STATE_HIDDEN 300
 #define KOOPAS_STATE_REBORN	500	
+#define KOOPAS_STATE_DIEBYTAIL	600
 
 
 #define KOOPAS_ANI_WALKING_LEFT 0
 #define KOOPAS_ANI_WALKING_RIGHT 1
 #define KOOPAS_ANI_HIDDEN 2
 #define KOOPAS_ANI_HIDDENMOVE 3
-
+#define KOOPAS_ANI_HIDDEN_DIE	5
 class CKoopas : public CGameObject
 {
 public:
@@ -32,7 +33,8 @@ public:
 		 IsJumpUp,
 		 IsHolding,
 		 IsAttack,
-		 IsReborning;
+		 IsReborning,
+		IsDead;
 	DWORD TimeReborn,
 		  TimeStartReborn;
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);

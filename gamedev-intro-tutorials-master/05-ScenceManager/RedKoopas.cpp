@@ -78,10 +78,16 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->obj->ObjType == ObjType::GOOMBA)
 				{
-					if (e->nx)
+					if (e->nx && IsAttack)
 					{
-						DebugOut(L"Goomba\n");
 						e->obj->SetState(GOOMBA_STATE_DIE);
+					}
+				}
+				if (e->obj->ObjType == ObjType::KOOPAS|| e->obj->ObjType == ObjType::REDKOOPAS)
+				{
+					if (e->nx && IsAttack)
+					{
+						e->obj->SetState(KOOPAS_STATE_DIE);
 					}
 				}
 				if (e->ny && e->obj->ObjType == ObjType::BLOCK)
@@ -106,6 +112,8 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (ny != 0) vy = 0;
 				y += min_ty * dy + ny * 0.4f;
+				if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
+					vx = vy = 0;
 			}
 		}
 	}

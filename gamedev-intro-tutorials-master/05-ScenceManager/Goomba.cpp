@@ -24,11 +24,11 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	CGameObject::Update(dt, coObjects);
-	if (IsDying && GetTickCount64() - DyingTime >= 1500)
+	if (state==GOOMBA_STATE_DIE && GetTickCount64() - DyingTime >= 1000)
 	{
 		SubHealth();
 	}
-	if (!IsDying)
+	if (state != GOOMBA_STATE_DIE)
 	{
 		if (state != GOOMBA_STATE_DIE)
 			vy += GRAVITY * dt;
@@ -97,6 +97,11 @@ void CGoomba::SetState(int state)
 			break;
 		case GOOMBA_STATE_WALKING: 
 			vx = GOOMBA_WALKING_SPEED;
+			break;
+		case GOOMBA_STATE_DIEBYTAIL:
+			IsDying = true;
+			vy = -0.25;
+			vx = 0.1 * nx;
 			break;
 	}
 }

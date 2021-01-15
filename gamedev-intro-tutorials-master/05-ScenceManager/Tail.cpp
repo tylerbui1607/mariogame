@@ -1,16 +1,28 @@
 #include "Tail.h"
 #include"QuestionBrick.h"
 #include "Brick.h"
+#include"Koopas.h"
+#include "RedKoopas.h"
+#include "Goomba.h"
 void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	if (IsActivated)
 	{
 		for (int i = 0; i < coObjects->size(); i++)
 		{
-			if (coObjects->at(i)->ObjType == ObjType::KOOPAS || coObjects->at(i)->ObjType == ObjType::GOOMBA)
+			if (coObjects->at(i)->ObjType == ObjType::KOOPAS|| coObjects->at(i)->ObjType == ObjType::REDKOOPAS)
 			{
 				if (CheckAABB(coObjects->at(i))) {
-					coObjects->at(i)->SubHealth();
+					coObjects->at(i)->nx = nx;
+					coObjects->at(i)->SetState(KOOPAS_STATE_DIEBYTAIL);
+				}
+			}
+			if (coObjects->at(i)->ObjType == ObjType:: GOOMBA)
+			{
+				if (CheckAABB(coObjects->at(i)))
+				{
+					coObjects->at(i)->nx = nx;
+					coObjects->at(i)->SetState(GOOMBA_STATE_DIEBYTAIL);
 				}
 			}
 			if (coObjects->at(i)->ObjType == ObjType::BRICK)

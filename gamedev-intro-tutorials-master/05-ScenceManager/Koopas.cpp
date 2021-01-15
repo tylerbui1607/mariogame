@@ -14,7 +14,7 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 		top = y;
 		right = x + KOOPAS_BBOX_WIDTH;
 		bottom = y + 25;
-		if (IsHidden)
+		if (IsHidden || IsDead)
 		{
 			bottom = y + 16;
 		}
@@ -28,7 +28,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//
 		// TO-DO: make sure Goomba can interact with the world and to each of them too!
 		// 
-		if (IsHidden && !IsReborning)
+		if (IsHidden && !IsReborning && !IsDead)
 		{
 			if (GetTickCount64() - TimeStartReborn >= 7000)
 			{
@@ -41,7 +41,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					SetState(KOOPAS_STATE_REBORN);
 			}
 		}
-		if (IsReborning)
+		if (IsReborning && !IsDead)
 		{
 			if (GetTickCount64() - TimeReborn >= 3600)
 			{
@@ -107,6 +107,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				
 				x += dx;
 				if (ny != 0) vy = 0;
+				if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
+					vx = vy = 0;
 				y += min_ty * dy + ny * 0.4f;
 			}
 		}
@@ -121,12 +123,12 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CKoopas::Render()
 {
 	int ani = KOOPAS_ANI_WALKING_LEFT;
-	if (state == KOOPAS_STATE_DIE) {
-		
+	if (IsDead) {
+		ani = KOOPAS_ANI_HIDDEN_DIE;
 	}
 	else if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
 	else if (vx < 0) ani = KOOPAS_ANI_WALKING_LEFT;
-	if (IsHidden)
+	if (IsHidden && !IsDead)
 	{
 		if (vx == 0 || IsHolding == true)
 			ani = KOOPAS_ANI_HIDDEN;
@@ -148,9 +150,13 @@ void CKoopas::SetState(int state)
 	switch (state)
 	{
 	case KOOPAS_STATE_DIE:
-		y += KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
-		vx = 0;
-		vy = 0;
+		if (!IsDead)
+		{
+			IsDead = true;
+			y += KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
+			vx = 0;
+			vy = 0;
+		}
 		break;
 	case KOOPAS_STATE_WALKING:
 		IsHidden = false;
@@ -160,7 +166,7 @@ void CKoopas::SetState(int state)
 		vx = nx*0.02;
 		break;
 	case KOOPAS_STATE_HIDDEN:
-		if (!IsHidden)
+		if (!IsHidden && !IsDead)
 		{
 			y += 9;
 		}
@@ -180,6 +186,13 @@ void CKoopas::SetState(int state)
 		IsWalking = false;
 		TimeReborn = GetTickCount64();
 		IsHolding = false;
+		break;
+	case KOOPAS_STATE_DIEBYTAIL:
+		if(!IsDead)
+			y += 9;
+		IsDead = true;
+		vy = -0.25;
+		vx = 0.1 * nx;
 		break;
 	}
 

@@ -321,7 +321,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					}
 					else if (e->nx != 0)
 					{
-						if (e->obj->state != KOOPAS_STATE_HIDDEN)
+						if (e->obj->state != KOOPAS_STATE_HIDDEN && e->obj->state != KOOPAS_STATE_DIEBYTAIL && e->obj->state != KOOPAS_STATE_DIE)
 						{
 							Calclevel();
 						}
@@ -331,8 +331,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							{
 								IsHoldingKoopas = true; 
 							}
-							else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && e->obj->state == KOOPAS_STATE_HIDDEN)
+							else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE)
 							{
+								if(e->obj->state== KOOPAS_STATE_HIDDEN|| e->obj->state == KOOPAS_STATE_DIEBYTAIL || e->obj->state == KOOPAS_STATE_DIE)
 								e->obj->nx = this->nx;
 								e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
 							}
