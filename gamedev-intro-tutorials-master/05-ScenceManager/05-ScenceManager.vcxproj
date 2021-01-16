@@ -145,6 +145,7 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MarioWM.cpp" />
     <ClCompile Include="MushRoom.cpp" />
+    <ClCompile Include="PiranhaPlant.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="QuestionBrick.cpp" />
     <ClCompile Include="RedKoopas.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="MarioWM.h" />
     <ClInclude Include="MushRoom.h" />
+    <ClInclude Include="PiranhaPlant.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="QuestionBrick.h" />
     <ClInclude Include="RedKoopas.h" />

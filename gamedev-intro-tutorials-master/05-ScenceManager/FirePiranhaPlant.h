@@ -40,6 +40,7 @@ public:
 	bool MarioNextTo;
 	vector<FireBullet*>FireBullets;
 public:
+	FirePiranhaPlant() {};
 	FirePiranhaPlant(float X, float Y)
 	{
 		ObjType = 8;

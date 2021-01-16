@@ -152,6 +152,9 @@
     <ClCompile Include="Score.cpp">
       <Filter>Player</Filter>
     </ClCompile>
+    <ClCompile Include="PiranhaPlant.cpp">
+      <Filter>Enemy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -267,6 +270,9 @@
     </ClInclude>
     <ClInclude Include="Score.h">
       <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="PiranhaPlant.h">
+      <Filter>Enemy</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

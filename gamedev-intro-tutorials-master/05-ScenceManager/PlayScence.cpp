@@ -22,6 +22,7 @@
 #include "RedKoopas.h"
 #include "Button.h"
 #include "BigCoin.h"
+#include "PiranhaPlant.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -40,15 +41,15 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	See scene1.txt, scene2.txt for detail format specification
 */
 
-#define SCENE_SECTION_UNKNOWN -1
-#define SCENE_SECTION_TEXTURES 2
-#define SCENE_SECTION_SPRITES 3
-#define SCENE_SECTION_ANIMATIONS 4
+#define SCENE_SECTION_UNKNOWN	   -1
+#define SCENE_SECTION_TEXTURES		2
+#define SCENE_SECTION_SPRITES		3
+#define SCENE_SECTION_ANIMATIONS	4
 #define SCENE_SECTION_ANIMATION_SETS	5
-#define SCENE_SECTION_OBJECTS	6
-#define SCENE_SECTION_MAP	7
-#define SCENE_SECTION_HUD	8
-#define SCENE_SECTION_HUD_TIME	9
+#define SCENE_SECTION_OBJECTS		6
+#define SCENE_SECTION_MAP			7
+#define SCENE_SECTION_HUD			8
+#define SCENE_SECTION_HUD_TIME		9
 #define OBJECT_TYPE_MARIO			0
 #define OBJECT_TYPE_BRICK			1
 #define OBJECT_TYPE_GOOMBA			2
@@ -58,10 +59,12 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_BLOCK			6
 #define OBJECT_TYPE_QUESTIONBRICK	7
 #define OBJECT_TYPE_FIREPIRANHAPLANT	8
-#define UNKNOW_ITEM	18
-#define OBJECT_TYPE_RED_KOOPAS			9
-#define OBJECT_TYPE_BUTTON		10
+#define UNKNOW_ITEM					18
+#define OBJECT_TYPE_RED_KOOPAS		9
+#define OBJECT_TYPE_BUTTON			10
 #define OBJECT_TYPE_UNBREAK_BRICK	11
+#define OBJECT_TYPE_BIGCOIN			21
+#define OBJECT_TYPE_PIRANHAPLANT	22
 
 
 #define MUSHROOM_ANISET_ID	8
@@ -220,6 +223,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX,MaxX); break;
 	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
+	case OBJECT_TYPE_BIGCOIN: {obj = new BigCoin(x, y); break; }
+	case OBJECT_TYPE_PIRANHAPLANT:obj = new PiranhaPlant(x, y); break;
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 		{	

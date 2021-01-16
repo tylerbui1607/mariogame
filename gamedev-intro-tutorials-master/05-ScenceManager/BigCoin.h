@@ -19,7 +19,8 @@ public:
 	};
 	virtual void Render()
 	{
-		animation_set->at(BIGCOIN_ANI)->Render(x, y);
+		if (Health > 0)
+			animation_set->at(BIGCOIN_ANI)->Render(x, y);
 	};
 	void SetState(int state)
 	{
@@ -32,10 +33,13 @@ public:
 	};
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	{
-		left = x;
-		top = y;
-		right = left + BIGCOIN_BBOX;
-		bottom = top + BIGCOIN_BBOX;
+		if (Health > 0)
+		{
+			left = x;
+			top = y;
+			right = left + BIGCOIN_BBOX;
+			bottom = top + BIGCOIN_BBOX;
+		}
 	}
 };
 

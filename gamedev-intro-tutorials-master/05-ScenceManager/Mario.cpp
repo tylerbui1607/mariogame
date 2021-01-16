@@ -31,6 +31,10 @@ CMario::CMario(float x, float y) : CGameObject()
 	IsEndRollBack = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
 	AmountofFirebullet = 2;
 	IsHoldingKoopas = false;
+	FireBullet* fb1 = new FireBullet(-50, 0);
+	FireBullet* fb2 = new FireBullet(-50, 0);
+	firebullet.push_back(fb1);
+	firebullet.push_back(fb2);
 	KP = new CKoopas();
 	score = new Score();
 }
@@ -56,19 +60,22 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		if (IsAttack && level == MARIO_LEVEL_FIRE)
 		{
-			if (AmountofFirebullet > 0)
+			for(int i=0;i<2;i++)
 			{
-				FireBullet* fb = new FireBullet(x + 5, y);
-				fb->SetSpeed(0.2 * nx, 0);
-				fb->FireMario = true;
-				firebullet.push_back(fb);
-				AmountofFirebullet--;
+				if (!firebullet[i]->Attack)
+				{
+					firebullet[i]->SetPosition(x + 5, y);
+					firebullet[i]->SetSpeed(0.2 * nx, 0);
+					firebullet[i]->FireMario = true;
+					firebullet[i]->Attack = true;
+					i = 2;
+				}
 			}
 			IsAttack = false;
 		}
 		for (int i = 0; i < firebullet.size(); i++)
 		{
-			if (firebullet[i]->Health != 0)
+			if (firebullet[i]->Attack)
 			{
 				firebullet[i]->Update(dt, coObjects);
 			}
@@ -224,13 +231,34 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
 				{
-					// jump on top >> kill Goomba and deflect a bit 
 					if (e->ny < 0)
 					{
 						if (e->obj->GetState() != GOOMBA_STATE_DIE)
 						{
+							int ani=0;
 							e->obj->SetState(GOOMBA_STATE_DIE);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
+							score->CalcScoreEarn();
+							switch (score->ScoreEarn) 
+							{
+							case 100:
+								ani = 0;
+								break;
+							case 200:
+								ani = 1;
+								break;
+							case 400:
+								ani = 2;
+								break;
+							case 800:
+								ani = 3;
+							case 1000:
+								ani = 4;
+								break;
+							}
+							Effect* ef = new Effect(e->obj->x, e->obj->y, 40, ani);
+							ef->SetState(40);
+							effects.push_back(ef);
 						}
 					}
 
@@ -436,6 +464,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (CounterSpeed == MAX_STACK_POWER  && abs(vx) == MARIO_MAX_SPEED * 2)
 	{
 		tail->StopRender = true;
+	}
+	if (x + MARIO_BIG_BBOX_WIDTH >= MAP_MAX_WIDTH)
+	{
+		x = MAP_MAX_WIDTH - MARIO_BIG_BBOX_WIDTH - 1;
+		vx = 0;
 	}
 }
 void CMario::Render()
@@ -867,6 +900,31 @@ void CMario::Render()
 						animation_set->at(MARIO_ANI_RACOON_HOLDKP_JMPL)->Render(x, y);
 				}
 			}
+			else if (level == MARIO_LEVEL_FIRE)
+			{
+				if (IsOnPlatForm)
+				{
+					if (vx != 0)
+					{
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_FIRE_WALKING_HOLDKP_RIGHT)->RenderHDKP(x, y);
+						else
+							animation_set->at(MARIO_ANI_FIRE_WALKING_HOLDKP_LEFT)->Render(x, y);
+					}
+					else
+						if (nx > 0)
+							animation_set->at(MARIO_ANI_FIRE_IDLE_HOLDKPRIGHT)->Render(x, y);
+						else
+							animation_set->at(MARIO_ANI_FIRE_IDLE_HOLDKPLEFT)->Render(x, y);
+				}
+				else
+				{
+					if (nx > 0)
+						animation_set->at(MARIO_ANI_FIRE_IDLE_HOLDKPJMPRIGHT)->Render(x, y);
+					else
+						animation_set->at(MARIO_ANI_FIRE_IDLE_HOLDKPJMPLEFT)->Render(x, y);
+				}
+			}
 		}
 		else if (IsAttack && level == MARIO_LEVEL_RACOON)
 		{
@@ -881,6 +939,7 @@ void CMario::Render()
 		}
 	for (int i = 0; i < firebullet.size(); i++)
 	{
+		if (firebullet[i]->Attack)
 		firebullet.at(i)->Render();
 	}
 	RenderBoundingBox();

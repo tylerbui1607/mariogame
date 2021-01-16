@@ -14,6 +14,7 @@ class FireBullet :
 public:
 	bool FireMario,
 		 Disable;
+	bool Attack;
 	FireBullet()
 	{
 		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);

@@ -8,7 +8,9 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (GetHealth() != 0)
 	{
 		if (!(Camera::GetInstance()->IsInCam(x, y)))
-			SubHealth();
+		{
+			Attack = false;
+		}
 		CGameObject::Update(dt);
 		if (FireMario)
 		{
@@ -34,6 +36,11 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				for (UINT i = 0; i < coEventsResult.size(); i++)
 				{
 					LPCOLLISIONEVENT e = coEventsResult[i];
+					if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS || e->obj->ObjType == ObjType::GOOMBA)
+					{
+						e->obj->SubHealth();
+						Attack = false;
+					}
 					if (e->obj->ObjType != ObjType::MARIO)
 					{
 						if (FireMario)
@@ -44,7 +51,7 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							}
 							if (e->nx && e->obj->ObjType != ObjType::BLOCK)
 							{
-								SubHealth();
+								Attack = false;
 								vx = 0;
 								vy = 0;
 							}

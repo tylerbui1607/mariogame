@@ -85,16 +85,6 @@ void Tail::Render()
 			else
 				ani = 11;
 		}
-		if (Attacking)
-		{
-			if (nx > 0)
-				ani = 8;
-			else
-				ani = 9;
-		}
-		if (ani == 9)
-			animation_set->at(ani)->RenderATK(x, y);
-		else
-			animation_set->at(ani)->Render(x, y);
+		animation_set->at(ani)->Render(x, y);
 	}
 }
