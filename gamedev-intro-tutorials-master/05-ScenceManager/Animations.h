@@ -37,6 +37,8 @@ public:
 	void RenderWM(float x, float y, int alpha = 255);
 	void RenderHDKP(float x, float y, int alpha = 255);
 	void RenderATKR(float x, float y, int alpha = 255);
+	void RenderTailSlowFalling(float x, float y, int alpha = 255);
+	void RenderFalling(float x, float y, int alpha = 255);
 	void Reset() { if (currentFrame != 0) currentFrame = -1; }
 };
 

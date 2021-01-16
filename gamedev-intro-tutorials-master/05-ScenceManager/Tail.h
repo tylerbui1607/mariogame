@@ -60,7 +60,10 @@ public:
 			Attacking = true;
 			SlowFalling = Falling = Idling = Walking = Jumping = false;
 			break;
-			
+		case TAIL_STATE_SLOWFALLING:
+			SlowFalling = true;
+			Falling = Idling = Walking = Jumping = false;
+			break;
 		}
 	};
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)

@@ -71,7 +71,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					i = 2;
 				}
 			}
-			IsAttack = false;
 		}
 		for (int i = 0; i < firebullet.size(); i++)
 		{
@@ -252,6 +251,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 								break;
 							case 800:
 								ani = 3;
+								break;
 							case 1000:
 								ani = 4;
 								break;
@@ -455,7 +455,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		else
 			KP->AdaptPosSmall(x, y, nx);
 	}
-	if (!IsOnPlatForm && vy > 0 && !IsSitting && !IsFlying)
+	if (!IsOnPlatForm && vy > 0 && !IsSitting && !IsFlying&&!IsSlowFalling)
 	{
 		tail->SetState(TAIL_STATE_FALLING);
 	}
@@ -711,7 +711,18 @@ void CMario::Render()
 		}
 		else if (level == MARIO_LEVEL_FIRE)
 		{
-			if (IsSitting)
+			if (IsAttack)
+			{
+				if (nx > 0)
+				{
+					ani = MARIO_ANI_FIRE_ATTACKRIGHT;
+				}
+				else
+				{
+					ani = MARIO_ANI_FIRE_ATTACKLEFT;
+				}
+			}
+			else if (IsSitting)
 			{
 				if (nx >= 0)
 					ani = MARIO_ANI_FIRE_SITTINGRIGHT;
@@ -942,7 +953,7 @@ void CMario::Render()
 		if (firebullet[i]->Attack)
 		firebullet.at(i)->Render();
 	}
-	RenderBoundingBox();
+	//RenderBoundingBox();
 	for (int i = 0; i < effects.size(); i++)
 		effects[i]->Render();
 }
@@ -1122,6 +1133,8 @@ void CMario::SetState(int state)
 		vy = -0.05;
 		StartYgoHiddenMap = y; 
 		StopUpdate = true;
+		break;
+	case MARIO_STATE_FINISH:
 		break;
 	}
 }

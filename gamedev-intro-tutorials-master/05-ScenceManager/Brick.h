@@ -28,7 +28,7 @@ public:
 		if (!IsCollision) {
 			if (Check)
 			{
-				if (GetTickCount64() - LimitTime >= 8000)
+				if (GetTickCount64() - LimitTime >= 5000)
 				{
 					SetState(BRICK_STATE_CHANGEBACKBRICK);
 				}

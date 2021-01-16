@@ -20,12 +20,10 @@ Map::Map(int ID, LPCWSTR FilePath_data, int Map_rows, int  Map_cols, int Num_row
 }
 void Map::Load()
 {
-	DebugOut(L"[INFO] Start loading map resources from : %s \n", MapFilePath);
 	ifstream f;
 	f.open(MapFilePath);
 	if (f.fail())
 	{
-		DebugOut(L"[ERROR] Map::Load_MapData failed: ID=%d", Id);
 		f.close();
 		return;
 	}
@@ -36,8 +34,6 @@ void Map::Load()
 	}
 
 	f.close();
-
-	DebugOut(L"[INFO] Done loading map resources %s\n", MapFilePath);
 }
 
 void Map::LoadMap()

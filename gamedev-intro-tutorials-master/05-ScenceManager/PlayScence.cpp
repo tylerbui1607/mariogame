@@ -575,12 +575,18 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		mario->SetSpeed(0, 0);
 		break;
 	case DIK_1:
-		mario->SetLevel(MARIO_LEVEL_BIG);
+		mario->SetLevel(MARIO_LEVEL_SMALL);
 		break;
 	case DIK_2:
-		mario->SetLevel(MARIO_LEVEL_RACOON);
+		mario->y -= 12;
+		mario->SetLevel(MARIO_LEVEL_BIG);
 		break;
 	case DIK_3:
+		mario->y -= 12;
+		mario->SetLevel(MARIO_LEVEL_RACOON);
+		break;
+	case DIK_4:
+		mario->y -= 12;
 		mario->SetLevel(MARIO_LEVEL_FIRE);
 		break;
 	case DIK_S:
@@ -600,6 +606,11 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		break;
 	case DIK_H:
 		mario->SetState(MARIO_STATE_GO_HIDDENMAP);
+		break;
+	case DIK_J:
+		mario->SetPosition(2256, 80);
+		Camera::GetInstance()->cam_x = mario->x / 2;
+		Camera::GetInstance()->cam_y = mario->y / 2;
 		break;
 	}
 }

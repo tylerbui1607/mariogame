@@ -41,6 +41,11 @@ void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					coObjects->at(i)->SetState(BRICK_STATE_COLISSION);
 				}
 			}
+			if (coObjects->at(i)->ObjType == ObjType::FIREPIRANHAPLANT)
+			{
+				if (CheckAABB(coObjects->at(i)))
+					coObjects->at(i)->SubHealth();
+			}
 		}
 	}
 }
@@ -78,13 +83,17 @@ void Tail::Render()
 			else
 				ani = 1;
 		}
-		else if (SlowFalling)
+		if (SlowFalling)
 		{
 			if (nx > 0)
 				ani = 10;
 			else
 				ani = 11;
+			animation_set->at(ani)->RenderTailSlowFalling(x, y);
 		}
-		animation_set->at(ani)->Render(x, y);
+		else if (Falling)
+			animation_set->at(ani)->RenderFalling(x, y);
+		else
+			animation_set->at(ani)->Render(x, y);
 	}
 }
