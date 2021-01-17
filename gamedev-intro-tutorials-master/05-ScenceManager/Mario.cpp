@@ -52,11 +52,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (!StopUpdate)
 	{
-		if (IsHoldingKoopas)
-			DebugOut(L"TRUE\n");
-		else
-			DebugOut(L"FALSE\n");
-
 		if (untouchable == 1 && GetTickCount64() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
 		{
 			untouchable_start = 0;

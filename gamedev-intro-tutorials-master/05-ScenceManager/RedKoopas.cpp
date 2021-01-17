@@ -4,15 +4,6 @@
 #include "Ground.h"
 void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if ((MINx-GOOMBA_BBOX_WIDTH/2 >= x || x + KOOPAS_BBOX_WIDTH >= MAXx+ GOOMBA_BBOX_WIDTH / 2) && IsWalking)
-	{
-		vx = -vx;
-		nx = -nx;
-		if (nx < 0)
-			x = MAXx - KOOPAS_BBOX_WIDTH - 2;
-		else
-			x = MINx+0.01;
-	}
 	CGameObject::Update(dt, coObjects);
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
@@ -94,22 +85,19 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->ny && e->obj->ObjType == ObjType::BLOCK)
 				{
 					Block* block = dynamic_cast<Block*>(e->obj);
-					MINx = block->x;
-					MAXx = block->x + block->GetWidth();
+				
 				}
 				if (e->ny && e->obj->ObjType == ObjType::GROUND)
 				{
 					Ground* ground = dynamic_cast<Ground*>(e->obj);
-					MINx = ground->x;
-					MAXx = ground->x + ground->GetWidth();
+					
 				}
 				if (e->obj->ObjType == ObjType::BRICK)
 				{
 					if (e->ny < 0)
 					{
 						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
-						MINx = brick->x;
-						MAXx = brick->x + BRICK_BBOX_WIDTH;
+						
 					}
 					if (IsAttack && e->nx)
 						e->obj->SubHealth();

@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "Utils.h"
-#define SCREEN_WIDTH 257
+#define SCREEN_WIDTH 300
 #define SCREEN_HEIGHT 272
 class Camera
 {

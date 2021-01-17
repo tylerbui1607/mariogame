@@ -12,8 +12,8 @@ class FireBullet :
 {
 	
 public:
-	bool FireMario,
-		 Disable;
+	bool FireMario = false ,
+		 Disable = false;
 	bool Attack;
 	FireBullet()
 	{

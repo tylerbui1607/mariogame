@@ -84,7 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <DisableSpecificWarnings>$(HideWarningsAndErrors)/true</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4018;4305;4005;28159;28251;6001;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3dx9.lib;d3d9.lib;dxguid.lib;dxerr.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -105,7 +105,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <DisableSpecificWarnings>$(HideWarningsAndErrors)/true</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;4018;4305;4005;28159;28251;6001;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

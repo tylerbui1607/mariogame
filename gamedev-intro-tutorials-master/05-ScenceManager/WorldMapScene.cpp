@@ -170,11 +170,6 @@ void WorldMapScene::_ParseSection_OBJECTS(string line)
 	}
 	
 	int Id = ani_set_id = atoi(tokens[3].c_str());
-	if (object_type == ObjType::REDKOOPAS)
-	{
-		MinX = atof(tokens[4].c_str());
-		MaxX = atof(tokens[5].c_str());
-	}
 
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 
@@ -200,7 +195,7 @@ void WorldMapScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
-	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX, MaxX); break;
+	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(); break;
 		/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 	{

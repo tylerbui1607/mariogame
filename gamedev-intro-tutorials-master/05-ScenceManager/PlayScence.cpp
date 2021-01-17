@@ -186,11 +186,6 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		ItemType = atof(tokens[4].c_str());
 	}
 	ani_set_id = atoi(tokens[3].c_str());
-	if (object_type == ObjType::REDKOOPAS)
-	{
-		MinX = atof(tokens[4].c_str());
-		MaxX = atof(tokens[5].c_str());
-	}
 	if (object_type == ObjType::BRICK)
 	{
 		ItemType = atof(tokens[4].c_str());
@@ -221,7 +216,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
-	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(MinX,MaxX); break;
+	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(); break;
 	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
 	case OBJECT_TYPE_BIGCOIN: {obj = new BigCoin(x, y); break; }
 	case OBJECT_TYPE_PIRANHAPLANT:obj = new PiranhaPlant(x, y); break;
