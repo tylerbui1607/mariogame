@@ -8,17 +8,16 @@ CKoopas::CKoopas()
 
 void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	if (!IsHolding)
-	{
+
 		left = x;
 		top = y;
 		right = x + KOOPAS_BBOX_WIDTH;
 		bottom = y + 25;
 		if (IsHidden || IsDead)
 		{
-			bottom = y + 16;
+			bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 		}
-	}
+
 }
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -32,12 +31,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		{
 			if (GetTickCount64() - TimeStartReborn >= 7000)
 			{
-				if (IsAttack)
-				{
-					if (IsHolding)
-					SetState(KOOPAS_STATE_REBORN);
-				}
-				else
+				if (IsHolding || !IsAttack)
 					SetState(KOOPAS_STATE_REBORN);
 			}
 		}
@@ -46,7 +40,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			if (GetTickCount64() - TimeReborn >= 3600)
 			{
 				IsReborning = false;
-				y -= 9;
+				y -= 14;
 				SetState(KOOPAS_STATE_WALKING);
 			}
 		}
@@ -162,6 +156,7 @@ void CKoopas::SetState(int state)
 		IsHidden = false;
 		IsAttack = false;
 		IsReborning = false;
+		IsHolding = false;
 		IsWalking = true;
 		vx = nx*0.02;
 		break;
@@ -183,17 +178,20 @@ void CKoopas::SetState(int state)
 		break;
 	case KOOPAS_STATE_REBORN:
 		IsReborning = true;
+		IsAttack = true;
 		IsWalking = false;
 		IsDead = false;
 		TimeReborn = GetTickCount64();
-		IsHolding = false;
 		break;
 	case KOOPAS_STATE_DIEBYTAIL:
 		if(!IsDead)
 			y += 9;
 		IsDead = true;
+		IsHidden = true;
+		IsAttack = false;
 		vy = -0.25;
 		vx = 0.1 * nx;
+		TimeStartReborn = GetTickCount64();
 		break;
 	}
 

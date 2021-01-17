@@ -13,7 +13,7 @@
 #define MARIO_ACCLERATION			0.004f
 #define MARIO_DECLERATION			0.007f
 #define MARIO_MAX_SPEED				0.15f
-#define MARIO_FRICTION				0.003f
+#define MARIO_FRICTION				0.004f
 #define MARIO_FLY_SPEED				0.25f
 #define MARIO_MAX_HIGH_JUMP			70
 #define MARIO_SET_LEVEL_Y			19
@@ -35,6 +35,7 @@
 #define MARIO_STATE_GO_HIDDENMAP	10
 #define MARIO_STATE_GO_OUT_HIDDENMAP	11
 #define MARIO_STATE_FINISH		12
+#define MARIO_STATE_DROPKOOPAS		13
 
 
 
@@ -213,7 +214,7 @@ public:
 
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
-	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
+	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 	void Calclevel();
 	void Reset();
 	void AdoptPosHolding()
@@ -227,7 +228,6 @@ public:
 		if (IsHoldingKoopas) {
 			KP->nx = this->nx;
 			KP->SetState(KOOPAS_STATE_HIDDEN_MOVE);
-			IsHoldingKoopas = false;
 		}
 	}
 	void IncreaseStack()

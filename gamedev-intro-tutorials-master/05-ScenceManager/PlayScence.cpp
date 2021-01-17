@@ -622,6 +622,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	{
 	case DIK_A:
 		mario->StopRunning();
+		mario->SetState(MARIO_STATE_DROPKOOPAS);
 		break;
 	case DIK_S:
 		mario->IsSlowFalling = false; 

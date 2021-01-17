@@ -17,11 +17,12 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 
-	if (IsHidden && !IsAttack && !IsReborning && !IsHolding)
+	if (IsHidden && !IsReborning)
 	{
-		if (GetTickCount64() - TimeStartReborn >= 7000)
+		if (GetTickCount64() - TimeStartReborn >= 15000)
 		{
-			SetState(KOOPAS_STATE_REBORN);
+			if (IsHolding || !IsAttack)
+				SetState(KOOPAS_STATE_REBORN);
 		}
 	}
 	if (IsReborning)
@@ -29,7 +30,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (GetTickCount64() - TimeReborn >= 3600)
 		{
 			IsReborning = false;
-			y -= 9;
+			y -= 14;
 			SetState(KOOPAS_STATE_WALKING);
 		}
 	}
@@ -129,5 +130,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 	}
 	else
+	{
 		x += dx;
+	}
 }
