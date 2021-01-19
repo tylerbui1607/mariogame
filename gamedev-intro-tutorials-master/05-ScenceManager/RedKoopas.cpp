@@ -8,6 +8,31 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 
+	if (state == KOOPAS_STATE_WALKING)
+	{	
+		if (nx > 0)
+		{
+			KPAI->SetPosition(x + 10, y);
+			if (KPAI->isFalling)
+			{
+				nx = -1;
+				KPAI->SetPosition(x - 15, y);
+				SetState(KOOPAS_STATE_WALKING);
+			}
+		}
+		else
+		{
+			KPAI->SetPosition(x - 10, y);
+			if (KPAI->isFalling)
+			{
+				nx = 1;
+				KPAI->SetPosition(x + 5, y);
+				SetState(KOOPAS_STATE_WALKING);
+			}
+		}
+	}
+	if (KPAI != NULL)
+		KPAI->Update(dt, coObjects);
 	if (IsHidden && !IsReborning)
 	{
 		if (GetTickCount64() - TimeStartReborn >= 15000)
@@ -53,7 +78,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 
 			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
+			
 
 			// Collision logic with Goombas
 			for (UINT i = 0; i < coEventsResult.size(); i++)
@@ -82,38 +107,31 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						e->obj->SetState(KOOPAS_STATE_DIE);
 					}
 				}
-				if (e->ny && e->obj->ObjType == ObjType::BLOCK)
-				{
-					Block* block = dynamic_cast<Block*>(e->obj);
 				
-				}
-				if (e->ny && e->obj->ObjType == ObjType::GROUND)
-				{
-					Ground* ground = dynamic_cast<Ground*>(e->obj);
-					
-				}
 				if (e->obj->ObjType == ObjType::BRICK)
-				{
-					if (e->ny < 0)
-					{
-						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
-						
-					}
+				{					
 					if (IsAttack && e->nx)
 						e->obj->SubHealth();
 				}
-				if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK)
+				if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK|| e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS|| e->obj->ObjType == ObjType::GOOMBA)
 				{
+
+					this->nx = -this->nx;
 					vx = -vx;
+				
 				}
-				if (e->nx && e->obj->ObjType == ObjType::BLOCK)
-				{
+				if (e->obj->ObjType == ObjType::BLOCK && e->nx)
 					x += dx;
-				}
 				if (ny != 0) vy = 0;
-				y += min_ty * dy + ny * 0.4f;
 				if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
 					vx = vy = 0;
+				if (e->obj->ObjType == ObjType::BRICK)
+					y += min_ty * dy + ny * 0.1f;
+				else
+					y += min_ty * dy + ny * 0.5f;
+				if (e->obj->ObjType != ObjType::BLOCK)
+					x += min_tx * dx+ nx * 0.5f;
+
 			}
 		}
 	}

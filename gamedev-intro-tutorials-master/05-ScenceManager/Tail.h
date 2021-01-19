@@ -32,7 +32,7 @@ public:
 		 Attacking,
 		 SlowFalling,
 		 Idling;
-
+	int alpha =255;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
 	void SetState(int state) {

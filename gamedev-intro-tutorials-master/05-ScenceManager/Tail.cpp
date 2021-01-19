@@ -89,11 +89,11 @@ void Tail::Render()
 				ani = 10;
 			else
 				ani = 11;
-			animation_set->at(ani)->RenderTailSlowFalling(x, y);
+			animation_set->at(ani)->RenderTailSlowFalling(x, y,alpha);
 		}
 		else if (Falling)
-			animation_set->at(ani)->RenderFalling(x, y);
+			animation_set->at(ani)->RenderFalling(x, y,alpha);
 		else
-			animation_set->at(ani)->Render(x, y);
+			animation_set->at(ani)->Render(x, y, alpha);
 	}
 }

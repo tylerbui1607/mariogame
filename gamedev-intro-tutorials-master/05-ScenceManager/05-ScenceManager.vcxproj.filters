@@ -156,7 +156,7 @@
       <Filter>Enemy</Filter>
     </ClCompile>
     <ClCompile Include="RedKoopasAI.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -278,7 +278,7 @@
       <Filter>Enemy</Filter>
     </ClInclude>
     <ClInclude Include="RedKoopasAI.h">
-      <Filter>GameEgine</Filter>
+      <Filter>Enemy</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

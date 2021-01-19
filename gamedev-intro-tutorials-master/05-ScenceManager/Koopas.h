@@ -25,6 +25,11 @@
 #define KOOPAS_ANI_HIDDEN 2
 #define KOOPAS_ANI_HIDDENMOVE 3
 #define KOOPAS_ANI_HIDDEN_DIE	5
+#define KOOPAS_ANI_FLYLEFT	6
+#define KOOPAS_ANI_FLYRIGHT	7
+
+#define KOOPAS_LEVEL_NORMAL	1
+#define KOOPAS_LEVEL_PARAKOOPAS	2	
 class CKoopas : public CGameObject
 {
 public:
@@ -35,6 +40,7 @@ public:
 		 IsAttack,
 		 IsReborning,
 		IsDead;
+	int Level;
 	DWORD TimeReborn,
 		  TimeStartReborn;
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
@@ -61,6 +67,12 @@ public:
 		IsHolding = isHolding;
 	}
 public:
-	CKoopas();
+	CKoopas() {
+		ObjType = ObjType::KOOPAS;
+		SetState(KOOPAS_STATE_WALKING);
+		IsMovingObject = true;
+		Level = 1;
+	};
+	CKoopas(int level);
 	virtual void SetState(int state);
 };

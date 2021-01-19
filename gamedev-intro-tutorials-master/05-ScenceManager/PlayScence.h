@@ -24,7 +24,7 @@ protected:
 	void _ParseSection_HUD(string line);
 	void _ParseSection_HUD_TIME(string line);
 public: 
-	
+	int count;
 	CPlayScene(int id, LPCWSTR filePath);
 
 	virtual void Load();

@@ -10,9 +10,15 @@
 #define GOOMBA_STATE_WALKING 100
 #define GOOMBA_STATE_DIE 200
 #define GOOMBA_STATE_DIEBYTAIL	300
+#define GOOMBA_STATE_FLY	400
+#define GOOMBA_STATE_READY_FLY	500
 
 #define GOOMBA_ANI_WALKING 0
 #define GOOMBA_ANI_DIE 1
+
+#define GOOMBA_LEVEL_NORMAL 1
+#define GOOMBA_LEVEL_FLY	2	
+
 
 class CGoomba : public CGameObject
 {
@@ -21,8 +27,14 @@ class CGoomba : public CGameObject
 	virtual void Render();
 
 public: 
+	int Level;
 	bool IsDying;
+	bool IsFlyGoomba,
+		IsFlying, ReadyFly;
+	int count;
+	DWORD WalkingTime;
 	DWORD DyingTime;
 	CGoomba();
+	CGoomba(int level);
 	virtual void SetState(int state);
 };

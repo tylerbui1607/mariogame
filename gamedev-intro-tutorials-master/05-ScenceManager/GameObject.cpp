@@ -72,12 +72,12 @@ void CGameObject::CalcPotentialCollisions(
 	{
 		if (coObjects->at(i)->ObjType != ItemType::BIGCOIN && coObjects->at(i)->ObjType != ObjType::PORTAL)
 		{
-			LPCOLLISIONEVENT e = SweptAABBEx(coObjects->at(i));
+				LPCOLLISIONEVENT e = SweptAABBEx(coObjects->at(i));
 
-			if (e->t > 0 && e->t <= 1.0f)
-				coEvents.push_back(e);
-			else
-				delete e;
+				if (e->t > 0 && e->t <= 1.0f)
+					coEvents.push_back(e);
+				else
+					delete e;
 		}
 	}
 

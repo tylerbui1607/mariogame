@@ -332,22 +332,28 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS && IsHoldingKoopas == false)
 				{
+					CKoopas* koopas = dynamic_cast<CKoopas*>(e->obj);
 					//Mario jump on the koopas
 					if (e->ny < 0)
 					{
-						switch (e->obj->state)
+						if (koopas->Level == KOOPAS_LEVEL_NORMAL)
 						{
-						case(KOOPAS_STATE_WALKING):
-							e->obj->SetState(KOOPAS_STATE_HIDDEN);
-							break;
-						case(KOOPAS_STATE_HIDDEN):
-							e->obj->nx = this->nx;
-							e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
-							break;
-						case(KOOPAS_STATE_HIDDEN_MOVE):
-							e->obj->SetState(KOOPAS_STATE_HIDDEN);
-							break;
+							switch (e->obj->state)
+							{
+							case(KOOPAS_STATE_WALKING):
+								e->obj->SetState(KOOPAS_STATE_HIDDEN);
+								break;
+							case(KOOPAS_STATE_HIDDEN):
+								e->obj->nx = this->nx;
+								e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
+								break;
+							case(KOOPAS_STATE_HIDDEN_MOVE):
+								e->obj->SetState(KOOPAS_STATE_HIDDEN);
+								break;
+							}
 						}
+						else
+							koopas->Level--;
 						vy = -MARIO_DIE_DEFLECT_SPEED;
 						y += min_ty * dy + ny * 0.6f;
 					}
@@ -374,16 +380,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							}
 						}
 					}
-					/*if (e->obj->ObjType == ObjType::KOOPAS) {
-						KP = dynamic_cast<CKoopas*>(e->obj);
-						if(!KP->IsReborning)
-						KP->ChkIsHolding(IsHoldingKoopas);
-					}
-					else if (e->obj->ObjType == ObjType::REDKOOPAS) {
-						KP = dynamic_cast<RedKoopas*>(e->obj);
-						if (!KP->IsReborning)
-						KP->ChkIsHolding(IsHoldingKoopas);
-					}*/
 				}
 			}
 
@@ -489,7 +485,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 void CMario::Render()
 {
 	int alpha = 255;
-	if (untouchable) alpha = 128;
+	if (untouchable) { alpha = 128; tail->alpha = 128; }
+	else
+		tail->alpha = 255;
 	if (!IsAttack && level==MARIO_LEVEL_RACOON)
 	{
 		animation_set->at(MARIO_ANI_RACOON_ATTACKRIGHT)->Reset();
@@ -961,7 +959,7 @@ void CMario::Render()
 		}
 		else
 		{
-		animation_set->at(ani)->Render(x, y, alpha);
+			animation_set->at(ani)->Render(x, y, alpha);
 		}
 	for (int i = 0; i < firebullet.size(); i++)
 	{

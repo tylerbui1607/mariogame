@@ -158,7 +158,6 @@ void WorldMapScene::_ParseSection_OBJECTS(string line)
 	float y = atof(tokens[2].c_str());
 	int ItemType;
 	int ani_set_id;
-	float MinX, MaxX;
 	if (object_type == ObjType::GROUND || object_type == ObjType::WARPPIPE || object_type == ObjType::BLOCK)
 	{
 		width = atof(tokens[4].c_str());

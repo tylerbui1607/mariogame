@@ -175,7 +175,9 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	float y = atof(tokens[2].c_str());
 	int ItemType;
 	int ani_set_id;
-	float MinX, MaxX;
+	int Level;
+	if (object_type == ObjType::KOOPAS || object_type == ObjType::GOOMBA)
+		Level = atoi(tokens[4].c_str());
 	if (object_type == ObjType::GROUND || object_type == ObjType::WARPPIPE || object_type == ObjType::BLOCK)
 		{
 			width = atof(tokens[4].c_str());
@@ -207,10 +209,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
-	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
+	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(Level); break;
 	case OBJECT_TYPE_BRICK: obj = new CBrick(ItemType); break;
 	case OBJECT_TYPE_UNBREAK_BRICK: { obj = new CBrick(0); obj->ObjType = ObjType::UNBREAKABLEBRICK; break; }
-	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
+	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(Level); break;
 	case OBJECT_TYPE_GROUND: obj = new Ground(width,height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;

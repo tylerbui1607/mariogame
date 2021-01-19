@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{C83A385D-5992-4E1B-B783-AB1D446414D5}</ProjectGuid>
-    <RootNamespace>My05ScenceManager</RootNamespace>
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{07B6E5B7-4184-4C44-B0DD-CB50FC85A6B3}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>LoadGrid</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>SuperBros</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,14 +43,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,144 +71,87 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <DisableSpecificWarnings>4244;4018;4305;4005;28159;28251;6001;26495;6230;6031;</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3dx9.lib;d3d9.lib;dxguid.lib;dxerr.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <DisableSpecificWarnings>4244;4018;4305;4005;28159;28251;6001;26495;6230;6031;</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3dx9.lib;d3d9.lib;dxguid.lib;dxerr.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Animations.cpp" />
-    <ClCompile Include="BigCoin.cpp" />
-    <ClCompile Include="Block.cpp" />
-    <ClCompile Include="Brick.cpp" />
-    <ClCompile Include="Button.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Coin.cpp" />
-    <ClCompile Include="Define.cpp" />
-    <ClCompile Include="Effect.cpp" />
-    <ClCompile Include="FireBullet.cpp" />
-    <ClCompile Include="FirePiranhaPlant.cpp" />
-    <ClCompile Include="Ground.cpp" />
-    <ClCompile Include="Hud.cpp" />
-    <ClCompile Include="HUD_Time.cpp" />
-    <ClCompile Include="Item.cpp" />
-    <ClCompile Include="Koopas.cpp" />
-    <ClCompile Include="Leaf.cpp" />
-    <ClCompile Include="Map.cpp" />
-    <ClCompile Include="MarioWM.cpp" />
-    <ClCompile Include="MushRoom.cpp" />
-    <ClCompile Include="PiranhaPlant.cpp" />
-    <ClCompile Include="Portal.cpp" />
-    <ClCompile Include="QuestionBrick.cpp" />
-    <ClCompile Include="RedKoopas.cpp" />
-    <ClCompile Include="RedKoopasAI.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="Score.cpp" />
-    <ClCompile Include="Tail.cpp" />
-    <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="Goomba.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mario.cpp" />
-    <ClCompile Include="PlayScence.cpp" />
-    <ClCompile Include="Scence.cpp" />
-    <ClCompile Include="Sprites.cpp" />
-    <ClCompile Include="Textures.cpp" />
-    <ClCompile Include="WarpPipe.cpp" />
-    <ClCompile Include="WorldMapScene.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Animations.h" />
-    <ClInclude Include="BigCoin.h" />
-    <ClInclude Include="Block.h" />
-    <ClInclude Include="Brick.h" />
-    <ClInclude Include="Button.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Coin.h" />
-    <ClInclude Include="Define.h" />
-    <ClInclude Include="Effect.h" />
-    <ClInclude Include="FireBullet.h" />
-    <ClInclude Include="FirePiranhaPlant.h" />
-    <ClInclude Include="Ground.h" />
-    <ClInclude Include="Hud.h" />
-    <ClInclude Include="HUD_Time.h" />
-    <ClInclude Include="Item.h" />
-    <ClInclude Include="Koopas.h" />
-    <ClInclude Include="Leaf.h" />
-    <ClInclude Include="Map.h" />
-    <ClInclude Include="MarioWM.h" />
-    <ClInclude Include="MushRoom.h" />
-    <ClInclude Include="PiranhaPlant.h" />
-    <ClInclude Include="Portal.h" />
-    <ClInclude Include="QuestionBrick.h" />
-    <ClInclude Include="RedKoopas.h" />
-    <ClInclude Include="RedKoopasAI.h" />
-    <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="Score.h" />
-    <ClInclude Include="Tail.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Goomba.h" />
-    <ClInclude Include="KeyEventHandler.h" />
-    <ClInclude Include="Mario.h" />
-    <ClInclude Include="PlayScence.h" />
-    <ClInclude Include="Scence.h" />
-    <ClInclude Include="Sprites.h" />
-    <ClInclude Include="Textures.h" />
-    <ClInclude Include="WarpPipe.h" />
-    <ClInclude Include="WorldMapScene.h" />
+    <ClCompile Include="LoadGrid.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
