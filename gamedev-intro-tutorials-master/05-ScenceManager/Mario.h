@@ -178,6 +178,7 @@ class CMario : public CGameObject
 	float LastVx;
 public:
 	int level;
+	int Money;
 	int CounterSpeed;
 	bool IsOnPlatForm,
 		IsRollBack,

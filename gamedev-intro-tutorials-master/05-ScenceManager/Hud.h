@@ -10,11 +10,24 @@
 class Hud
 {
 public:
+	static Hud* __instance;
+
+	static Hud* Hud::GetInstance()
+	{
+		if (__instance == NULL) __instance = new Hud();
+		return __instance;
+	}
+	Hud() {
+		MarioMoney = 7;
+	};
 	float HUDx, HUDy;
 	int SpriteHUD;
 	int SpriteStack;
 	int SpritePower;
 	int MarioStack;
+	int MarioMoney;
+	int ItemType;
+	int ItemCount;
 	HUD_Time* hudTime;
 	Hud(float x, float y, int SpriteID,int spriteStackID,int SpritePowerID) {
 		HUDx = x;

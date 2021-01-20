@@ -36,6 +36,9 @@
     <Filter Include="Effect">
       <UniqueIdentifier>{aa83787c-a947-48ee-a65b-166fb9e274d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Grid">
+      <UniqueIdentifier>{f00baf55-f881-4d89-9be7-e4d874b2e216}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -158,6 +161,9 @@
     <ClCompile Include="RedKoopasAI.cpp">
       <Filter>Enemy</Filter>
     </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>Grid</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -279,6 +285,9 @@
     </ClInclude>
     <ClInclude Include="RedKoopasAI.h">
       <Filter>Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Grid</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -13,12 +13,14 @@ public:
 		ObjType = ObjType::REDKOOPAS;
 		SetState(KOOPAS_STATE_WALKING);
 		KPAI = new RedKoopasAI();
+		IsHolding = false;
 		nx = 1;
 	}
-	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render()
 	{
 		CKoopas::Render();
+		KPAI->RenderBoundingBox();
 	}
 };
 

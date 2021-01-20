@@ -44,7 +44,8 @@ public:
 	FirePiranhaPlant(float X, float Y)
 	{
 		ObjType = 8;
-		INIT = IsAttack = IsMovingObject = false;
+		StopMove = INIT = Appear = Hidden = IsAttack  = false;
+		IsMovingObject = true;
 		x = X;
 		y = Y;
 		Max = y - 48;

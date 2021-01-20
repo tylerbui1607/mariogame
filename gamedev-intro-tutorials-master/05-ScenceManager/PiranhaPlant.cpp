@@ -46,7 +46,6 @@ void PiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				WarpPipe* wp = dynamic_cast<WarpPipe*>(coObjects->at(i));
 				if (!MarioNextTo)
 					StopMove = wp->MarioOn;
-
 			}
 		}
 	}

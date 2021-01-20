@@ -21,6 +21,7 @@ public:
 		Health = 3;
 		ObjType = 7;
 		Check = false;
+		IsMovingObject = false;
 		ItemType = itemType;
 	}
 	void Render();

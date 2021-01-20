@@ -2,6 +2,7 @@
 CKoopas::CKoopas(int level)
 {
 	ObjType = ObjType::KOOPAS;
+
 	SetState(KOOPAS_STATE_WALKING);
 	IsMovingObject = true;
 	Level = level;
@@ -18,7 +19,6 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 		{
 			bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 		}
-
 }
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -28,96 +28,106 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//
 		// TO-DO: make sure Goomba can interact with the world and to each of them too!
 		// 
-		
-		if (IsHidden && !IsReborning)
+		if (!IsDieByShell)
 		{
-			if (GetTickCount64() - TimeStartReborn >= 7000)
+			if (IsHidden && !IsReborning)
 			{
-				if (IsHolding || !IsAttack)
-					SetState(KOOPAS_STATE_REBORN);
-			}
-		}
-		if (IsReborning)
-		{
-			if (GetTickCount64() - TimeReborn >= 3600)
-			{
-				IsReborning = false;
-				y -= 14;
-				SetState(KOOPAS_STATE_WALKING);
-			}
-		}
-		if (!IsHolding)
-		{
-		if (state != KOOPAS_STATE_DIE)
-			vy += GRAVITY * dt;
-		vector<LPCOLLISIONEVENT> coEvents;
-		vector<LPCOLLISIONEVENT> coEventsResult;
-		for (int i = 0; i < coObjects->size(); i++)
-		{
-			if (coObjects->at(i)->ObjType == ObjType::GOOMBA)
-				if (CheckAABB(coObjects->at(i))) {
-					coObjects->at(i)->SetState(GOOMBA_STATE_DIE);
+				if (GetTickCount64() - TimeStartReborn >= 7000)
+				{
+					if (IsHolding || !IsAttack)
+						SetState(KOOPAS_STATE_REBORN);
 				}
+			}
+			if (IsReborning)
+			{
+				if (GetTickCount64() - TimeReborn >= 3600)
+				{
+					IsReborning = false;
+					y -= 14;
+					SetState(KOOPAS_STATE_WALKING);
+				}
+			}
+			if (!IsHolding)
+			{
+				if (state != KOOPAS_STATE_DIE)
+					vy += GRAVITY * dt;
+				vector<LPCOLLISIONEVENT> coEvents;
+				vector<LPCOLLISIONEVENT> coEventsResult;
+				for (int i = 0; i < coObjects->size(); i++)
+				{
+					if (coObjects->at(i)->ObjType == ObjType::GOOMBA)
+						if (CheckAABB(coObjects->at(i))) {
+							coObjects->at(i)->SetState(GOOMBA_STATE_DIE);
+						}
+				}
+				coEvents.clear();
+				CalcPotentialCollisions(coObjects, coEvents);
+				if (coEvents.size() == 0)
+				{
+					x += dx;
+					y += dy;
+				}
+				else
+				{
+					float min_tx, min_ty, nx = 0, ny;
+					float rdx = 0;
+					float rdy = 0;
+
+
+					FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
+
+
+					// Collision logic with Goombas
+					for (UINT i = 0; i < coEventsResult.size(); i++)
+					{
+						LPCOLLISIONEVENT e = coEventsResult[i];
+
+						if (e->obj->ObjType == ObjType::QUESTIONBRICK)
+						{
+							if (e->nx)
+							{
+								if (IsHidden)
+									e->obj->SetState(BRICK_STATE_COLISSION);
+							}
+						}
+						if (e->obj->ObjType == ObjType::GOOMBA)
+						{
+							if (e->nx)
+							{
+								e->obj->SetState(GOOMBA_STATE_DIEBYTAIL);
+							}
+						}
+						if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS)
+						{
+							if (e->nx)
+							{
+								e->obj->SetState(KOOPAS_STATE_DIEBYSHELL);
+							}
+						}
+						else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK || e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS || e->obj->ObjType == ObjType::GOOMBA)
+						{
+							this->nx *= -1;
+							vx = -vx;
+						}
+
+						x += dx;
+						if (ny != 0) vy = 0;
+						if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
+						{
+							vx = vy = 0;
+						}
+						if (e->ny < 0 && Level == KOOPAS_LEVEL_PARAKOOPAS)
+							vy = -0.2;
+						y += min_ty * dy + ny * 0.4f;
+					}
+				}
+			}
 		}
-		coEvents.clear();
-		CalcPotentialCollisions(coObjects, coEvents);
-		if (coEvents.size() == 0)
+		else
 		{
+			vy += GRAVITY * dt;
 			x += dx;
 			y += dy;
-		}
-		else
-		{
-			float min_tx, min_ty, nx = 0, ny;
-			float rdx = 0;
-			float rdy = 0;
-
-
-			FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
-
-			// Collision logic with Goombas
-			for (UINT i = 0; i < coEventsResult.size(); i++)
-			{
-				LPCOLLISIONEVENT e = coEventsResult[i];
-
-				if (e->obj->ObjType == ObjType::QUESTIONBRICK)
-				{
-					if (e->nx)
-					{
-						if (IsHidden)
-							e->obj->SetState(BRICK_STATE_COLISSION);
-					}
-				}
-				if (e->obj->ObjType == ObjType::GOOMBA)
-				{
-					if (e->nx)
-					{
-						e->obj->SetState(GOOMBA_STATE_DIE);
-					}
-				}
-				else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK || e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS || e->obj->ObjType == ObjType::GOOMBA)
-				{
-					this->nx *= -1;
-					vx = -vx;
-				}
-				
-				x += dx;
-				if (ny != 0) vy = 0;
-				if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
-				{
-					vx = vy = 0;
-				}
-				if (e->ny < 0 && Level == KOOPAS_LEVEL_PARAKOOPAS)
-					vy = -0.2;
-				y += min_ty * dy + ny * 0.4f;
-			}
-		}
-		}
-		else
-		{
-			/*if (state != KOOPAS_STATE_HIDDEN)
-				SetState(KOOPAS_STATE_HIDDEN);*/
 		}
 }
 
@@ -193,7 +203,7 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_HIDDEN_MOVE:
 		IsAttack = true;
 		IsWalking = false;
-		vx = nx*0.05;
+		vx = nx*0.1;
 		break;
 	case KOOPAS_STATE_REBORN:
 		IsReborning = true;
@@ -208,9 +218,16 @@ void CKoopas::SetState(int state)
 		IsDead = true;
 		IsHidden = true;
 		IsAttack = false;
-		vy = -0.25;
-		vx = 0.1 * nx;
+		vy = -0.2;
 		TimeStartReborn = GetTickCount64();
+		break;
+	case KOOPAS_STATE_DIEBYSHELL:
+		if (!IsDead)
+			y += 9;
+		IsDead = true;
+		IsHidden = true;
+		IsAttack = false;
+		IsDieByShell = true;
 		break;
 	}
 

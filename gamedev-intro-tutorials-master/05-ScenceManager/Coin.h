@@ -15,6 +15,8 @@ public:
 		StartY = y = Y;
 		vy = -0.2;
 		InnitEffect = false;
+		IsMovingObject = true;
+
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();

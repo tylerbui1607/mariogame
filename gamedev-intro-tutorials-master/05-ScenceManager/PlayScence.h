@@ -26,7 +26,9 @@ protected:
 public: 
 	int count;
 	CPlayScene(int id, LPCWSTR filePath);
-
+	vector<LPGAMEOBJECT> coMovingObjects;
+	vector<LPGAMEOBJECT> coNotMoveObjects;
+	vector<LPGAMEOBJECT> coObjects;
 	virtual void Load();
 	virtual void Update(DWORD dt);
 	virtual void Render();

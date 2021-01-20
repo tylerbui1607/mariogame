@@ -5,6 +5,11 @@
 #define MAXHEIGHT_HIDDEN	16
 void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (StopMove)
+		DebugOut(L"True\n");
+	else
+		DebugOut(L"False\n");
+
 	if (IsAttack && GetTickCount64() - CalcAtkTime >= 2000)
 	{
 		IsAttack = false;

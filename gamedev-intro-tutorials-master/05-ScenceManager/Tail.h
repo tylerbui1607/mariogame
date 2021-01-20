@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Effect.h"
 #define TAIL_BBOX_WIDH	5
 #define TAIL_BBOX_HEIGHT	5
 #define TAIL_BBOX_ATKWIDH	14
@@ -23,6 +24,7 @@ public:
 		int ani = 0;
 	};
 	int ani;
+	vector<Effect*> effects;
 	bool StopRender;
 	bool IsActivated;
 	bool GetBBox1;

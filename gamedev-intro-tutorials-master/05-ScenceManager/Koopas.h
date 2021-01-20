@@ -4,6 +4,7 @@
 #include "Goomba.h"
 #include "Utils.h"
 #include "GameObject.h"
+#include "RedKoopasAI.h"
 
 #define KOOPAS_WALKING_SPEED 0.03f;
 #define KOOPAS_HIDDEN_SPEED 0.2f;
@@ -18,6 +19,7 @@
 #define KOOPAS_STATE_HIDDEN 300
 #define KOOPAS_STATE_REBORN	500	
 #define KOOPAS_STATE_DIEBYTAIL	600
+#define KOOPAS_STATE_DIEBYSHELL	700
 
 
 #define KOOPAS_ANI_WALKING_LEFT 0
@@ -39,6 +41,7 @@ public:
 		 IsHolding,
 		 IsAttack,
 		 IsReborning,
+		IsDieByShell,
 		IsDead;
 	int Level;
 	DWORD TimeReborn,
@@ -69,6 +72,7 @@ public:
 public:
 	CKoopas() {
 		ObjType = ObjType::KOOPAS;
+		nx = -1;
 		SetState(KOOPAS_STATE_WALKING);
 		IsMovingObject = true;
 		Level = 1;

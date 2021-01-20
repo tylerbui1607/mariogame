@@ -8,6 +8,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 
+	DebugOut(L"VX+VY %f%f\n", vx, vy);
 	if (state == KOOPAS_STATE_WALKING)
 	{	
 		if (nx > 0)
@@ -35,7 +36,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		KPAI->Update(dt, coObjects);
 	if (IsHidden && !IsReborning)
 	{
-		if (GetTickCount64() - TimeStartReborn >= 15000)
+		if (GetTickCount64() - TimeStartReborn >= 5000)
 		{
 			if (IsHolding || !IsAttack)
 				SetState(KOOPAS_STATE_REBORN);
@@ -52,6 +53,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (!IsHolding)
 	{
+		
 		if (state != KOOPAS_STATE_DIE)
 			vy += GRAVITY * dt;
 		vector<LPCOLLISIONEVENT> coEvents;
@@ -107,7 +109,20 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						e->obj->SetState(KOOPAS_STATE_DIE);
 					}
 				}
-				
+				if (e->obj->ObjType == ObjType::GOOMBA)
+				{
+					if (e->nx)
+					{
+						e->obj->SetState(GOOMBA_STATE_DIEBYTAIL);
+					}
+				}
+				if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS)
+				{
+					if (e->nx)
+					{
+						e->obj->SetState(KOOPAS_STATE_DIEBYSHELL);
+					}
+				}
 				if (e->obj->ObjType == ObjType::BRICK)
 				{					
 					if (IsAttack && e->nx)

@@ -7,7 +7,8 @@ public:
 	PiranhaPlant(float X, float Y)
 	{
 		ObjType = 8;
-		INIT = IsAttack = IsMovingObject = false;
+		StopMove = INIT = IsAttack = false;
+		IsMovingObject = true;
 		x = X;
 		y = Y;
 		Max = y - 24;

@@ -5,6 +5,8 @@
 
 #define GOOMBA_BBOX_WIDTH 16
 #define GOOMBA_BBOX_HEIGHT 15
+#define GOOMBA_BBOX_HEIGHTLV2 19
+
 #define GOOMBA_BBOX_HEIGHT_DIE 9
 
 #define GOOMBA_STATE_WALKING 100
@@ -15,6 +17,9 @@
 
 #define GOOMBA_ANI_WALKING 0
 #define GOOMBA_ANI_DIE 1
+#define GOOMBA_ANI_WALKING_HAVEWINGS	2
+#define GOOMBA_ANI_READY_FLY	3
+#define GOOMBA_ANI_FLYING	4
 
 #define GOOMBA_LEVEL_NORMAL 1
 #define GOOMBA_LEVEL_FLY	2	
@@ -30,7 +35,7 @@ public:
 	int Level;
 	bool IsDying;
 	bool IsFlyGoomba,
-		IsFlying, ReadyFly;
+		IsFlying, ReadyFly, IsDie;
 	int count;
 	DWORD WalkingTime;
 	DWORD DyingTime;

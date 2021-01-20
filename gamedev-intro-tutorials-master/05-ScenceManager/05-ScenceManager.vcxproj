@@ -138,6 +138,7 @@
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="FireBullet.cpp" />
     <ClCompile Include="FirePiranhaPlant.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Ground.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="HUD_Time.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="Effect.h" />
     <ClInclude Include="FireBullet.h" />
     <ClInclude Include="FirePiranhaPlant.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="HUD_Time.h" />

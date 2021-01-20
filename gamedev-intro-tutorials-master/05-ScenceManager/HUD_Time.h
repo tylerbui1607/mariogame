@@ -23,16 +23,24 @@ public:
 		LimitTime = 300;
 	};
 	void Update(DWORD dt);
-	void Render(int Score)
+	void Render(int Score,int money)
 	{
 		int n = LimitTime;
 		int ts = Score;
+		int mn = money;
 		for (int i = 2; i >= 0; i--)
 		{
 			int c = n % 10;
 			CSprites::GetInstance()->Get(SpriteID[c])->DrawHUD(HUD_TIMEx + 8 * i, HUD_TIMEy);
 			if (n != 0)
 				n = n / 10;
+		}
+		for (int i = mn/10; i >= 0; i--)
+		{
+			int c = mn % 10;
+			CSprites::GetInstance()->Get(SpriteID[c])->DrawHUD(HUD_TIMEx+8 + 8 * i, HUD_TIMEy-10);
+			if (mn != 0)
+				mn = mn / 10;
 		}
 		for (int i = 6; i >= 0; i--)
 		{

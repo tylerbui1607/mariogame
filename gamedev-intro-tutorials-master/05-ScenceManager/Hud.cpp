@@ -1,5 +1,5 @@
 #include "Hud.h"
-
+Hud* Hud::__instance = NULL;
 void Hud::Update(DWORD dt)
 {
 	hudTime->Update(dt);
@@ -15,5 +15,5 @@ void Hud::Render(int Score)
 		else
 			CSprites::GetInstance()->Get(SpritePower)->DrawHUD(HUDx + 58 + 8 * (i - 1), HUDy + 9);
 	}
-	hudTime->Render(Score);
+	hudTime->Render(Score,MarioMoney);
 }

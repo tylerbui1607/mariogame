@@ -23,6 +23,7 @@
 #include "Button.h"
 #include "BigCoin.h"
 #include "PiranhaPlant.h"
+#include "Grid.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -30,10 +31,12 @@ Hud* hud;
 Map* map;
 bool DoneLoad;
 vector<LPGAMEOBJECT>Cbricks;
+Grid* grid;
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
 	key_handler = new CPlayScenceKeyHandler(this);
+	grid = new Grid();
 }
 
 /*
@@ -258,8 +261,15 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		Button* button = dynamic_cast<Button*>(obj);
 		button->Bricks = Cbricks;
 	}
-	camera = new Camera();
-}
+	
+	float l, t, r, b;
+	obj->GetBoundingBox(l, t, r, b);
+	int Top = int(t / 115);
+	int Left = int(l / 150);
+	int Right = ceil(r / 150);
+	int Bottom = ceil(b / 115);
+	grid->InsertObj(obj, Left, Top, Right, Bottom);
+ }
 
 void CPlayScene::_ParseSection_MAP(string line)
 {
@@ -299,7 +309,11 @@ void CPlayScene::_ParseSection_HUD(string line)
 	 int SpritePower = atof(tokens[4].c_str());
 	 float HUDX = atof(tokens[0].c_str());
 	 float HUDY = atof(tokens[1].c_str());
-	 hud = new Hud(HUDX, HUDY, SpriteID,SpriteStack,SpritePower);
+	 Hud::GetInstance()->SpriteHUD= SpriteID;
+	 Hud::GetInstance()->SpriteStack=SpriteStack;
+	 Hud::GetInstance()->HUDx = HUDX;
+	 Hud::GetInstance()->HUDy = HUDY;
+	 Hud::GetInstance()->SpritePower= SpritePower;
 }
 void CPlayScene::_ParseSection_HUD_TIME(string line)
 {
@@ -314,10 +328,12 @@ void CPlayScene::_ParseSection_HUD_TIME(string line)
 	{
 		arr[i] = atof(tokens[i].c_str());
 	}
-	hud->hudTime = new HUD_Time(x, y, arr);
+	Hud::GetInstance()->hudTime = new HUD_Time(x, y, arr);
 }
 void CPlayScene::Load()
 {
+	Camera::GetInstance()->cam_y = 240;
+	Camera::GetInstance()->cam_x = 0;
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
 	ifstream f;
@@ -372,7 +388,7 @@ void CPlayScene::Load()
 	f.close();
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
-	Camera::GetInstance()->cam_y = 240;
+
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -380,18 +396,11 @@ void CPlayScene::Update(DWORD dt)
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
-	vector<LPGAMEOBJECT> coMovingObjects;
-	vector<LPGAMEOBJECT> coNotMoveObjects;
-	vector<LPGAMEOBJECT> coObjects;
-	vector<LPGAMEOBJECT> coMarioObjects;
-
-	hud->Update(dt);
-	for (size_t i = 1; i < objects.size(); i++)
+	
+	Hud::GetInstance()->Update(dt);
+	grid->GetListObj(coNotMoveObjects, coMovingObjects,coObjects);
+	/*for (size_t i = 1; i < objects.size(); i++)
 	{
-		if (objects[i]->ObjType == ObjType::WARPPIPE)
-		{
-			coMarioObjects.push_back(objects[i]);
-		}
 		if (objects[i]->GetHealth() != 0)
 		{
 			if (objects[i]->ObjType == ObjType::BRICK && objects[i]->GetHealth() == 2)
@@ -403,7 +412,6 @@ void CPlayScene::Update(DWORD dt)
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 					LPANIMATION_SET ani_set = animation_sets->Get(11);
 					btn->SetAnimationSet(ani_set);
-					DebugOut(L"Size: %d\n", Cbricks.size());
 					btn->Bricks = Cbricks;
 					objects.push_back(btn);
 					brick->SubHealth();
@@ -447,17 +455,107 @@ void CPlayScene::Update(DWORD dt)
 					objects[i] = coin;
 				}
 			}
-			coObjects.push_back(objects[i]);
-			if (objects[i]->IsMovingObject)
+			coObjects.push_back(objects[i]);*/
+
+		/*	if (objects[i]->IsMovingObject)
 				coMovingObjects.push_back(objects[i]);
 			else
 				coNotMoveObjects.push_back(objects[i]);
-			//DebugOut(L"CoNotMoveObject%d\n", coNotMoveObjects.size());
+			DebugOut(L"CoNotMoveObject%d\n", coNotMoveObjects.size());*/
+	/*	}
+	}*/
+	for (size_t i = 0; i < coMovingObjects.size(); i++)
+	{
+		if (coMovingObjects[i]->GetHealth() != 0)
+		{
+			if (coMovingObjects[i]->ObjType == ObjType::KOOPAS)
+			{
+				CKoopas* KP = dynamic_cast<CKoopas*>(coMovingObjects[i]);
+				if (KP->IsAttack)
+					coMovingObjects[i]->Update(dt, &coObjects);
+				else
+					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
+
+			}
+			if (coMovingObjects[i]->ObjType == ObjType::REDKOOPAS)
+			{
+				CKoopas* KP = dynamic_cast<CKoopas*>(coMovingObjects[i]);
+				if (KP->IsAttack)
+					coMovingObjects[i]->Update(dt, &coObjects);
+				else
+					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
+			}
+			else
+			{
+				if (coMovingObjects[i]->ObjType == ObjType::FIREPIRANHAPLANT)
+				{
+					coMovingObjects[i]->GetEnemyPos(player->x, player->y);
+					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
+				}
+				else
+					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
+			}
+			coMovingObjects[i]->IsInList = false;
 		}
 	}
-	coMarioObjects.push_back(player);
+	player->Update(dt, &coObjects);
+	for (size_t i = 0; i < coNotMoveObjects.size(); i++)
+	{
+		if (coNotMoveObjects[i]->ObjType == ObjType::BRICK && coNotMoveObjects[i]->GetHealth() == 2)
+		{
+			CBrick* brick = dynamic_cast<CBrick*>(coNotMoveObjects[i]);
+			if (brick->IsCollision)
+			{
+				Button* btn = new Button(brick->x, brick->y - 16);
+				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+				LPANIMATION_SET ani_set = animation_sets->Get(11);
+				btn->SetAnimationSet(ani_set);
+				btn->Bricks = Cbricks;
+				objects.push_back(btn);
+				brick->SubHealth();
+			}
+		}
+		if (coNotMoveObjects[i]->ObjType == ObjType::QUESTIONBRICK && coNotMoveObjects[i]->GetHealth() == 2)
+		{
+			QuestionBrick* qb = dynamic_cast<QuestionBrick*>(coNotMoveObjects[i]);
+			if (qb->ItemType == UNKNOW_ITEM)
+			{
+				if (player->level == MARIO_LEVEL_SMALL)
+				{
+					MushRoom* mushroom = new MushRoom(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+					mushroom->CaclVx(player->x);
+					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+					LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+					mushroom->SetAnimationSet(ani_set);
+					qb->SubHealth();
+					objects.push_back(mushroom);
+				}
+				else
+				{
+					Leaf* leaf = new Leaf(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+					LPANIMATION_SET ani_set = animation_sets->Get(LEAF_ANISET_ID);
+					leaf->SetAnimationSet(ani_set);
+					qb->SubHealth();
+					objects.push_back(leaf);
+				}
+			}
+			else if (qb->ItemType == ItemType::COIN)
+			{
+				Coin* coin = new Coin(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+				LPANIMATION_SET ani_set = animation_sets->Get(10);
+				coin->SetAnimationSet(ani_set);
+				qb->SubHealth();
+				objects.push_back(coin);
+			}
+		}
+		if (coNotMoveObjects[i]->Health != 0)
+			coNotMoveObjects[i]->Update(dt, &coObjects);
+		coNotMoveObjects[i]->IsInList = false;
+	}
 	/*DebugOut(L"hello%d\n", coObjects.size());*/
-	for (size_t i = 0; i < objects.size(); i++)
+	/*for (size_t i = 0; i < objects.size(); i++)
 	{
 	
 		if (objects[i]->GetHealth() != 0)
@@ -487,7 +585,7 @@ void CPlayScene::Update(DWORD dt)
 					objects[i]->Update(dt, &coNotMoveObjects);
 			}
 		}
-	}
+	}*/
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
@@ -514,33 +612,39 @@ void CPlayScene::Update(DWORD dt)
 		Camera::GetInstance()->cam_x = 0;
 	if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
 		Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
-	hud->MarioStack = player->CounterSpeed;
+
+
+	Hud::GetInstance()->MarioStack = player->CounterSpeed;
+	Hud::GetInstance()->MarioMoney = player->Money;
+
 	if (player->IsSwitchScene)
 	{
 		CGame::GetInstance()->SwitchScene(player->NextSceneID);
 	}
+	grid->UpdateGrid(objects);
+
 }
 
 void CPlayScene::Render()
 {
 	map->Draw();
-	for (int i = 1; i < objects.size(); i++)
+	for (int i = 0; i < coNotMoveObjects.size(); i++)
 	{
-		if (objects[i]->ObjType != ObjType::WARPPIPE)
-		{
-			if (objects[i]->Health != 0)
-				objects[i]->Render();
-		}
+		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType == ObjType::WARPPIPE)
+			coNotMoveObjects[i]->Render();
 	}
 	objects[0]->Render();
-	for (int i = 1; i < objects.size(); i++)
+	for (int i = 0; i < coMovingObjects.size(); i++)
 	{
-		if (objects[i]->ObjType == ObjType::WARPPIPE)
-		{
-				objects[i]->Render();
-		}
+		if (coMovingObjects[i]->Health != 0)
+			coMovingObjects[i]->Render();
 	}
-	hud->Render(player->score->TotalScore);
+	for (int i = 0; i < coNotMoveObjects.size(); i++)
+	{
+		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType != ObjType::WARPPIPE)
+			coNotMoveObjects[i]->Render();
+	}
+	Hud::GetInstance()->Render(player->score->TotalScore);
 }
 
 /*

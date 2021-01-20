@@ -12,6 +12,7 @@ public:
 	Leaf(float X, float Y) {
 		x = X;
 		y = Y;
+		IsMovingObject = true;
 		ObjType = 20;
 		SetState(LEAF_STATE_INIT);
 	}

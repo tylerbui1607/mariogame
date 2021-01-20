@@ -36,16 +36,22 @@ CMario::CMario(float x, float y) : CGameObject()
 	firebullet.push_back(fb1);
 	firebullet.push_back(fb2);
 	KP = new CKoopas();
+	Money = 0;
 	score = new Score();
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
 	// Simple fall down
 	// Simple fall down
+	if (x <= 0)
+	{
+		x = 0;
+	}
+	if (x + MARIO_BIG_BBOX_WIDTH > 2816)
+	x = 2816 - MARIO_BIG_BBOX_WIDTH;
 	for (int i = 0; i < effects.size(); i++)
 	{
 		effects[i]->Update(dt);
@@ -233,8 +239,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					{
 						if (e->obj->GetState() != GOOMBA_STATE_DIE)
 						{
+							CGoomba* gb = dynamic_cast<CGoomba*>(e->obj);
 							int ani=0;
-							e->obj->SetState(GOOMBA_STATE_DIE);
+							if (gb->Level == GOOMBA_LEVEL_NORMAL)
+								e->obj->SetState(GOOMBA_STATE_DIE);
+							else
+							{
+								gb->Level--;
+								gb->SetState(GOOMBA_STATE_WALKING);
+							}
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
 							score->CalcScoreEarn();
 							switch (score->ScoreEarn) 
@@ -318,7 +331,25 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					{
 						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
 						if (brick->ItemType != ObjType::BUTTON)
+						{
 							e->obj->SubHealth();
+							Effect* ef1 = new Effect(e->obj->x-1, e->obj->y, 20, 0);
+							Effect* ef2 = new Effect(e->obj->x+8, e->obj->y, 20, 0);
+							Effect* ef3 = new Effect(e->obj->x-1, e->obj->y+8, 20, 0);
+							Effect* ef4 = new Effect(e->obj->x+8, e->obj->y+8, 20, 0);
+							ef1->SetState(EFFECT_BRICK_BREAK);
+							ef2->SetState(EFFECT_BRICK_BREAK);
+							ef3->SetState(EFFECT_BRICK_BREAK);
+							ef4->SetState(EFFECT_BRICK_BREAK);
+							ef1->SetSpeed(-0.06, -0.16*2);
+							ef2->SetSpeed(0.06, -0.16*2);
+							ef3->SetSpeed(-0.06, -0.16);
+							ef4->SetSpeed(0.06, -0.16);
+							effects.push_back(ef1);
+							effects.push_back(ef2);
+							effects.push_back(ef3);
+							effects.push_back(ef4);
+						}
 						else
 							brick->SetState(BRICK_STATE_COLLISION);
 					}
@@ -350,6 +381,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							case(KOOPAS_STATE_HIDDEN_MOVE):
 								e->obj->SetState(KOOPAS_STATE_HIDDEN);
 								break;
+							case(KOOPAS_STATE_DIE):
+								e->obj->nx = this->nx;
+								e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE); break;
 							}
 						}
 						else
@@ -428,6 +462,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (CheckAABB(coObjects->at(i)))
 				{
 					score->CalcScoreEarn();
+					Money++;
 					coObjects->at(i)->SetState(BIGCOIN_STATE_COLLECTED);
 					coObjects->at(i)->SubHealth();
 				}
