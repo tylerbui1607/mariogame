@@ -5,11 +5,6 @@
 #define MAXHEIGHT_HIDDEN	16
 void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (StopMove)
-		DebugOut(L"True\n");
-	else
-		DebugOut(L"False\n");
-
 	if (IsAttack && GetTickCount64() - CalcAtkTime >= 2000)
 	{
 		IsAttack = false;
@@ -51,6 +46,7 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		else
 			bullet = new FireBullet(VxBullet, VyBullet, x+8, y);
 		FireBullets.push_back(bullet);
+		coObjects->push_back(bullet);
 		count--;
 	}
 	for (int i = 0; i < FireBullets.size(); i++)

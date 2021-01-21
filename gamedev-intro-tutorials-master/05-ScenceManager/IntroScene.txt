@@ -1,0 +1,44 @@
+
+# id	file_path	transparent_color_r	g	b
+[TEXTURES]
+0	map\introScene.png	255	0	255
+1	textures\title.png	166	166	166
+2	textures\title.png	185	122	87
+[SPRITES]
+#Curtain
+1	1	0	255	182	1
+#Part1
+2	516	0	772	187	1
+#Part2
+3	779	228	1035	415	1
+#Number3
+4	194	363	236	404	2
+5	240	363	282	404	2
+6	287	363	329	404	2
+7	333	363	375	404	2
+#Choose
+8	30	307	142	331	2
+9	155	307	267	331	2
+[ANIMATIONS]
+1	1	100
+2	2	100
+3	3	100
+4	4	100	5	100	6	100	7	100
+5	8	100
+6	9	100
+[ANIMATION_SETS]
+1	1
+2	2
+3	3
+4	4
+5	5	6
+[OBJECTS]
+#Curtains
+1	0	0	1
+2	0	-187	2
+3	0	0	3
+4	113	98	4
+5	68	143	5
+
+[MAP]
+0	map\Intro.txt	14	16	1	6	16	16	1

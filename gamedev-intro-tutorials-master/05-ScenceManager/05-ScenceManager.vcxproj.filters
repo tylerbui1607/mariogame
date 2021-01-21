@@ -131,9 +131,6 @@
     <ClCompile Include="RedKoopas.cpp">
       <Filter>Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WorldMapScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -163,6 +160,12 @@
     </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneIntro.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Curtain.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -288,6 +291,12 @@
     </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneIntro.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Curtain.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

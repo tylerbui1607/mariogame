@@ -134,6 +134,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="Curtain.cpp" />
     <ClCompile Include="Define.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="FireBullet.cpp" />
@@ -153,7 +154,7 @@
     <ClCompile Include="QuestionBrick.cpp" />
     <ClCompile Include="RedKoopas.cpp" />
     <ClCompile Include="RedKoopasAI.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SceneIntro.cpp" />
     <ClCompile Include="Score.cpp" />
     <ClCompile Include="Tail.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Coin.h" />
+    <ClInclude Include="Curtain.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="FireBullet.h" />
@@ -196,6 +198,7 @@
     <ClInclude Include="QuestionBrick.h" />
     <ClInclude Include="RedKoopas.h" />
     <ClInclude Include="RedKoopasAI.h" />
+    <ClInclude Include="SceneIntro.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Score.h" />
     <ClInclude Include="Tail.h" />

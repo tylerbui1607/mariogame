@@ -6,6 +6,8 @@
 #include "Camera.h"
 #include "PlayScence.h"
 #include"WorldMapScene.h"
+#include "SceneIntro.h"
+
 
 CGame * CGame::__instance = NULL;
 
@@ -365,6 +367,11 @@ void CGame::_ParseSection_SCENES(string line)
 	{
 		LPCWSTR path = ToLPCWSTR(tokens[1]);
 		scene = new WorldMapScene(id, path);
+	}
+	else if (id == 3)
+	{
+		LPCWSTR path = ToLPCWSTR(tokens[1]);
+		scene = new IntroScene(id, path);
 	}
 	else
 	{

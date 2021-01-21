@@ -100,7 +100,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (e->ny < 0)
 							SetState(GOOMBA_STATE_WALKING);
 					}
-					y += min_ty * dy + ny * 0.5f;
+					if (e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::MARIO)
+						y += min_ty * dy + ny * 0.5f;
 				}
 			}
 		}
@@ -168,7 +169,7 @@ void CGoomba::SetState(int state)
 			IsFlying = false;
 			ReadyFly = false;
 			vy = -0.25;
-			vx = 0.1 * nx;
+			vx = 0.05 * nx;
 			break;
 		case GOOMBA_STATE_FLY:
 			IsFlying = true;

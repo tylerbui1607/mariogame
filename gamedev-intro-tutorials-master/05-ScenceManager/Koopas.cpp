@@ -25,9 +25,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	
 		CGameObject::Update(dt, coObjects);
-		//
-		// TO-DO: make sure Goomba can interact with the world and to each of them too!
-		// 
 		if (!IsDieByShell)
 		{
 			if (IsHidden && !IsReborning)
@@ -57,7 +54,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (coObjects->at(i)->ObjType == ObjType::GOOMBA)
 						if (CheckAABB(coObjects->at(i))) {
-							coObjects->at(i)->SetState(GOOMBA_STATE_DIE);
+							coObjects->at(i)->nx = nx;
+							coObjects->at(i)->SetState(GOOMBA_STATE_DIEBYTAIL);
 						}
 				}
 				coEvents.clear();
@@ -92,19 +90,19 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						}
 						if (e->obj->ObjType == ObjType::GOOMBA)
 						{
-							if (e->nx)
+							if (e->nx && IsAttack)
 							{
 								e->obj->SetState(GOOMBA_STATE_DIEBYTAIL);
 							}
 						}
 						if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS)
 						{
-							if (e->nx)
+							if (e->nx && IsAttack)
 							{
 								e->obj->SetState(KOOPAS_STATE_DIEBYSHELL);
 							}
 						}
-						else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK || e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS || e->obj->ObjType == ObjType::GOOMBA)
+						else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA)
 						{
 							this->nx *= -1;
 							vx = -vx;
@@ -118,7 +116,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						}
 						if (e->ny < 0 && Level == KOOPAS_LEVEL_PARAKOOPAS)
 							vy = -0.2;
-						y += min_ty * dy + ny * 0.4f;
+						if (e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::MARIO)
+							y += min_ty * dy + ny * 0.5f;
 					}
 				}
 			}
@@ -228,6 +227,7 @@ void CKoopas::SetState(int state)
 		IsHidden = true;
 		IsAttack = false;
 		IsDieByShell = true;
+		vy = -0.2;
 		break;
 	}
 

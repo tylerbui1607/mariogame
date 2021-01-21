@@ -104,6 +104,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			IsAttack = false;
 			tail->Attacking = false;
 		}
+		if (IsKickKoopas)
+		{
+			tail->StopRender = true;
+			if (GetTickCount64() - Kick >= 200)
+			{
+				IsKickKoopas = false;
+				tail->StopRender = false;
+			}
+		}
 		if (nx * vx >= 0 && IsRollBack)
 		{
 			IsEndRollBack = true;
@@ -332,23 +341,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
 						if (brick->ItemType != ObjType::BUTTON)
 						{
-							e->obj->SubHealth();
-							Effect* ef1 = new Effect(e->obj->x-1, e->obj->y, 20, 0);
-							Effect* ef2 = new Effect(e->obj->x+8, e->obj->y, 20, 0);
-							Effect* ef3 = new Effect(e->obj->x-1, e->obj->y+8, 20, 0);
-							Effect* ef4 = new Effect(e->obj->x+8, e->obj->y+8, 20, 0);
-							ef1->SetState(EFFECT_BRICK_BREAK);
-							ef2->SetState(EFFECT_BRICK_BREAK);
-							ef3->SetState(EFFECT_BRICK_BREAK);
-							ef4->SetState(EFFECT_BRICK_BREAK);
-							ef1->SetSpeed(-0.06, -0.16*2);
-							ef2->SetSpeed(0.06, -0.16*2);
-							ef3->SetSpeed(-0.06, -0.16);
-							ef4->SetSpeed(0.06, -0.16);
-							effects.push_back(ef1);
-							effects.push_back(ef2);
-							effects.push_back(ef3);
-							effects.push_back(ef4);
+							brick->SetState(BRICK_STATE_BROKEN);
 						}
 						else
 							brick->SetState(BRICK_STATE_COLLISION);
@@ -408,6 +401,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							}
 							else if (e->obj->state != KOOPAS_STATE_HIDDEN_MOVE && !IsHoldingKoopas)
 							{
+								if (!IsKickKoopas)
+								{
+									IsKickKoopas = true;
+									Kick = GetTickCount64();
+								}
 								if(e->obj->state== KOOPAS_STATE_HIDDEN|| e->obj->state == KOOPAS_STATE_DIEBYTAIL || e->obj->state == KOOPAS_STATE_DIE)
 								e->obj->nx = this->nx;
 								e->obj->SetState(KOOPAS_STATE_HIDDEN_MOVE);
@@ -465,6 +463,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					Money++;
 					coObjects->at(i)->SetState(BIGCOIN_STATE_COLLECTED);
 					coObjects->at(i)->SubHealth();
+				}
+			}
+			if (coObjects->at(i)->ObjType == ObjType::BULLET)
+			{
+				if (CheckAABB(coObjects->at(i)))
+				{
+					Calclevel();
 				}
 			}
 		}
@@ -832,6 +837,7 @@ void CMario::Render()
 				}
 			}
 		}
+
 		if (IsRunning && IsOnPlatForm && !IsAttack && !IsHoldingKoopas)
 		{
 			if (CounterSpeed == MAX_STACK_POWER  && abs(vx) == MARIO_MAX_SPEED * 2)
@@ -876,6 +882,37 @@ void CMario::Render()
 			else
 			{
 				animation_set->at(ani)->RenderFTime(x, y, 20, alpha);
+			}
+		}
+		if (IsKickKoopas)
+		{
+			if (level == MARIO_LEVEL_BIG)
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_BIG_IDLE_KICKKPRIGHT;
+				else
+					ani = MARIO_ANI_BIG_IDLE_KICKKPLEFT;
+			}
+			else if (level == MARIO_LEVEL_SMALL)
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_SMALL_IDLE_KICKKPRIGHT;
+				else
+					ani = MARIO_ANI_SMALL_IDLE_KICKKPLEFT;
+			}
+			else if (level == MARIO_LEVEL_RACOON)
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_RACOON_IDLE_KICKKPRIGHT;
+				else
+					ani = MARIO_ANI_RACOON_IDLE_KICKKPLEFT;
+			}
+			else if (level == MARIO_LEVEL_FIRE)
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_FIRE_IDLE_KICKKPRIGHT;
+				else
+					ani = MARIO_ANI_FIRE_IDLE_KICKKPLEFT;
 			}
 		}
 		if (IsHoldingKoopas)

@@ -33,23 +33,7 @@ void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					CBrick* brick = dynamic_cast<CBrick*>(coObjects->at(i));
 					if (brick->ItemType != ObjType::BUTTON)
 					{
-						coObjects->at(i)->SubHealth();
-						Effect* ef1 = new Effect(coObjects->at(i)->x - 1, coObjects->at(i)->y, 20, 0);
-						Effect* ef2 = new Effect(coObjects->at(i)->x + 8, coObjects->at(i)->y, 20, 0);
-						Effect* ef3 = new Effect(coObjects->at(i)->x - 1, coObjects->at(i)->y + 8, 20, 0);
-						Effect* ef4 = new Effect(coObjects->at(i)->x + 8, coObjects->at(i)->y + 8, 20, 0);
-						ef1->SetState(EFFECT_BRICK_BREAK);
-						ef2->SetState(EFFECT_BRICK_BREAK);
-						ef3->SetState(EFFECT_BRICK_BREAK);
-						ef4->SetState(EFFECT_BRICK_BREAK);
-						ef1->SetSpeed(-0.06, -0.16 * 2);
-						ef2->SetSpeed(0.06, -0.16 * 2);
-						ef3->SetSpeed(-0.06, -0.16);
-						ef4->SetSpeed(0.06, -0.16);
-						effects.push_back(ef1);
-						effects.push_back(ef2);
-						effects.push_back(ef3);
-						effects.push_back(ef4);
+						brick->SetState(BRICK_STATE_BROKEN);
 					}
 					else
 						brick->SetState(BRICK_STATE_COLLISION);

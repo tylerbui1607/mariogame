@@ -19,12 +19,16 @@ public:
 	{
 		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
 		SetAnimationSet(ani_set);
+		IsMovingObject = true;
+		ObjType = ObjType::BULLET;
 	};
 	FireBullet(float X, float Y) {
 		x = X;
 		y = Y;
+		IsMovingObject = true;
 		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
 		SetAnimationSet(ani_set);
+		ObjType = ObjType::BULLET;
 	}
 	FireBullet(float Vx, float Vy, float X, float Y)
 	{
@@ -32,8 +36,10 @@ public:
 		y = Y;
 		vx = Vx;
 		vy = Vy;
+		IsMovingObject = true;
 		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
 		SetAnimationSet(ani_set);
+		ObjType = ObjType::BULLET;
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render()

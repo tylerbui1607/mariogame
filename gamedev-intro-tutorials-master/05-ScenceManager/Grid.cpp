@@ -16,7 +16,17 @@ void Grid::UpdateGrid(vector<LPGAMEOBJECT> listObj)
 	for (int i = 0; i < listObj.size(); i++)
 	{
 		float l, t, r, b;
-		listObj[i]->GetBoundingBox(l, t, r, b);
+		if (listObj[i]->ObjType != ObjType::BRICK)
+		{
+			listObj[i]->GetBoundingBox(l, t, r, b);
+		}
+		else
+		{
+			l = listObj[i]->x;
+			t = listObj[i]->y;
+			r = l + 16;
+			b = t + 16;
+		}
 		int Top = int(t /CELL_HEIGHT);
 		int Left = int(l /CELL_WIDTH);
 		int Right = ceil(r /CELL_WIDTH);
@@ -25,8 +35,10 @@ void Grid::UpdateGrid(vector<LPGAMEOBJECT> listObj)
 		//DebugOut(L"Top%d\n", Top);
 		//DebugOut(L"Right%d\n", Right);
 		//DebugOut(L"Bottom%d\n", Bottom);
-		if (listObj[i]->Health != 0)
-		InsertObj(listObj[i], Left, Top, Right, Bottom);
+		if (listObj[i]->Health != 0 && CheckObjPos(listObj[i]->x,listObj[i]->y))
+		{
+			InsertObj(listObj[i], Left, Top, Right, Bottom);
+		}
 	}
 }
 
@@ -63,7 +75,7 @@ void Grid::GetListObj(vector<LPGAMEOBJECT>& listNotMoveObj, vector<LPGAMEOBJECT>
 			
 			for (int k = 0; k < Cell[i][j].size(); k++)
 			{
-				if (Cell[i][j][k]->ObjType != ObjType::MARIO && !Cell[i][j][k]->IsInList)
+				if (!Cell[i][j][k]->IsInList)
 				{
 					if (!Cell[i][j][k]->IsMovingObject)
 					{

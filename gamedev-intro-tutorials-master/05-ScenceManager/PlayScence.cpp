@@ -213,8 +213,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(Level); break;
-	case OBJECT_TYPE_BRICK: obj = new CBrick(ItemType); break;
-	case OBJECT_TYPE_UNBREAK_BRICK: { obj = new CBrick(0); obj->ObjType = ObjType::UNBREAKABLEBRICK; break; }
+	case OBJECT_TYPE_BRICK: obj = new CBrick(ItemType,x,y); break;
+	case OBJECT_TYPE_UNBREAK_BRICK: { obj = new CBrick(0,x,y); obj->ObjType = ObjType::UNBREAKABLEBRICK; break; }
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(Level); break;
 	case OBJECT_TYPE_GROUND: obj = new Ground(width,height); break;
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
@@ -399,74 +399,9 @@ void CPlayScene::Update(DWORD dt)
 	
 	Hud::GetInstance()->Update(dt);
 	grid->GetListObj(coNotMoveObjects, coMovingObjects,coObjects);
-	/*for (size_t i = 1; i < objects.size(); i++)
-	{
-		if (objects[i]->GetHealth() != 0)
-		{
-			if (objects[i]->ObjType == ObjType::BRICK && objects[i]->GetHealth() == 2)
-			{
-				CBrick* brick = dynamic_cast<CBrick*>(objects[i]);
-				if (brick->IsCollision)
-				{
-					Button* btn = new Button(brick->x, brick->y - 16);
-					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-					LPANIMATION_SET ani_set = animation_sets->Get(11);
-					btn->SetAnimationSet(ani_set);
-					btn->Bricks = Cbricks;
-					objects.push_back(btn);
-					brick->SubHealth();
-				}
-			}
-			if (objects[i]->ObjType == ObjType::QUESTIONBRICK && objects[i]->GetHealth() == 2)
-			{
-				QuestionBrick* qb = dynamic_cast<QuestionBrick*>(objects[i]);
-				if (qb->ItemType == UNKNOW_ITEM)
-				{
-					if (player->level == MARIO_LEVEL_SMALL)
-					{
-						MushRoom* mushroom = new MushRoom(objects[i]->x, objects[i]->y);
-						mushroom->CaclVx(player->x);
-						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-						LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
-						mushroom->SetAnimationSet(ani_set);
-						qb->SubHealth();
-						objects.push_back(qb);
-						objects[i] = mushroom;
-					}
-					else
-					{
-						Leaf* leaf = new Leaf(objects[i]->x, objects[i]->y);
-						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-						LPANIMATION_SET ani_set = animation_sets->Get(LEAF_ANISET_ID);
-						leaf->SetAnimationSet(ani_set);
-						qb->SubHealth();
-						objects.push_back(qb);
-						objects[i] = leaf;
-					}
-				}
-				else if(qb->ItemType== ItemType::COIN)
-				{
-					Coin* coin = new Coin(objects[i]->x, objects[i]->y);
-					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-					LPANIMATION_SET ani_set = animation_sets->Get(10);
-					coin->SetAnimationSet(ani_set);
-					qb->SubHealth();
-					objects.push_back(qb);
-					objects[i] = coin;
-				}
-			}
-			coObjects.push_back(objects[i]);*/
-
-		/*	if (objects[i]->IsMovingObject)
-				coMovingObjects.push_back(objects[i]);
-			else
-				coNotMoveObjects.push_back(objects[i]);
-			DebugOut(L"CoNotMoveObject%d\n", coNotMoveObjects.size());*/
-	/*	}
-	}*/
 	for (size_t i = 0; i < coMovingObjects.size(); i++)
 	{
-		if (coMovingObjects[i]->GetHealth() != 0)
+		if (coMovingObjects[i]->GetHealth() != 0 && coMovingObjects[i]->ObjType != ObjType::MARIO)
 		{
 			if (coMovingObjects[i]->ObjType == ObjType::KOOPAS)
 			{
@@ -542,6 +477,7 @@ void CPlayScene::Update(DWORD dt)
 			}
 			else if (qb->ItemType == ItemType::COIN)
 			{
+				DebugOut(L"Fuck\n");
 				Coin* coin = new Coin(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
 				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 				LPANIMATION_SET ani_set = animation_sets->Get(10);
@@ -554,39 +490,6 @@ void CPlayScene::Update(DWORD dt)
 			coNotMoveObjects[i]->Update(dt, &coObjects);
 		coNotMoveObjects[i]->IsInList = false;
 	}
-	/*DebugOut(L"hello%d\n", coObjects.size());*/
-	/*for (size_t i = 0; i < objects.size(); i++)
-	{
-	
-		if (objects[i]->GetHealth() != 0)
-		{
-			if (objects[i]->ObjType == ObjType::KOOPAS)
-			{
-				CKoopas* KP = dynamic_cast<CKoopas*>(objects[i]);
-				if (KP->IsAttack)
-					objects[i]->Update(dt, &coObjects);
-			}
-			if (objects[i]->ObjType == ObjType::REDKOOPAS)
-			{
-				RedKoopas* KP = dynamic_cast<RedKoopas*>(objects[i]);
-				if (KP->IsAttack)
-					objects[i]->Update(dt, &coObjects);
-			}
-			if (objects[i]->ObjType == ObjType::MARIO)
-				objects[i]->Update(dt, &coObjects);
-			else 
-			{
-				if (objects[i]->ObjType == ObjType::FIREPIRANHAPLANT)
-				{
-					objects[i]->GetEnemyPos(player->x, player->y);
-					objects[i]->Update(dt, &coMarioObjects);
-				}
-				else
-					objects[i]->Update(dt, &coNotMoveObjects);
-			}
-		}
-	}*/
-
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
 
@@ -636,7 +539,7 @@ void CPlayScene::Render()
 	objects[0]->Render();
 	for (int i = 0; i < coMovingObjects.size(); i++)
 	{
-		if (coMovingObjects[i]->Health != 0)
+		if (coMovingObjects[i]->Health != 0 && coMovingObjects[i]->ObjType != ObjType::MARIO)
 			coMovingObjects[i]->Render();
 	}
 	for (int i = 0; i < coNotMoveObjects.size(); i++)

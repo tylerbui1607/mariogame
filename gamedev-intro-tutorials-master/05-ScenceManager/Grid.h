@@ -19,11 +19,13 @@ public:
 	void UpdateGrid(vector<LPGAMEOBJECT> listObj);
 	Grid();
 	~Grid() {};
+	bool CheckObjPos(float Objx, float Objy)
+	{
+		return(!(Objx < 0 || Objx>2816 || Objy < 0 || Objy>624));
+	}
 	void GetListObj(vector<LPGAMEOBJECT>& listNotMoveObj, vector<LPGAMEOBJECT>& listEnemy, vector<LPGAMEOBJECT>& listObj);
 	void InsertObj(LPGAMEOBJECT Object, int Left, int Top, int Right, int Bottom)
 	{
-		if (Right < 20 && Bottom < 7)
-		{
 			for (int i = Left; i < Right; i++)
 			{
 				for (int j = Top; j < Bottom; j++)
@@ -32,7 +34,6 @@ public:
 					Cell[i][j].push_back(Object);
 				}
 			}
-		}
 	}
 	
 };
