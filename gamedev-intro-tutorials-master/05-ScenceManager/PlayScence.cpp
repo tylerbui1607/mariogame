@@ -24,6 +24,7 @@
 #include "BigCoin.h"
 #include "PiranhaPlant.h"
 #include "Grid.h"
+#include"FlyingWood.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -68,6 +69,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_UNBREAK_BRICK	11
 #define OBJECT_TYPE_BIGCOIN			21
 #define OBJECT_TYPE_PIRANHAPLANT	22
+#define OBJECT_TYPE_MOVINGWOOD		23
 
 
 #define MUSHROOM_ANISET_ID	8
@@ -220,11 +222,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
-	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
+	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y,player); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(); break;
 	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
 	case OBJECT_TYPE_BIGCOIN: {obj = new BigCoin(x, y); break; }
-	case OBJECT_TYPE_PIRANHAPLANT:obj = new PiranhaPlant(x, y); break;
+	case OBJECT_TYPE_PIRANHAPLANT: {obj = new PiranhaPlant(x, y);  break; }
+	case OBJECT_TYPE_MOVINGWOOD:
+	{
+		obj = new FlyingWood();
+		break;
+	}
 	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
 	case OBJECT_TYPE_PORTAL:
 		{	
@@ -333,6 +340,7 @@ void CPlayScene::_ParseSection_HUD_TIME(string line)
 void CPlayScene::Load()
 {
 	Camera::GetInstance()->cam_y = 240;
+	Camera::GetInstance()->cam_vy = 0;
 	Camera::GetInstance()->cam_x = 0;
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
@@ -477,7 +485,6 @@ void CPlayScene::Update(DWORD dt)
 			}
 			else if (qb->ItemType == ItemType::COIN)
 			{
-				DebugOut(L"Fuck\n");
 				Coin* coin = new Coin(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
 				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 				LPANIMATION_SET ani_set = animation_sets->Get(10);

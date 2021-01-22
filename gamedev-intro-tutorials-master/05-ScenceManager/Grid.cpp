@@ -3,7 +3,7 @@
 void Grid::UpdateGrid(vector<LPGAMEOBJECT> listObj)
 {
 	int left = (int)(Camera::GetInstance()->cam_x / CELL_WIDTH);
-	int right = ceil(((Camera::GetInstance()->cam_x + 300 )/ CELL_WIDTH));
+	int right = ceil(((Camera::GetInstance()->cam_x + 252 )/ CELL_WIDTH));
 	int top = (int)(Camera::GetInstance()->cam_y / CELL_HEIGHT);
 	int bottom = ceil(((Camera::GetInstance()->cam_y + 230) / CELL_HEIGHT));
 	for (int i = left; i < right; i++)
@@ -57,7 +57,7 @@ Grid::Grid()
 void Grid::GetListObj(vector<LPGAMEOBJECT>& listNotMoveObj, vector<LPGAMEOBJECT>& listEnemy, vector<LPGAMEOBJECT>& listObj)
 {
 	int left = (int)((Camera::GetInstance()->cam_x )/ CELL_WIDTH);
-	int right = ceil(((Camera::GetInstance()->cam_x + 300) / CELL_WIDTH));
+	int right = ceil(((Camera::GetInstance()->cam_x + 252) / CELL_WIDTH));
 	int top = (int)((Camera::GetInstance()->cam_y) / CELL_HEIGHT);
 	int bottom = ceil(((Camera::GetInstance()->cam_y + 230) / CELL_HEIGHT));
 

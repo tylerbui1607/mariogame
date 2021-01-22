@@ -39,9 +39,22 @@ public:
 	bool StopMove;
 	bool MarioNextTo;
 	vector<FireBullet*>FireBullets;
+	
 public:
 	FirePiranhaPlant() {};
+	LPGAMEOBJECT mario;
 	FirePiranhaPlant(float X, float Y)
+	{
+		ObjType = 8;
+		StopMove = INIT = Appear = Hidden = IsAttack = false;
+		IsMovingObject = true;
+		x = X;
+		y = Y;
+		Max = y - 48;
+		Min = y;
+		SetState(FIREPIRANHAPLANT_APPEAR);
+	}
+	FirePiranhaPlant(float X, float Y,LPGAMEOBJECT m)
 	{
 		ObjType = 8;
 		StopMove = INIT = Appear = Hidden = IsAttack  = false;
@@ -50,6 +63,7 @@ public:
 		y = Y;
 		Max = y - 48;
 		Min = y;
+		mario = m;
 		SetState(FIREPIRANHAPLANT_APPEAR);
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);

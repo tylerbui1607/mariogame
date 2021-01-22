@@ -18,7 +18,13 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 			vector<LPCOLLISIONEVENT> coEvents;
 			vector<LPCOLLISIONEVENT> coEventsResult;
-
+			if (CheckAABB(mario))
+			{
+				DebugOut(L"%d", mario->Health);
+				mario->SubHealth();
+				DebugOut(L"%d", mario->Health);
+				this->SubHealth();
+			}
 			coEvents.clear();
 			CalcPotentialCollisions(coObjects, coEvents);
 			if (coEvents.size() == 0)

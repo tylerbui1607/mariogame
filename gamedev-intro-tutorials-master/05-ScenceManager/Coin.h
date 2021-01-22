@@ -16,13 +16,17 @@ public:
 		vy = -0.2;
 		InnitEffect = false;
 		IsMovingObject = true;
-
+		ObjType = ItemType::COIN;
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
 	void SetState(int state);
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	{
+		left = x;
+		right = left + 5;
+		top = y;
+		bottom = y + 5;
 	}
 };
 

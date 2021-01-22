@@ -2,7 +2,7 @@
 #include "Game.h"';
 #include"GameObject.h"
 #include "Camera.h"
-#define CELL_WIDTH	150
+#define CELL_WIDTH	126
 #define CELL_HEIGHT	115
 class Grid
 {
@@ -26,11 +26,11 @@ public:
 	void GetListObj(vector<LPGAMEOBJECT>& listNotMoveObj, vector<LPGAMEOBJECT>& listEnemy, vector<LPGAMEOBJECT>& listObj);
 	void InsertObj(LPGAMEOBJECT Object, int Left, int Top, int Right, int Bottom)
 	{
+
 			for (int i = Left; i < Right; i++)
 			{
 				for (int j = Top; j < Bottom; j++)
 				{
-					int Type = Object->ObjType;
 					Cell[i][j].push_back(Object);
 				}
 			}

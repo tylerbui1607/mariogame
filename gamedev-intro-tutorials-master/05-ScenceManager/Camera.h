@@ -6,8 +6,8 @@
 class Camera
 {
 public:
-	float Mariovx, Mariovy, MarioY;
-	float cam_x, cam_y, cam_vx, cam_vy;
+	float Mariovx, Mariovy=0, MarioY;
+	float cam_x, cam_y, cam_vx, cam_vy =0;
 	bool IsFollowingMario;
 public:
 	static Camera* __instance;
@@ -20,6 +20,7 @@ public:
 	Camera();
 
 	void SetCamSpeed()
+
 	{
 		if (Mariovy < 0 && cam_y >= 0)
 			cam_vy = Mariovy;

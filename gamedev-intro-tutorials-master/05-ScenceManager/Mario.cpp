@@ -15,7 +15,7 @@
 #include "Button.h"
 #include "Camera.h"
 #include "BigCoin.h"
-
+#include "FlyingWood.h"
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_SMALL;
@@ -215,6 +215,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->ny < 0)
 				{
+					if (e->obj->ObjType == ObjType::MOVINGWOOD)
+					{
+						FlyingWood* FW = dynamic_cast<FlyingWood*>(e->obj);
+						FW->IsMarioOn = true;
+					}
 					if (e->obj->ObjType == ObjType::BUTTON)
 					{
 						e->obj->SetState(BUTTON_STATE_ISPRESSED);

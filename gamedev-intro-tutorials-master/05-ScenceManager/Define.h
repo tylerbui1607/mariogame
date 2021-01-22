@@ -16,6 +16,7 @@ enum ObjType
 	BULLET = 15,
 	UNBREAKABLEBRICK = 12,
 	LSPORTAL = 14,
+	MOVINGWOOD = 22,
 };
 enum ItemType
 {

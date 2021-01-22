@@ -45,8 +45,8 @@ void FirePiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			bullet = new FireBullet(VxBullet, VyBullet, x, y);
 		else
 			bullet = new FireBullet(VxBullet, VyBullet, x+8, y);
+		bullet->GetMario(mario);
 		FireBullets.push_back(bullet);
-		coObjects->push_back(bullet);
 		count--;
 	}
 	for (int i = 0; i < FireBullets.size(); i++)

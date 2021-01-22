@@ -14,7 +14,12 @@ class FireBullet :
 public:
 	bool FireMario = false ,
 		 Disable = false;
+	LPGAMEOBJECT mario;
 	bool Attack;
+	void GetMario(LPGAMEOBJECT M)
+	{
+		mario = M;
+	};
 	FireBullet()
 	{
 		LPANIMATION_SET ani_set = CAnimationSets::GetInstance()->Get(BULLET_ANI_SET);
