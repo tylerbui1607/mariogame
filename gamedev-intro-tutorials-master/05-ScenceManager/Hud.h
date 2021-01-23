@@ -24,10 +24,12 @@ public:
 	int SpriteHUD;
 	int SpriteStack;
 	int SpritePower;
+	int SpriteItem;
 	int MarioStack;
 	int MarioMoney;
-	int ItemType;
-	int ItemCount;
+	vector<int> Item;
+	bool CourseClear;
+	DWORD Time = 0;
 	HUD_Time* hudTime;
 	Hud(float x, float y, int SpriteID,int spriteStackID,int SpritePowerID) {
 		HUDx = x;

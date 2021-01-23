@@ -168,7 +168,10 @@
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="FlyingWood.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="LastSceenItem.cpp">
+      <Filter>Object\Item</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -302,7 +305,10 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="FlyingWood.h">
-      <Filter>GameEgine</Filter>
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="LastSceenItem.h">
+      <Filter>Object\Item</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

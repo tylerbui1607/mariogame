@@ -12,14 +12,14 @@ void FlyingWood::Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects)
 		else if (DropTime != 0 && GetTickCount64() - DropTime >= 100)
 		{
 			vx = 0;
-			vy += GRAVITY * dt;
+			vy = 0.07;
 		}
 	}
 }
 
 void FlyingWood::Render()
 {
-	RenderBoundingBox();
+	animation_set->at(0)->Render(x, y);
 }
 
 void FlyingWood::SetState(int state)

@@ -17,6 +17,7 @@ enum ObjType
 	UNBREAKABLEBRICK = 12,
 	LSPORTAL = 14,
 	MOVINGWOOD = 22,
+	
 };
 enum ItemType
 {
@@ -24,6 +25,7 @@ enum ItemType
 	COIN = 19,
 	LEAF = 20,
 	BIGCOIN = 21,
+	LASTITEM = 23,
 };
 enum EffectType
 {

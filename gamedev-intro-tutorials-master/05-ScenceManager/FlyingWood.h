@@ -9,7 +9,7 @@ public:
 	FlyingWood()
 	{
 		IsMovingObject = true;
-		vx = -0.05;
+		vx = -0.02;
 		ObjType = ObjType::MOVINGWOOD;
 		DropTime = 0;
 	};

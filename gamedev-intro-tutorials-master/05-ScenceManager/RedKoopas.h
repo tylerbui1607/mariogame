@@ -5,12 +5,14 @@ class RedKoopas :
 	public CKoopas
 {
 public:
+	
 	int Type;
 	RedKoopasAI* KPAI;
 	RedKoopas()
 	{
 		IsMovingObject = true;
 		ObjType = ObjType::REDKOOPAS;
+		IsPara = false;
 		SetState(KOOPAS_STATE_WALKING);
 		KPAI = new RedKoopasAI();
 		IsHolding = false;
@@ -20,7 +22,6 @@ public:
 	virtual void Render()
 	{
 		CKoopas::Render();
-		KPAI->RenderBoundingBox();
 	}
 };
 

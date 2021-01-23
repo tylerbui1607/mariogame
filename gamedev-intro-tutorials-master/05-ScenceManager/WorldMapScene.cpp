@@ -195,7 +195,7 @@ void WorldMapScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
 	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(); break;
-		/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
+//	case OBJECT_TYPE_BRICK:	obj - new CBrick(x,y,0); break;	
 	case OBJECT_TYPE_PORTAL:
 	{
 		float r = atof(tokens[4].c_str());

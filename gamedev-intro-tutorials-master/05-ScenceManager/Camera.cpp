@@ -11,12 +11,20 @@ Camera::Camera()
 
 void Camera::Update(DWORD dt)
 {
-	if (IsFollowingMario)
+	if (AutoMove != 1)
 	{
-		SetCamSpeed();
-		cam_y += cam_vy * dt;
+		if (IsFollowingMario)
+		{
+			SetCamSpeed();
+			cam_y += cam_vy * dt;
+		}
+		else
+			cam_vy = 0;
+		floor(cam_y);
 	}
 	else
+	{
 		cam_vy = 0;
-	floor(cam_y);
+		cam_x += cam_vx * dt;
+	}
 }

@@ -25,6 +25,7 @@
 #include "PiranhaPlant.h"
 #include "Grid.h"
 #include"FlyingWood.h"
+#include "LastSceenItem.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -54,6 +55,8 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_MAP			7
 #define SCENE_SECTION_HUD			8
 #define SCENE_SECTION_HUD_TIME		9
+#define SCENE_SECTION_CAMERA		10
+
 #define OBJECT_TYPE_MARIO			0
 #define OBJECT_TYPE_BRICK			1
 #define OBJECT_TYPE_GOOMBA			2
@@ -70,10 +73,13 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_BIGCOIN			21
 #define OBJECT_TYPE_PIRANHAPLANT	22
 #define OBJECT_TYPE_MOVINGWOOD		23
+#define OBJECT_TYPE_LASTITEM		24
+#define OBJECT_TYPE_BRICKMANYCOINS			25
+#define OBJECT_TYPE_PARAKOOPAS			26
 
 
 #define MUSHROOM_ANISET_ID	8
-
+#define GREENMUSHROOM_ANISET_ID	24
 #define OBJECT_TYPE_PORTAL	50
 
 #define OBJECT_TYPE_PORTAL_LASTSCENE	500
@@ -178,7 +184,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	int object_type = atoi(tokens[0].c_str());
 	float x = atof(tokens[1].c_str());
 	float y = atof(tokens[2].c_str());
-	int ItemType;
+	int ItemType=19;
 	int ani_set_id;
 	int Level;
 	if (object_type == ObjType::KOOPAS || object_type == ObjType::GOOMBA)
@@ -232,7 +238,19 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new FlyingWood();
 		break;
 	}
-	/*case OBJECT_TYPE_ITEM: objects.push_back(item); break;*/
+	case OBJECT_TYPE_BRICKMANYCOINS:
+		obj = new QuestionBrick(ItemType);
+		obj->Health = 12;
+		break;
+	case OBJECT_TYPE_LASTITEM:obj = new LastSceenItem(); break;
+	case OBJECT_TYPE_PARAKOOPAS:
+	{
+		obj = new RedKoopas();
+		RedKoopas* rk = dynamic_cast<RedKoopas*>(obj);
+		rk->IsPara = true;
+		rk->SetSpeed(0, -0.05);
+		break;
+	}
 	case OBJECT_TYPE_PORTAL:
 		{	
 			float r = atof(tokens[4].c_str());
@@ -322,6 +340,14 @@ void CPlayScene::_ParseSection_HUD(string line)
 	 Hud::GetInstance()->HUDy = HUDY;
 	 Hud::GetInstance()->SpritePower= SpritePower;
 }
+void CPlayScene::_ParseSection_CAMERA(string line)
+{
+	vector<string> tokens = split(line);
+
+	Camera::GetInstance()->cam_x = atof(tokens[0].c_str());
+	Camera::GetInstance()->cam_y = atof(tokens[1].c_str());
+	Camera::GetInstance()->AutoMove = atof(tokens[2].c_str());
+}
 void CPlayScene::_ParseSection_HUD_TIME(string line)
 {
 	vector<string> tokens = split(line);
@@ -375,6 +401,9 @@ void CPlayScene::Load()
 		if (line == "[HUD_TIME]") {
 			section = SCENE_SECTION_HUD_TIME; continue;
 		}
+		if (line == "[CAMERA]") {
+			section = SCENE_SECTION_CAMERA; continue;
+		}
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
 
 		//
@@ -390,7 +419,7 @@ void CPlayScene::Load()
 			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
 			case SCENE_SECTION_HUD: _ParseSection_HUD(line); break;
 			case SCENE_SECTION_HUD_TIME: _ParseSection_HUD_TIME(line); break;
-
+			case SCENE_SECTION_CAMERA: _ParseSection_CAMERA(line); break;
 		}
 	}
 	f.close();
@@ -458,38 +487,64 @@ void CPlayScene::Update(DWORD dt)
 				brick->SubHealth();
 			}
 		}
-		if (coNotMoveObjects[i]->ObjType == ObjType::QUESTIONBRICK && coNotMoveObjects[i]->GetHealth() == 2)
+		if (coNotMoveObjects[i]->ObjType == ObjType::QUESTIONBRICK)
 		{
 			QuestionBrick* qb = dynamic_cast<QuestionBrick*>(coNotMoveObjects[i]);
-			if (qb->ItemType == UNKNOW_ITEM)
+			if (coNotMoveObjects[i]->GetHealth() == 2)
 			{
-				if (player->level == MARIO_LEVEL_SMALL)
+				if (qb->ItemType == UNKNOW_ITEM)
+				{
+					if (player->level == MARIO_LEVEL_SMALL)
+					{
+						MushRoom* mushroom = new MushRoom(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+						mushroom->CaclVx(player->x);
+						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+						mushroom->SetAnimationSet(ani_set);
+						qb->SubHealth();
+						qb->Check = true;
+						objects.push_back(mushroom);
+					}
+					else
+					{
+						Leaf* leaf = new Leaf(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						LPANIMATION_SET ani_set = animation_sets->Get(LEAF_ANISET_ID);
+						leaf->SetAnimationSet(ani_set);
+						qb->SubHealth();
+						qb->Check = true;
+						objects.push_back(leaf);
+					}
+				}
+				if (qb->ItemType == 17)
 				{
 					MushRoom* mushroom = new MushRoom(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
 					mushroom->CaclVx(player->x);
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-					LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
+					LPANIMATION_SET ani_set = animation_sets->Get(GREENMUSHROOM_ANISET_ID);
 					mushroom->SetAnimationSet(ani_set);
 					qb->SubHealth();
+					qb->Check = true;
 					objects.push_back(mushroom);
 				}
-				else
+				else if (qb->ItemType == ItemType::COIN)
 				{
-					Leaf* leaf = new Leaf(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
+					Coin* coin = new Coin(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-					LPANIMATION_SET ani_set = animation_sets->Get(LEAF_ANISET_ID);
-					leaf->SetAnimationSet(ani_set);
+					LPANIMATION_SET ani_set = animation_sets->Get(10);
+					coin->SetAnimationSet(ani_set);
 					qb->SubHealth();
-					objects.push_back(leaf);
+					qb->Check = true;
+					objects.push_back(coin);
 				}
 			}
-			else if (qb->ItemType == ItemType::COIN)
+			else if (coNotMoveObjects[i]->GetHealth() > 3 && qb->IsHit)
 			{
 				Coin* coin = new Coin(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
 				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 				LPANIMATION_SET ani_set = animation_sets->Get(10);
 				coin->SetAnimationSet(ani_set);
-				qb->SubHealth();
+				qb->IsHit = false;
 				objects.push_back(coin);
 			}
 		}
@@ -514,16 +569,29 @@ void CPlayScene::Update(DWORD dt)
 			Camera::GetInstance()->IsFollowingMario = false;
 		}
 	}
-	Camera::GetInstance()->cam_x = player->x;
-	Camera::GetInstance()->Update(dt);
-	CGame *game = CGame::GetInstance();
-	Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
-	if (Camera::GetInstance()->cam_x < 0)
-		Camera::GetInstance()->cam_x = 0;
-	if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
-		Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
+	if (Camera::GetInstance()->AutoMove != 1)
+	{
+		Camera::GetInstance()->cam_x = player->x;
+		Camera::GetInstance()->Update(dt);
+		CGame* game = CGame::GetInstance();
+		Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
+		if (Camera::GetInstance()->cam_x < 0)
+			Camera::GetInstance()->cam_x = 0;
+		if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
+			Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
+	}
+	else
+	{		
+		if(Camera::GetInstance()->cam_x + SCREEN_WIDTH <2048)
+			Camera::GetInstance()->cam_vx = 0.03;
+		else
+		{
+			Camera::GetInstance()->cam_x = 2048 - SCREEN_WIDTH;
+			Camera::GetInstance()->cam_vx = 0;
+		}
+		Camera::GetInstance()->Update(dt);
 
-
+	}
 	Hud::GetInstance()->MarioStack = player->CounterSpeed;
 	Hud::GetInstance()->MarioMoney = player->Money;
 
@@ -576,76 +644,81 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-	
-	switch (KeyCode)
+	if (!mario->EndScene)
 	{
-	case DIK_B: // reset
-		mario->SetState(MARIO_STATE_IDLE);
-		mario->SetLevel(MARIO_LEVEL_BIG);
-		mario->SetPosition(50.0f, 0.0f);
-		mario->SetSpeed(0, 0);
-		break;
-	case DIK_1:
-		mario->SetLevel(MARIO_LEVEL_SMALL);
-		break;
-	case DIK_2:
-		mario->y -= 12;
-		mario->SetLevel(MARIO_LEVEL_BIG);
-		break;
-	case DIK_3:
-		mario->y -= 12;
-		mario->SetLevel(MARIO_LEVEL_RACOON);
-		break;
-	case DIK_4:
-		mario->y -= 12;
-		mario->SetLevel(MARIO_LEVEL_FIRE);
-		break;
-	case DIK_S:
-		mario->SetState(MARIO_STATE_JUMP);
-		if (mario->level == MARIO_LEVEL_RACOON)
+		switch (KeyCode)
 		{
-			mario->SetState(MARIO_STATE_SLOWFALLING);
-			mario->SetState(MARIO_STATE_FLY);
+		case DIK_B: // reset
+			mario->SetState(MARIO_STATE_IDLE);
+			mario->SetLevel(MARIO_LEVEL_BIG);
+			mario->SetPosition(50.0f, 0.0f);
+			mario->SetSpeed(0, 0);
+			break;
+		case DIK_1:
+			mario->SetLevel(MARIO_LEVEL_SMALL);
+			break;
+		case DIK_2:
+			mario->y -= 12;
+			mario->SetLevel(MARIO_LEVEL_BIG);
+			break;
+		case DIK_3:
+			mario->y -= 12;
+			mario->SetLevel(MARIO_LEVEL_RACOON);
+			break;
+		case DIK_4:
+			mario->y -= 12;
+			mario->SetLevel(MARIO_LEVEL_FIRE);
+			break;
+		case DIK_S:
+			mario->SetState(MARIO_STATE_JUMP);
+			if (mario->level == MARIO_LEVEL_RACOON)
+			{
+				mario->SetState(MARIO_STATE_SLOWFALLING);
+				mario->SetState(MARIO_STATE_FLY);
+			}
+			break;
+		case DIK_A:
+			if (mario->level >= MARIO_LEVEL_RACOON)
+				mario->SetState(MARIO_STATE_ATTACK);
+			break;
+		case DIK_DOWN:
+			mario->GoHiddenMap = true;
+			break;
+		case DIK_H:
+			mario->SetState(MARIO_STATE_GO_HIDDENMAP);
+			break;
+		case DIK_J:
+			mario->SetPosition(2256, 80);
+			Camera::GetInstance()->cam_x = mario->x / 2;
+			Camera::GetInstance()->cam_y = mario->y / 2;
+			break;
 		}
-		break;
-	case DIK_A:
-		if (mario->level >= MARIO_LEVEL_RACOON)
-			mario->SetState(MARIO_STATE_ATTACK);
-		break;
-	case DIK_DOWN:
-		mario->GoHiddenMap = true;
-		break;
-	case DIK_H:
-		mario->SetState(MARIO_STATE_GO_HIDDENMAP);
-		break;
-	case DIK_J:
-		mario->SetPosition(2256, 80);
-		Camera::GetInstance()->cam_x = mario->x / 2;
-		Camera::GetInstance()->cam_y = mario->y / 2;
-		break;
 	}
 }
 
 void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
 	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
-	switch (KeyCode)
+	if (!mario->EndScene)
 	{
-	case DIK_A:
-		mario->StopRunning();
-		mario->SetState(MARIO_STATE_DROPKOOPAS);
-		break;
-	case DIK_S:
-		mario->IsSlowFalling = false; 
-		if (mario->vy < 0)
-			mario->vy = 0;
-		break;
-	case DIK_DOWN:
-		mario->GoHiddenMap = false;
-		break;
-	case DIK_UP:
-		mario->GoOutHiddenMap = false;
-		break;
+		switch (KeyCode)
+		{
+		case DIK_A:
+			mario->StopRunning();
+			mario->SetState(MARIO_STATE_DROPKOOPAS);
+			break;
+		case DIK_S:
+			mario->IsSlowFalling = false;
+			if (mario->vy < 0)
+				mario->vy = 0;
+			break;
+		case DIK_DOWN:
+			mario->GoHiddenMap = false;
+			break;
+		case DIK_UP:
+			mario->GoOutHiddenMap = false;
+			break;
+		}
 	}
 }
 
@@ -653,20 +726,23 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-	if (game->IsKeyDown(DIK_UP))
+	if (!mario->EndScene)
 	{
-		mario->GoOutHiddenMap = true;
+		if (game->IsKeyDown(DIK_UP))
+		{
+			mario->GoOutHiddenMap = true;
+		}
+		if (game->IsKeyDown(DIK_A))
+			mario->SetState(MARIO_STATE_RUN);
+		// disable control key when Mario die 
+		if (mario->GetState() == MARIO_STATE_DIE) return;
+		if (game->IsKeyDown(DIK_RIGHT))
+			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+		else if (game->IsKeyDown(DIK_LEFT))
+			mario->SetState(MARIO_STATE_WALKING_LEFT);
+		else if (game->IsKeyDown(DIK_DOWN))
+			mario->SetState(MARIO_STATE_SIT);
+		else
+			mario->SetState(MARIO_STATE_IDLE);
 	}
-	if (game->IsKeyDown(DIK_A))
-		mario->SetState(MARIO_STATE_RUN);
-	// disable control key when Mario die 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
-	if (game->IsKeyDown(DIK_RIGHT))
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
-	else if (game->IsKeyDown(DIK_DOWN))
-		mario->SetState(MARIO_STATE_SIT);
-	else
-		mario->SetState(MARIO_STATE_IDLE);
 }

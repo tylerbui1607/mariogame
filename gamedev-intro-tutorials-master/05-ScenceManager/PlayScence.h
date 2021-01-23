@@ -23,6 +23,7 @@ protected:
 	void _ParseSection_MAP(string line);
 	void _ParseSection_HUD(string line);
 	void _ParseSection_HUD_TIME(string line);
+	void _ParseSection_CAMERA(string line);
 public: 
 	int count;
 	CPlayScene(int id, LPCWSTR filePath);

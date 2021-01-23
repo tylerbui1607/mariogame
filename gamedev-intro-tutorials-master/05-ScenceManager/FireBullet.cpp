@@ -18,12 +18,13 @@ void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 			vector<LPCOLLISIONEVENT> coEvents;
 			vector<LPCOLLISIONEVENT> coEventsResult;
-			if (CheckAABB(mario))
+			if (!FireMario)
 			{
-				DebugOut(L"%d", mario->Health);
-				mario->SubHealth();
-				DebugOut(L"%d", mario->Health);
-				this->SubHealth();
+				if (CheckAABB(mario))
+				{
+					CMario* p = dynamic_cast<CMario*>(mario);
+						p->Calclevel();
+				}
 			}
 			coEvents.clear();
 			CalcPotentialCollisions(coObjects, coEvents);

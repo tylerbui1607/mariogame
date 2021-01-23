@@ -184,8 +184,10 @@ class CMario : public CGameObject
 	float start_y; 
 	float LastVx;
 public:
+
 	int level;
 	int Money;
+	int LastItem;
 	int CounterSpeed;
 	bool IsOnPlatForm,
 		IsRollBack,
@@ -195,7 +197,9 @@ public:
 		IsEndRollBack,
 		IsSlowFalling,
 		IsAttack,
-		IsHoldingKoopas;
+		IsHoldingKoopas,
+		EndScene,
+		IsOnWood;
 	CKoopas* KP;
 	vector<FireBullet*> firebullet;
 	int AmountofFirebullet;
@@ -205,6 +209,7 @@ public:
 	DWORD TCanFly = 0;
 	DWORD TAttack = 0;
 	DWORD Kick = 0;
+	DWORD Endscene = 0;
 	Tail* tail = new Tail();
 	bool IsCollision,IsCollisionBackUp;
 	bool GoHiddenMap,
@@ -216,7 +221,7 @@ public:
 	Score * score;
 	vector<Effect*> effects;
 	WarpPipe* WP = new WarpPipe();
-public: 
+public:
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();

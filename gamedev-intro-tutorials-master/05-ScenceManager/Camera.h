@@ -1,13 +1,14 @@
 #pragma once
 #include <Windows.h>
 #include "Utils.h"
-#define SCREEN_WIDTH 300
+#define SCREEN_WIDTH 252
 #define SCREEN_HEIGHT 272
 class Camera
 {
 public:
 	float Mariovx, Mariovy=0, MarioY;
 	float cam_x, cam_y, cam_vx, cam_vy =0;
+	int AutoMove;
 	bool IsFollowingMario;
 public:
 	static Camera* __instance;

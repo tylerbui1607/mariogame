@@ -29,6 +29,7 @@
 #define KOOPAS_ANI_HIDDEN_DIE	5
 #define KOOPAS_ANI_FLYLEFT	6
 #define KOOPAS_ANI_FLYRIGHT	7
+#define KOOPAS_ANI_PARA		8
 
 #define KOOPAS_LEVEL_NORMAL	1
 #define KOOPAS_LEVEL_PARAKOOPAS	2	
@@ -42,7 +43,8 @@ public:
 		 IsAttack,
 		 IsReborning,
 		IsDieByShell,
-		IsDead;
+		IsDead,
+		IsPara;
 	int Level;
 	DWORD TimeReborn,
 		  TimeStartReborn;

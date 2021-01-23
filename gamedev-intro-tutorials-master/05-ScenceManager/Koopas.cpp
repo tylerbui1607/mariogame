@@ -25,109 +25,111 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	
 		CGameObject::Update(dt, coObjects);
-		if (!IsDieByShell)
-		{
-			if (IsHidden && !IsReborning)
+		
+			if (!IsDieByShell)
 			{
-				if (GetTickCount64() - TimeStartReborn >= 7000)
+				if (IsHidden && !IsReborning)
 				{
-					if (IsHolding || !IsAttack)
-						SetState(KOOPAS_STATE_REBORN);
-				}
-			}
-			if (IsReborning)
-			{
-				if (GetTickCount64() - TimeReborn >= 3600)
-				{
-					IsReborning = false;
-					y -= 14;
-					SetState(KOOPAS_STATE_WALKING);
-				}
-			}
-			if (!IsHolding)
-			{
-				if (state != KOOPAS_STATE_DIE)
-					vy += GRAVITY * dt;
-				vector<LPCOLLISIONEVENT> coEvents;
-				vector<LPCOLLISIONEVENT> coEventsResult;
-				for (int i = 0; i < coObjects->size(); i++)
-				{
-					if (coObjects->at(i)->ObjType == ObjType::GOOMBA)
-						if (CheckAABB(coObjects->at(i))) {
-							coObjects->at(i)->nx = nx;
-							coObjects->at(i)->SetState(GOOMBA_STATE_DIEBYTAIL);
-						}
-				}
-				coEvents.clear();
-				CalcPotentialCollisions(coObjects, coEvents);
-				if (coEvents.size() == 0)
-				{
-					x += dx;
-					y += dy;
-				}
-				else
-				{
-					float min_tx, min_ty, nx = 0, ny;
-					float rdx = 0;
-					float rdy = 0;
-
-
-					FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
-
-					// Collision logic with Goombas
-					for (UINT i = 0; i < coEventsResult.size(); i++)
+					if (GetTickCount64() - TimeStartReborn >= 7000)
 					{
-						LPCOLLISIONEVENT e = coEventsResult[i];
-
-						if (e->obj->ObjType == ObjType::QUESTIONBRICK)
-						{
-							if (e->nx)
-							{
-								if (IsHidden)
-									e->obj->SetState(BRICK_STATE_COLISSION);
+						if (IsHolding || !IsAttack)
+							SetState(KOOPAS_STATE_REBORN);
+					}
+				}
+				if (IsReborning)
+				{
+					if (GetTickCount64() - TimeReborn >= 3600)
+					{
+						IsReborning = false;
+						y -= 14;
+						SetState(KOOPAS_STATE_WALKING);
+					}
+				}
+				if (!IsHolding)
+				{
+					if (state != KOOPAS_STATE_DIE)
+						vy += GRAVITY * dt;
+					vector<LPCOLLISIONEVENT> coEvents;
+					vector<LPCOLLISIONEVENT> coEventsResult;
+					for (int i = 0; i < coObjects->size(); i++)
+					{
+						if (coObjects->at(i)->ObjType == ObjType::GOOMBA)
+							if (CheckAABB(coObjects->at(i))) {
+								coObjects->at(i)->nx = nx;
+								coObjects->at(i)->SetState(GOOMBA_STATE_DIEBYTAIL);
 							}
-						}
-						if (e->obj->ObjType == ObjType::GOOMBA)
-						{
-							if (e->nx && IsAttack)
-							{
-								e->obj->SetState(GOOMBA_STATE_DIEBYTAIL);
-							}
-						}
-						if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS)
-						{
-							if (e->nx && IsAttack)
-							{
-								e->obj->SetState(KOOPAS_STATE_DIEBYSHELL);
-							}
-						}
-						else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA)
-						{
-							this->nx *= -1;
-							vx = -vx;
-						}
-
+					}
+					coEvents.clear();
+					CalcPotentialCollisions(coObjects, coEvents);
+					if (coEvents.size() == 0)
+					{
 						x += dx;
-						if (ny != 0) vy = 0;
-						if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
+						y += dy;
+					}
+					else
+					{
+						float min_tx, min_ty, nx = 0, ny;
+						float rdx = 0;
+						float rdy = 0;
+
+
+						FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
+
+
+						// Collision logic with Goombas
+						for (UINT i = 0; i < coEventsResult.size(); i++)
 						{
-							vx = vy = 0;
+							LPCOLLISIONEVENT e = coEventsResult[i];
+
+							if (e->obj->ObjType == ObjType::QUESTIONBRICK)
+							{
+								if (e->nx)
+								{
+									if (IsHidden)
+										e->obj->SetState(BRICK_STATE_COLISSION);
+								}
+							}
+							if (e->obj->ObjType == ObjType::GOOMBA)
+							{
+								if (e->nx && IsAttack)
+								{
+									e->obj->SetState(GOOMBA_STATE_DIEBYTAIL);
+								}
+							}
+							if (e->obj->ObjType == ObjType::KOOPAS || e->obj->ObjType == ObjType::REDKOOPAS)
+							{
+								if (e->nx && IsAttack)
+								{
+									e->obj->SetState(KOOPAS_STATE_DIEBYSHELL);
+								}
+							}
+							else if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA)
+							{
+								this->nx *= -1;
+								vx = -vx;
+							}
+
+							x += dx;
+							if (ny != 0) vy = 0;
+							if (e->ny < 0 && state == KOOPAS_STATE_DIEBYTAIL)
+							{
+								vx = vy = 0;
+							}
+							if (e->ny < 0 && Level == KOOPAS_LEVEL_PARAKOOPAS)
+								vy = -0.25;
+							if (e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::MARIO)
+								y += min_ty * dy + ny * 0.5f;
 						}
-						if (e->ny < 0 && Level == KOOPAS_LEVEL_PARAKOOPAS)
-							vy = -0.2;
-						if (e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::MARIO)
-							y += min_ty * dy + ny * 0.5f;
 					}
 				}
 			}
-		}
-		else
-		{
-			vy += GRAVITY * dt;
-			x += dx;
-			y += dy;
-		}
+			else
+			{
+				vy += GRAVITY * dt;
+				x += dx;
+				y += dy;
+			}
+
 }
 
 void CKoopas::Render()
@@ -158,6 +160,8 @@ void CKoopas::Render()
 		else
 			ani = KOOPAS_ANI_FLYLEFT;
 	}
+	if (IsPara)
+		ani = KOOPAS_ANI_PARA;
 	animation_set->at(ani)->Render(x, y);
 
 	RenderBoundingBox();
@@ -217,7 +221,8 @@ void CKoopas::SetState(int state)
 		IsDead = true;
 		IsHidden = true;
 		IsAttack = false;
-		vy = -0.2;
+		vy = -0.1;
+		vx = 0;
 		TimeStartReborn = GetTickCount64();
 		break;
 	case KOOPAS_STATE_DIEBYSHELL:

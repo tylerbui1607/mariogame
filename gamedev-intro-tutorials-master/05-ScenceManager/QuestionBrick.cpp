@@ -20,7 +20,7 @@ void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects)
 		{
 			vy = BRICK_SPEED_Y;
 		}
-		if (StartY - y <0)
+		if (StartY - y < 0)
 		{
 			SetState(BRICK_STATE_NOTHINGLEFT);
 		}
@@ -37,12 +37,14 @@ void QuestionBrick::SetState(int state)
 	{
 	case BRICK_STATE_COLISSION:
 		vy = -BRICK_SPEED_Y;
+		IsHit = true;
 		break;
 	case BRICK_STATE_NOTHINGLEFT:		
 		vy = 0;
 		if (y > StartY)
 			y = StartY;
-		Check = true;
+		if (Health == 2)
+			Check = true;
 		SubHealth();
 		break;
 	}

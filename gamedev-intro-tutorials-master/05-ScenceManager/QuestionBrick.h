@@ -3,7 +3,7 @@
 #define ANI_BRICK 0
 #define	ANI_BRICK_TWO	1
 
-#define BRICK_SPEED_Y	0.05
+#define BRICK_SPEED_Y	0.07
 #define MAX_HIGH	5
 #define BRICK_STATE_COLISSION 1
 #define BRICK_STATE_NOTHINGLEFT 2
@@ -16,10 +16,11 @@ public:
 	bool IsCollision;
 public:
 	bool Check;
+	bool IsHit;
 	QuestionBrick(int itemType)
 	{
 		Health = 3;
-		ObjType = 7;
+		ObjType = ObjType::QUESTIONBRICK;
 		Check = false;
 		IsMovingObject = false;
 		ItemType = itemType;

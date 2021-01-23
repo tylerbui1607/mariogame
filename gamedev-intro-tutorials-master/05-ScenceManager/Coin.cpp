@@ -2,7 +2,7 @@
 
 void Coin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (StartY - y >= 100)
+	if (StartY - y >= 50)
 		vy = -vy;
 	else if (StartY - y <= 16 && vy > 0 && !InnitEffect)
 	{

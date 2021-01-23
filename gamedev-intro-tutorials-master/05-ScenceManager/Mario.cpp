@@ -16,6 +16,8 @@
 #include "Camera.h"
 #include "BigCoin.h"
 #include "FlyingWood.h"
+#include "LastSceenItem.h"
+#include "Hud.h"
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_SMALL;
@@ -50,8 +52,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		x = 0;
 	}
-	if (x + MARIO_BIG_BBOX_WIDTH > 2816)
+	if (x + MARIO_BIG_BBOX_WIDTH > 2816 && !EndScene)
 	x = 2816 - MARIO_BIG_BBOX_WIDTH;
+	if (Camera::GetInstance()->AutoMove == 1)
+	{
+		if (x < Camera::GetInstance()->cam_x)
+		{
+			x = Camera::GetInstance()->cam_x;
+		}
+	}
 	for (int i = 0; i < effects.size(); i++)
 	{
 		effects[i]->Update(dt);
@@ -184,12 +193,27 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			untouchable_start = 0;
 			untouchable = 0;
 		}
+		if (EndScene && IsOnPlatForm)
+		{
+			nx = 1;
+			tail->SetState(TAIL_STATE_WALKING);
+			SetSpeed(0.15, 0);
+		}
+		if (EndScene && GetTickCount64() - Endscene >= 1500)
+		{
+			Hud::GetInstance()->CourseClear = true;
+			if (GetTickCount64() - Endscene >= 3500)
+			{
+				NextSceneID = 1;
+				IsSwitchScene = true;
+			}
+		}
 		// No collision occured, proceed normally
 		if (coEvents.size() == 0)
 		{
 			x += dx;
 			y += dy;
-			if (vy > 0.1)
+			if (vy > 0.1 && !IsOnWood)
 			{
 				IsOnPlatForm = false;
 			}
@@ -205,12 +229,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			for (UINT i = 0; i < coEventsResult.size(); i++)
 			{
 				LPCOLLISIONEVENT e = coEventsResult[i];
-				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::PORTAL&&e->obj->ObjType != ItemType::BIGCOIN)
+				if (e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::PORTAL && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::BRICK)
 				{
 					if (e->nx != 0) {
-						vx = 0; 
-						if (!IsFlying)
-						DecreaseStack();
+							vx = 0;
+							if (!IsFlying)
+								DecreaseStack();
 					}
 				}
 				if (e->ny < 0)
@@ -219,6 +243,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					{
 						FlyingWood* FW = dynamic_cast<FlyingWood*>(e->obj);
 						FW->IsMarioOn = true;
+						IsOnWood = true;
 					}
 					if (e->obj->ObjType == ObjType::BUTTON)
 					{
@@ -231,7 +256,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					}
 					else
 						WP->SetState(WARPIPE_STATE_NOTHAVE_MARIOON);
-					vy = 0;
+					if (e->obj->ObjType != ObjType::MOVINGWOOD)
+						vy = 0;
+					else
+						vy = e->obj->vy-0.01;
 					IsOnPlatForm = true;
 				}
 				else if (e->ny > 0)
@@ -246,6 +274,23 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					Health++;
 					level = MARIO_LEVEL_BIG;
 					y -= MARIO_SET_LEVEL_Y;
+				}
+				if (e->obj->ObjType == ObjType::MOVINGWOOD)
+				{
+					if (e->nx != 0)
+					{
+						x += min_tx * dx + nx * 0.5f;
+						x = e->obj->x - 16;
+					}
+				}
+				if (e->obj->ObjType == ItemType::LASTITEM)
+				{
+					LastSceenItem* LI = dynamic_cast<LastSceenItem*>(e->obj);
+					LI->SetState(STATE_ACTIVE);
+					LI->CalcLastItem();
+					LastItem = LI->Item;
+					Hud::GetInstance()->Item.push_back(LastItem);
+					this->SetState(MARIO_STATE_FINISH);
 				}
 				if (e->obj->ObjType == ObjType::GOOMBA) // if e->obj is Goomba 
 				{
@@ -341,6 +386,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				if (e->obj->ObjType == ObjType::BRICK)
 				{
+					if (e->nx != 0)
+					{	
+						if (e->obj->y < y + MARIO_BIG_BBOX_HEIGHT)
+						{
+							vx = 0;
+						}
+						else
+						{
+							x += dx;
+						}
+					}
 					if (e->ny > 0)
 					{
 						CBrick* brick = dynamic_cast<CBrick*>(e->obj);
@@ -365,7 +421,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					//Mario jump on the koopas
 					if (e->ny < 0)
 					{
-						if (koopas->Level == KOOPAS_LEVEL_NORMAL)
+						if (koopas->IsPara)
+						{
+							koopas->IsPara = false;
+						}
+						else if (koopas->Level == KOOPAS_LEVEL_NORMAL)
 						{
 							switch (e->obj->state)
 							{
@@ -387,13 +447,23 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						else
 							koopas->Level--;
 						vy = -MARIO_DIE_DEFLECT_SPEED;
-						y += min_ty * dy + ny * 0.6f;
+						y += min_ty * dy + ny * 0.5f;
 					}
 					else if (e->nx != 0)
 					{
 						if (e->obj->state != KOOPAS_STATE_HIDDEN && e->obj->state != KOOPAS_STATE_DIEBYTAIL && e->obj->state != KOOPAS_STATE_DIE && !IsHoldingKoopas)
 						{
-							Calclevel();
+						
+							if (untouchable == 0)
+							{
+									if (level > MARIO_LEVEL_SMALL)
+									{
+										Calclevel();
+										StartUntouchable();
+									}
+									else
+										SetState(MARIO_STATE_DIE);
+							}
 						}
 						else
 						{
@@ -1235,6 +1305,9 @@ void CMario::SetState(int state)
 		}
 		break;
 	case MARIO_STATE_FINISH:
+		vx = vy = 0;
+		EndScene = true;
+		Endscene = GetTickCount64();
 		break;
 	}
 }
