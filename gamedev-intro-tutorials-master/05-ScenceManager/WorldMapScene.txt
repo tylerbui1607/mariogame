@@ -51,4 +51,4 @@
 
 
 [MAP]
-3000	map\WorldMap.txt	16	21	10	14	16	16	1
+3000	map\WorldMap.txt	16	20	10	14	16	16	1

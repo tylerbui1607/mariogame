@@ -30,7 +30,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->y = y; 
 	CounterSpeed = 0;
 	IsMovingObject = true;
-	IsEndRollBack = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
+	StopUpdate = IsEndRollBack = IsFlying = IsRunning = IsSitting = IsRollBack = IsOnPlatForm = false;
 	AmountofFirebullet = 2;
 	IsHoldingKoopas = false;
 	FireBullet* fb1 = new FireBullet(-50, 0);
@@ -264,8 +264,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				}
 				else if (e->ny > 0)
 				{
-					if(e->obj->ObjType!=ItemType::BIGCOIN)
-						vy = 0;
+					if (e->obj->ObjType != ItemType::BIGCOIN)
+					{
+						if (e->obj->ObjType == ObjType::BRICK && e->obj->vy == 0)
+							vy = 0;
+						else if (e->obj->ObjType != ObjType::BRICK)
+							vy = 0;
+					}
 					IsOnPlatForm = false;
 				}
 				if (e->obj->ObjType == ItemType::MUSHROOM)
@@ -557,8 +562,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		y += dy;
 		if (y - StartYgoHiddenMap >= MARIO_RACOON_BBOX_HEIGHT)
 		{
-			Camera::GetInstance()->cam_y = y = HIDDEN_MAP_Y;
-			x = HIDDEN_MAP_X;
+			if (Camera::GetInstance()->AutoMove != 1)
+			{
+				Camera::GetInstance()->cam_y = y = HIDDEN_MAP_Y;
+				x = HIDDEN_MAP_X;
+			}
+			else
+			{
+				Camera::GetInstance()->cam_y = 240;
+				Camera::GetInstance()->AutoMove++;
+				Camera::GetInstance()->cam_x = 2096;
+				y = 352;
+				x = 2192;
+			}
 			StopUpdate = false;
 		}
 		if (StartYgoHiddenMap - y >= 32)

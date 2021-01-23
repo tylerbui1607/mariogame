@@ -11,7 +11,7 @@ Camera::Camera()
 
 void Camera::Update(DWORD dt)
 {
-	if (AutoMove != 1)
+	if (AutoMove < 1)
 	{
 		if (IsFollowingMario)
 		{

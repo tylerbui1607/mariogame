@@ -212,7 +212,7 @@ public:
 	DWORD Endscene = 0;
 	Tail* tail = new Tail();
 	bool IsCollision,IsCollisionBackUp;
-	bool GoHiddenMap,
+	bool GoHiddenMap = false,
 		 GoOutHiddenMap,
 		 StopUpdate;
 	bool IsSwitchScene, IsKickKoopas;

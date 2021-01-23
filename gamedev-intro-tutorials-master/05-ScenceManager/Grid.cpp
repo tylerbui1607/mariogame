@@ -60,7 +60,7 @@ void Grid::GetListObj(vector<LPGAMEOBJECT>& listNotMoveObj, vector<LPGAMEOBJECT>
 	int right = ceil(((Camera::GetInstance()->cam_x + 252) / CELL_WIDTH));
 	int top = (int)((Camera::GetInstance()->cam_y) / CELL_HEIGHT);
 	int bottom = ceil(((Camera::GetInstance()->cam_y + 230) / CELL_HEIGHT));
-
+	float Camy = Camera::GetInstance()->cam_y;
 	listObj.clear();
 	listEnemy.clear();
 	listNotMoveObj.clear();

@@ -8,7 +8,7 @@ class Camera
 public:
 	float Mariovx, Mariovy=0, MarioY;
 	float cam_x, cam_y, cam_vx, cam_vy =0;
-	int AutoMove;
+	int AutoMove = 0;
 	bool IsFollowingMario;
 public:
 	static Camera* __instance;

@@ -569,7 +569,7 @@ void CPlayScene::Update(DWORD dt)
 			Camera::GetInstance()->IsFollowingMario = false;
 		}
 	}
-	if (Camera::GetInstance()->AutoMove != 1)
+	if (Camera::GetInstance()->AutoMove == 0)
 	{
 		Camera::GetInstance()->cam_x = player->x;
 		Camera::GetInstance()->Update(dt);
@@ -581,13 +581,28 @@ void CPlayScene::Update(DWORD dt)
 			Camera::GetInstance()->cam_x = MAP_MAX_WIDTH - SCREEN_WIDTH;
 	}
 	else
-	{		
-		if(Camera::GetInstance()->cam_x + SCREEN_WIDTH <2048)
-			Camera::GetInstance()->cam_vx = 0.03;
-		else
+	{
+		if (Camera::GetInstance()->AutoMove == 1)
 		{
-			Camera::GetInstance()->cam_x = 2048 - SCREEN_WIDTH;
-			Camera::GetInstance()->cam_vx = 0;
+			if (Camera::GetInstance()->cam_x + SCREEN_WIDTH < 2048)
+				Camera::GetInstance()->cam_vx = 0.03;
+			else
+			{
+				Camera::GetInstance()->cam_x = 2048 - SCREEN_WIDTH;
+				Camera::GetInstance()->cam_vx = 0;
+			}
+		}
+		else if (Camera::GetInstance()->AutoMove == 2)
+		{
+			Camera::GetInstance()->cam_x = player->x;
+			Camera::GetInstance()->cam_y = 240;
+			Camera::GetInstance()->Update(dt);
+			CGame* game = CGame::GetInstance();
+			Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
+			if (Camera::GetInstance()->cam_x < 2064)
+				Camera::GetInstance()->cam_x = 2064;
+			if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > 2560)
+				Camera::GetInstance()->cam_x = 2560 - SCREEN_WIDTH;
 		}
 		Camera::GetInstance()->Update(dt);
 
@@ -606,11 +621,6 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	map->Draw();
-	for (int i = 0; i < coNotMoveObjects.size(); i++)
-	{
-		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType == ObjType::WARPPIPE)
-			coNotMoveObjects[i]->Render();
-	}
 	objects[0]->Render();
 	for (int i = 0; i < coMovingObjects.size(); i++)
 	{
@@ -620,6 +630,11 @@ void CPlayScene::Render()
 	for (int i = 0; i < coNotMoveObjects.size(); i++)
 	{
 		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType != ObjType::WARPPIPE)
+			coNotMoveObjects[i]->Render();
+	}
+	for (int i = 0; i < coNotMoveObjects.size(); i++)
+	{
+		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType == ObjType::WARPPIPE)
 			coNotMoveObjects[i]->Render();
 	}
 	Hud::GetInstance()->Render(player->score->TotalScore);
