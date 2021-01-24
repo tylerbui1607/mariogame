@@ -8,7 +8,7 @@
 #include "Goomba.h"
 #include "Koopas.h"
 #include "MarioWM.h"
-
+#include "Hud.h"
 	class WorldMapScene : public CScene
 	{
 	protected:
@@ -21,6 +21,8 @@
 		void _ParseSection_ANIMATION_SETS(string line);
 		void _ParseSection_OBJECTS(string line);
 		void _ParseSection_MAP(string line);
+		void _ParseSection_HUD(string line);
+		void _ParseSection_HUD_TIME(string line);
 	public:
 
 		WorldMapScene(int id, LPCWSTR filePath);

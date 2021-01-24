@@ -151,7 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ArrangeGrid.cpp" />
     <ClCompile Include="LoadGrid.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArrangeGrid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

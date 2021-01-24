@@ -456,7 +456,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					}
 					else if (e->nx != 0)
 					{
-						if (e->obj->state != KOOPAS_STATE_HIDDEN && e->obj->state != KOOPAS_STATE_DIEBYTAIL && e->obj->state != KOOPAS_STATE_DIE && !IsHoldingKoopas)
+						if (e->obj->state != KOOPAS_STATE_HIDDEN && e->obj->state != KOOPAS_STATE_DIEBYTAIL && e->obj->state != KOOPAS_STATE_DIE && e->obj->state != KOOPAS_STATE_DIEBYTAIL && !IsHoldingKoopas)
 						{
 						
 							if (untouchable == 0)
@@ -1371,7 +1371,7 @@ void CMario::Reset()
 {
 	SetState(MARIO_STATE_IDLE);
 	SetLevel(MARIO_LEVEL_RACOON);
-	SetPosition(start_x, start_y);
+	SetPosition(Camera::GetInstance()->cam_x+32, start_y);
 	SetSpeed(0, 0);
 }
 

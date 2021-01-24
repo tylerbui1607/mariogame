@@ -18,7 +18,7 @@ public:
 		return __instance;
 	}
 	Hud() {
-		MarioMoney = 7;
+		MarioMoney = 0;
 	};
 	float HUDx, HUDy;
 	int SpriteHUD;
@@ -29,6 +29,7 @@ public:
 	int MarioMoney;
 	vector<int> Item;
 	bool CourseClear;
+	bool StopTime;
 	DWORD Time = 0;
 	HUD_Time* hudTime;
 	Hud(float x, float y, int SpriteID,int spriteStackID,int SpritePowerID) {

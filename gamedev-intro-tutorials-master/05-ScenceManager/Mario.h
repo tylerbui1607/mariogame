@@ -7,7 +7,7 @@
 #include "Effect.h"
 #include "WarpPipe.h"
 #define MARIO_WALKING_SPEED			0.15f 
-#define MARIO_JUMP_SPEED_Y			0.25f
+#define MARIO_JUMP_SPEED_Y			0.27f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
 #define MARIO_DIE_DEFLECT_SPEED		0.2f
 #define MARIO_ACCLERATION			0.004f

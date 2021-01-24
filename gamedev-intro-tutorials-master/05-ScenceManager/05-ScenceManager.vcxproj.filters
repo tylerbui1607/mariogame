@@ -30,14 +30,14 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{babb2b31-0dd4-4a98-95d2-ebab2643c110}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HUD">
-      <UniqueIdentifier>{e6282089-8f3e-4581-a5d6-d5481a105f92}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Effect">
       <UniqueIdentifier>{aa83787c-a947-48ee-a65b-166fb9e274d5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Grid">
       <UniqueIdentifier>{f00baf55-f881-4d89-9be7-e4d874b2e216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid\HUD">
+      <UniqueIdentifier>{e6282089-8f3e-4581-a5d6-d5481a105f92}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -123,10 +123,10 @@
       <Filter>Camera</Filter>
     </ClCompile>
     <ClCompile Include="Hud.cpp">
-      <Filter>HUD</Filter>
+      <Filter>Grid\HUD</Filter>
     </ClCompile>
     <ClCompile Include="HUD_Time.cpp">
-      <Filter>HUD</Filter>
+      <Filter>Grid\HUD</Filter>
     </ClCompile>
     <ClCompile Include="RedKoopas.cpp">
       <Filter>Enemy</Filter>
@@ -172,6 +172,12 @@
     </ClCompile>
     <ClCompile Include="LastSceenItem.cpp">
       <Filter>Object\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="BoomeRang.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="BomerangBrother.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,10 +263,10 @@
       <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Hud.h">
-      <Filter>HUD</Filter>
+      <Filter>Grid\HUD</Filter>
     </ClInclude>
     <ClInclude Include="HUD_Time.h">
-      <Filter>HUD</Filter>
+      <Filter>Grid\HUD</Filter>
     </ClInclude>
     <ClInclude Include="RedKoopas.h">
       <Filter>Enemy</Filter>
@@ -309,6 +315,12 @@
     </ClInclude>
     <ClInclude Include="LastSceenItem.h">
       <Filter>Object\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="BoomeRang.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="BomerangBrother.h">
+      <Filter>Enemy</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

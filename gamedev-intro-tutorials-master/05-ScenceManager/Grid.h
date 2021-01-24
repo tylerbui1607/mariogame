@@ -31,9 +31,14 @@ public:
 			{
 				for (int j = Top; j < Bottom; j++)
 				{
+					int type = Object->ObjType;
 					Cell[i][j].push_back(Object);
 				}
 			}
+	}
+	void UnLoadGrid()
+	{
+		Cell.clear();
 	}
 	
 };

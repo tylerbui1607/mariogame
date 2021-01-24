@@ -7,6 +7,7 @@
 #include "Mario.h"
 #include "Goomba.h"
 #include "Koopas.h"
+#include"../LoadGrid/ArrangeGrid.h"
 
 
 class CPlayScene: public CScene
@@ -19,12 +20,13 @@ protected:
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ANIMATION_SETS(string line);
-	void _ParseSection_OBJECTS(string line);
+	void _ParseSection_OBJECTS(string line, int l, int t, int r, int b);
 	void _ParseSection_MAP(string line);
 	void _ParseSection_HUD(string line);
 	void _ParseSection_HUD_TIME(string line);
 	void _ParseSection_CAMERA(string line);
 public: 
+	ArrangeGrid* ArrangeG = new ArrangeGrid();
 	int count;
 	CPlayScene(int id, LPCWSTR filePath);
 	vector<LPGAMEOBJECT> coMovingObjects;

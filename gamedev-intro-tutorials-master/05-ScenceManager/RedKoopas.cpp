@@ -138,7 +138,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 								x += dx;
 						}
 						if (IsAttack && e->nx)
-							e->obj->SubHealth();
+							e->obj->SetState(BRICK_STATE_COLLISION);
 					}
 					if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::QUESTIONBRICK && e->obj->ObjType != ObjType::BRICK)
 					{

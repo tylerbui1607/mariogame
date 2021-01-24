@@ -26,6 +26,7 @@
 #include "Grid.h"
 #include"FlyingWood.h"
 #include "LastSceenItem.h"
+#include"BomerangBrother.h"
 #define MAP_MAX_WIDTH	 2816
 using namespace std;
 Camera* camera;
@@ -38,7 +39,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	CScene(id, filePath)
 {
 	key_handler = new CPlayScenceKeyHandler(this);
-	grid = new Grid();
+	ArrangeG = new ArrangeGrid();
 }
 
 /*
@@ -76,7 +77,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_LASTITEM		24
 #define OBJECT_TYPE_BRICKMANYCOINS			25
 #define OBJECT_TYPE_PARAKOOPAS			26
-
+#define OBJECT_TYPE_BOMERANGBROTHER			27
 
 #define MUSHROOM_ANISET_ID	8
 #define GREENMUSHROOM_ANISET_ID	24
@@ -173,7 +174,7 @@ void CPlayScene::_ParseSection_ANIMATION_SETS(string line)
 /*
 	Parse a line in section [OBJECTS] 
 */
-void CPlayScene::_ParseSection_OBJECTS(string line)
+void CPlayScene::_ParseSection_OBJECTS(string line,int l , int t, int r, int b)
 {
 	vector<string> tokens = split(line);
 
@@ -238,6 +239,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new FlyingWood();
 		break;
 	}
+	case OBJECT_TYPE_BOMERANGBROTHER:
+	{
+		obj = new CBomerangBrother(x,y);
+		break;
+	}
 	case OBJECT_TYPE_BRICKMANYCOINS:
 		obj = new QuestionBrick(ItemType);
 		obj->Health = 12;
@@ -287,13 +293,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		button->Bricks = Cbricks;
 	}
 	
-	float l, t, r, b;
-	obj->GetBoundingBox(l, t, r, b);
-	int Top = int(t / 115);
-	int Left = int(l / 150);
-	int Right = ceil(r / 150);
-	int Bottom = ceil(b / 115);
-	grid->InsertObj(obj, Left, Top, Right, Bottom);
+	grid->InsertObj(obj, l,t,r,b);
  }
 
 void CPlayScene::_ParseSection_MAP(string line)
@@ -339,6 +339,7 @@ void CPlayScene::_ParseSection_HUD(string line)
 	 Hud::GetInstance()->HUDx = HUDX;
 	 Hud::GetInstance()->HUDy = HUDY;
 	 Hud::GetInstance()->SpritePower= SpritePower;
+	 Hud::GetInstance()->StopTime = false;
 }
 void CPlayScene::_ParseSection_CAMERA(string line)
 {
@@ -365,11 +366,22 @@ void CPlayScene::_ParseSection_HUD_TIME(string line)
 }
 void CPlayScene::Load()
 {
+	grid = new Grid();
+
 	Camera::GetInstance()->cam_y = 240;
 	Camera::GetInstance()->cam_vy = 0;
 	Camera::GetInstance()->cam_x = 0;
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
-
+	string FilePathGrid;
+	if (CGame::GetInstance()->GetCurrentScene()->id == 2)
+	{
+		FilePathGrid = "gridinfo.txt";
+	}
+	else if (CGame::GetInstance()->GetCurrentScene()->id == 4)
+	{
+		FilePathGrid = "gridinfo1_4.txt";
+	}
+	ifstream ifs(FilePathGrid, ios::in);
 	ifstream f;
 	f.open(sceneFilePath);
 
@@ -415,7 +427,10 @@ void CPlayScene::Load()
 			case SCENE_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
 			case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
-			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
+			case SCENE_SECTION_OBJECTS: {
+				int l, t, r, b;
+				ifs >> l >> l >> t >> r >> b;
+				_ParseSection_OBJECTS(line, l, t, r, b); break; }
 			case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
 			case SCENE_SECTION_HUD: _ParseSection_HUD(line); break;
 			case SCENE_SECTION_HUD_TIME: _ParseSection_HUD_TIME(line); break;
@@ -609,12 +624,13 @@ void CPlayScene::Update(DWORD dt)
 	}
 	Hud::GetInstance()->MarioStack = player->CounterSpeed;
 	Hud::GetInstance()->MarioMoney = player->Money;
-
+	grid->UpdateGrid(objects);
 	if (player->IsSwitchScene)
 	{
+		grid->UnLoadGrid();
 		CGame::GetInstance()->SwitchScene(player->NextSceneID);
 	}
-	grid->UpdateGrid(objects);
+	
 
 }
 

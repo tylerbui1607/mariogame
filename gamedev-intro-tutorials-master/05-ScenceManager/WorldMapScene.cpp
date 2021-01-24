@@ -250,8 +250,39 @@ void WorldMapScene::_ParseSection_MAP(string line)
 		Worldmap->IsWorldMap = true;
 	}
 }
+void WorldMapScene::_ParseSection_HUD(string line)
+{
+	vector<string> tokens = split(line);
 
+	if (tokens.size() < 3) return; // skip invalid lines - an animation set must at least id and one animation id
 
+	int SpriteID = atof(tokens[2].c_str());
+	int SpriteStack = atof(tokens[3].c_str());
+	int SpritePower = atof(tokens[4].c_str());
+	float HUDX = atof(tokens[0].c_str());
+	float HUDY = atof(tokens[1].c_str());
+	Hud::GetInstance()->SpriteHUD = SpriteID;
+	Hud::GetInstance()->SpriteStack = SpriteStack;
+	Hud::GetInstance()->HUDx = HUDX;
+	Hud::GetInstance()->HUDy = HUDY;
+	Hud::GetInstance()->SpritePower = SpritePower;
+	Hud::GetInstance()->StopTime = true;
+}
+void WorldMapScene::_ParseSection_HUD_TIME(string line)
+{
+	vector<string> tokens = split(line);
+
+	// skip invalid lines - an animation set must at least id and one animation id
+
+	float x = atof(tokens[10].c_str());
+	float y = atof(tokens[11].c_str());
+	int arr[10];
+	for (int i = 0; i < 10; i++)
+	{
+		arr[i] = atof(tokens[i].c_str());
+	}
+	Hud::GetInstance()->hudTime = new HUD_Time(x, y, arr);
+}
 void WorldMapScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
@@ -282,6 +313,12 @@ void WorldMapScene::Load()
 		if (line == "[OBJECTS]") {
 			section = SCENE_SECTION_OBJECTS; continue;
 		}
+		if (line == "[HUD]") {
+			section = SCENE_SECTION_HUD; continue;
+		}
+		if (line == "[HUD_TIME]") {
+			section = SCENE_SECTION_HUD_TIME; continue;
+		}
 		if (line == "[MAP]") {
 			section = SCENE_SECTION_MAP; continue;
 		}
@@ -298,6 +335,8 @@ void WorldMapScene::Load()
 		case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 		case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 		case SCENE_SECTION_MAP: _ParseSection_MAP(line); break;
+		case SCENE_SECTION_HUD: _ParseSection_HUD(line); break;
+		case SCENE_SECTION_HUD_TIME: _ParseSection_HUD_TIME(line); break;
 		}
 	}
 	f.close();
@@ -308,6 +347,7 @@ void WorldMapScene::Load()
 
 void WorldMapScene::Update(DWORD dt)
 {
+	Hud::GetInstance()->Update(dt);
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{
@@ -329,6 +369,7 @@ void WorldMapScene::Render()
 	{
 		objects[i]->Render();
 	}
+		//Hud::GetInstance()->Render(0);
 }
 
 /*
