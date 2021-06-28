@@ -6,6 +6,8 @@ CKoopas::CKoopas(int level)
 	SetState(KOOPAS_STATE_WALKING);
 	IsMovingObject = true;
 	Level = level;
+	vx = -0.02;
+	nx = -1;
 }
 
 void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &bottom)
@@ -25,7 +27,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	
 		CGameObject::Update(dt, coObjects);
-		
 			if (!IsDieByShell)
 			{
 				if (IsHidden && !IsReborning)
@@ -206,7 +207,7 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_HIDDEN_MOVE:
 		IsAttack = true;
 		IsWalking = false;
-		vx = nx*0.1;
+		vx = nx*0.15;
 		break;
 	case KOOPAS_STATE_REBORN:
 		IsReborning = true;

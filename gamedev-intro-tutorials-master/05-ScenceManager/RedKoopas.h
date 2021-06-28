@@ -22,6 +22,7 @@ public:
 	virtual void Render()
 	{
 		CKoopas::Render();
+		KPAI->Render();
 	}
 };
 

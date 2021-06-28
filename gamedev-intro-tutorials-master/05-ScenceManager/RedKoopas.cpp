@@ -8,6 +8,8 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 
+	if (state == KOOPAS_STATE_HIDDEN_MOVE)
+		DebugOut(L"redkoopasVX%f/n", vx);
 	if (!IsPara)
 	{
 		if (state == KOOPAS_STATE_WALKING)
@@ -138,7 +140,7 @@ void RedKoopas::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 								x += dx;
 						}
 						if (IsAttack && e->nx)
-							e->obj->SetState(BRICK_STATE_COLLISION);
+							e->obj->SetState(BRICK_STATE_BROKEN);
 					}
 					if (e->nx && e->obj->ObjType != ItemType::MUSHROOM && e->obj->ObjType != ObjType::BLOCK && e->obj->ObjType != ObjType::KOOPAS && e->obj->ObjType != ObjType::REDKOOPAS && e->obj->ObjType != ObjType::GOOMBA && e->obj->ObjType != ObjType::QUESTIONBRICK && e->obj->ObjType != ObjType::BRICK)
 					{

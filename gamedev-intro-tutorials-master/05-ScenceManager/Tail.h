@@ -28,45 +28,11 @@ public:
 	bool StopRender;
 	bool IsActivated;
 	bool GetBBox1;
-	bool Walking,
-		 Jumping,
-		 Falling,
-		 Attacking,
-		 SlowFalling,
-		 Idling;
 	int alpha =255;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects = NULL);
 	virtual void Render();
 	void SetState(int state) {
-		switch (state)
-		{
-		case TAIL_STATE_IDLING:
-			Idling = true;
-			SlowFalling = Falling = Walking = Jumping = false;
-			StopRender = false;
-			break;
-		case TAIL_STATE_WALKING:
-			Walking = true;
-			SlowFalling = Falling = Idling = Jumping = false;
-			break;
-		case TAIL_STATE_FALLING:
-			Falling = true;
-			SlowFalling = Idling = Walking = Jumping = false;
-			StopRender = false;
-			break;
-		case TAIL_STATE_JUMPING:
-			Jumping = true;
-			SlowFalling = Falling = Idling = Walking = false;
-			break;
-		case TAIL_STATE_ATTACKING:
-			Attacking = true;
-			SlowFalling = Falling = Idling = Walking = Jumping = false;
-			break;
-		case TAIL_STATE_SLOWFALLING:
-			SlowFalling = true;
-			Falling = Idling = Walking = Jumping = false;
-			break;
-		}
+		
 	};
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	{

@@ -337,7 +337,7 @@ void IntroSceneKeyHandler::OnKeyDown(int KeyCode)
 	Curtain* Pick = ((IntroScene*)scence)->Choose;
 	switch (KeyCode)
 	{
-	case DIK_W:
+	case DIK_H:
 		ct->IsUp = true;
 		Part2->IsDown = true;
 		break;

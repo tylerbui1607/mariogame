@@ -57,49 +57,6 @@ void Tail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void Tail::Render()
 {
-	for (int i = 0; i < effects.size(); i++)
-		effects[i]->Render();
-	if (!StopRender && !Attacking)
-	{
-		if (Idling)
-		{
-			if (nx > 0)
-				ani = 4;
-			else
-				ani = 5;
-		}
-		else if (Walking)
-		{
-			if (nx > 0)
-				ani = 6;
-			else
-				ani = 7;
-		}
-		else if (Jumping)
-		{
-			if (nx > 0)
-				ani = 2;
-			else
-				ani = 3;
-		}
-		else if (Falling)
-		{
-			if (nx > 0)
-				ani = 0;
-			else
-				ani = 1;
-		}
-		if (SlowFalling)
-		{
-			if (nx > 0)
-				ani = 10;
-			else
-				ani = 11;
-			animation_set->at(ani)->RenderTailSlowFalling(x, y,alpha);
-		}
-		else if (Falling)
-			animation_set->at(ani)->RenderFalling(x, y,alpha);
-		else
-			animation_set->at(ani)->Render(x, y, alpha);
-	}
+	RenderBoundingBox();
+
 }
