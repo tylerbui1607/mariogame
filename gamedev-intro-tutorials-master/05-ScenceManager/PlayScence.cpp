@@ -208,17 +208,12 @@ void CPlayScene::_ParseSection_OBJECTS(string line,int l , int t, int r, int b)
 
 	CGameObject *obj = NULL;
 	Item* item = NULL;
+	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
-		if (player!=NULL) 
-		{
-			DebugOut(L"[ERROR] MARIO object was created before!\n");
-			return;
-		}
-		obj = new CMario(x,y); 
-		player = (CMario*)obj;  
-
+		CMario::GetInstance()->SetAnimationSet(ani_set);
+		CMario::GetInstance()->SetPosition(x, y);
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(Level); break;
@@ -229,7 +224,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line,int l , int t, int r, int b)
 	case OBJECT_TYPE_WARPPIPE: obj = new WarpPipe(width, height); break;
 	case OBJECT_TYPE_BLOCK: obj = new Block(width, height); break;
 	case OBJECT_TYPE_QUESTIONBRICK: obj = new QuestionBrick(ItemType); break;
-	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y,player); break;
+	case OBJECT_TYPE_FIREPIRANHAPLANT: obj = new FirePiranhaPlant(x,y,CMario::GetInstance()); break;
 	case OBJECT_TYPE_RED_KOOPAS: obj = new RedKoopas(); break;
 	case OBJECT_TYPE_BUTTON: obj = new Button(x, y); break;
 	case OBJECT_TYPE_BIGCOIN: {obj = new BigCoin(x, y); break; }
@@ -279,10 +274,12 @@ void CPlayScene::_ParseSection_OBJECTS(string line,int l , int t, int r, int b)
 	}
 
 	// General object setup
-	obj->SetPosition(x, y);
-	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
-	obj->SetAnimationSet(ani_set);
-	objects.push_back(obj);
+	if (object_type != ObjType::MARIO)
+	{
+		obj->SetPosition(x, y);
+		obj->SetAnimationSet(ani_set);
+		objects.push_back(obj);
+	}
 	if (object_type == OBJECT_TYPE_BRICK)
 	{
 		Cbricks.push_back(obj);
@@ -460,11 +457,13 @@ void CPlayScene::Update(DWORD dt)
 				CKoopas* KP = dynamic_cast<CKoopas*>(coMovingObjects[i]);
 				if (KP->IsAttack)
 					coMovingObjects[i]->Update(dt, &coObjects);
-				else
+
+				else 
 					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
 
+
 			}
-			if (coMovingObjects[i]->ObjType == ObjType::REDKOOPAS)
+			else if (coMovingObjects[i]->ObjType == ObjType::REDKOOPAS)
 			{
 				CKoopas* KP = dynamic_cast<CKoopas*>(coMovingObjects[i]);
 				if (KP->IsAttack)
@@ -476,7 +475,7 @@ void CPlayScene::Update(DWORD dt)
 			{
 				if (coMovingObjects[i]->ObjType == ObjType::FIREPIRANHAPLANT)
 				{
-					coMovingObjects[i]->GetEnemyPos(player->x, player->y);
+					coMovingObjects[i]->GetEnemyPos(CMario::GetInstance()->x, CMario::GetInstance()->y);
 					coMovingObjects[i]->Update(dt, &coNotMoveObjects);
 				}
 				else
@@ -485,7 +484,7 @@ void CPlayScene::Update(DWORD dt)
 			coMovingObjects[i]->IsInList = false;
 		}
 	}
-	player->Update(dt, &coObjects);
+	CMario::GetInstance()->Update(dt, &coObjects);
 	for (size_t i = 0; i < coNotMoveObjects.size(); i++)
 	{
 		if (coNotMoveObjects[i]->ObjType == ObjType::BRICK && coNotMoveObjects[i]->GetHealth() == 2)
@@ -509,10 +508,10 @@ void CPlayScene::Update(DWORD dt)
 			{
 				if (qb->ItemType == UNKNOW_ITEM)
 				{
-					if (player->level == MARIO_LEVEL_SMALL)
+					if (CMario::GetInstance()->level == MARIO_LEVEL_SMALL)
 					{
 						MushRoom* mushroom = new MushRoom(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
-						mushroom->CaclVx(player->x);
+						mushroom->CaclVx(CMario::GetInstance()->x);
 						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 						LPANIMATION_SET ani_set = animation_sets->Get(MUSHROOM_ANISET_ID);
 						mushroom->SetAnimationSet(ani_set);
@@ -534,7 +533,7 @@ void CPlayScene::Update(DWORD dt)
 				if (qb->ItemType == 17)
 				{
 					MushRoom* mushroom = new MushRoom(coNotMoveObjects[i]->x, coNotMoveObjects[i]->y);
-					mushroom->CaclVx(player->x);
+					mushroom->CaclVx(CMario::GetInstance()->x);
 					CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 					LPANIMATION_SET ani_set = animation_sets->Get(GREENMUSHROOM_ANISET_ID);
 					mushroom->SetAnimationSet(ani_set);
@@ -568,15 +567,15 @@ void CPlayScene::Update(DWORD dt)
 		coNotMoveObjects[i]->IsInList = false;
 	}
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
-	if (player == NULL) return; 
+	
 
 	// Update camera to follow mario
 	
 
-	if (player->y <= 270)
+	if (CMario::GetInstance()->y <= 270)
 	{
-		if (player->IsOnPlatForm == false) {
-			Camera::GetInstance()->Mariovy = player->vy;
+		if (CMario::GetInstance()->IsOnPlatForm == false) {
+			Camera::GetInstance()->Mariovy = CMario::GetInstance()->vy;
 			Camera::GetInstance()->IsFollowingMario = true;
 		}
 		else
@@ -586,10 +585,10 @@ void CPlayScene::Update(DWORD dt)
 	}
 	if (Camera::GetInstance()->AutoMove == 0)
 	{
-		Camera::GetInstance()->cam_x = player->x;
-		Camera::GetInstance()->Update(dt);
 		CGame* game = CGame::GetInstance();
-		Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
+			Camera::GetInstance()->cam_x = CMario::GetInstance()->x;
+			Camera::GetInstance()->cam_x -= game->GetScreenWidth() / 2;
+		Camera::GetInstance()->Update(dt);
 		if (Camera::GetInstance()->cam_x < 0)
 			Camera::GetInstance()->cam_x = 0;
 		if (Camera::GetInstance()->cam_x + SCREEN_WIDTH > MAP_MAX_WIDTH)
@@ -609,7 +608,7 @@ void CPlayScene::Update(DWORD dt)
 		}
 		else if (Camera::GetInstance()->AutoMove == 2)
 		{
-			Camera::GetInstance()->cam_x = player->x;
+			Camera::GetInstance()->cam_x = CMario::GetInstance()->x;
 			Camera::GetInstance()->cam_y = 240;
 			Camera::GetInstance()->Update(dt);
 			CGame* game = CGame::GetInstance();
@@ -622,13 +621,13 @@ void CPlayScene::Update(DWORD dt)
 		Camera::GetInstance()->Update(dt);
 
 	}
-	Hud::GetInstance()->MarioStack = player->CounterSpeed;
-	Hud::GetInstance()->MarioMoney = player->Money;
+	Hud::GetInstance()->MarioStack = CMario::GetInstance()->CounterSpeed;
+	Hud::GetInstance()->MarioMoney = CMario::GetInstance()->Money;
 	grid->UpdateGrid(objects);
-	if (player->IsSwitchScene)
+	if (CMario::GetInstance()->IsSwitchScene)
 	{
 		grid->UnLoadGrid();
-		CGame::GetInstance()->SwitchScene(player->NextSceneID);
+		CGame::GetInstance()->SwitchScene(CMario::GetInstance()->NextSceneID);
 	}
 	
 
@@ -637,7 +636,7 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	map->Draw();
-	objects[0]->Render();
+	CMario::GetInstance()->Render();
 	for (int i = 0; i < coMovingObjects.size(); i++)
 	{
 		if (coMovingObjects[i]->Health != 0 && coMovingObjects[i]->ObjType != ObjType::MARIO)
@@ -653,7 +652,7 @@ void CPlayScene::Render()
 		if (coNotMoveObjects[i]->Health != 0 && coNotMoveObjects[i]->ObjType == ObjType::WARPPIPE)
 			coNotMoveObjects[i]->Render();
 	}
-	Hud::GetInstance()->Render(player->score->TotalScore);
+	Hud::GetInstance()->Render(CMario::GetInstance()->score->TotalScore);
 }
 
 /*
@@ -665,8 +664,6 @@ void CPlayScene::Unload()
 		delete objects[i];
 	Cbricks.clear();
 	objects.clear();
-	player = NULL;
-
 	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
@@ -674,7 +671,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	CMario* mario = CMario::GetInstance();
 	if (!mario->EndScene)
 	{
 		switch (KeyCode)
@@ -729,7 +726,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 
 void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
-	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
+	CMario* mario = CMario::GetInstance();
 	if (!mario->EndScene)
 	{
 		switch (KeyCode)
@@ -741,7 +738,9 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		case DIK_S:
 			mario->IsSlowFalling = false;
 			if (mario->vy < 0)
+			{
 				mario->vy = 0;
+			}
 			break;
 		case DIK_DOWN:
 			mario->GoHiddenMap = false;
@@ -756,7 +755,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	CMario* mario = CMario::GetInstance();
 	if (!mario->EndScene)
 	{
 		if (game->IsKeyDown(DIK_UP))

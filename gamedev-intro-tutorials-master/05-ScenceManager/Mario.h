@@ -7,13 +7,13 @@
 #include "Effect.h"
 #include "WarpPipe.h"
 #define MARIO_WALKING_SPEED			0.15f 
-#define MARIO_JUMP_SPEED_Y			0.27f
+#define MARIO_JUMP_SPEED_Y			0.25f
 #define MARIO_JUMP_DEFLECT_SPEED	0.2f
 #define MARIO_DIE_DEFLECT_SPEED		0.2f
 #define MARIO_ACCLERATION			0.004f
 #define MARIO_DECLERATION			0.007f
 #define MARIO_MAX_SPEED				0.15f
-#define MARIO_FRICTION				0.004f
+#define MARIO_FRICTION				0.007f
 #define MARIO_FLY_SPEED				0.25f
 #define MARIO_MAX_HIGH_JUMP			70
 #define MARIO_SET_LEVEL_Y			19
@@ -158,7 +158,7 @@
 #define MARIO_RACOON_BBOX_HEIGHT 29
 
 
-#define MARIO_SMALL_BBOX_WIDTH  13
+#define MARIO_SMALL_BBOX_WIDTH  14
 #define MARIO_SMALL_BBOX_HEIGHT 15
 
 #define MARIO_UNTOUCHABLE_TIME 5000
@@ -176,7 +176,7 @@
 #define MAP_MAX_WIDTH	2816
 class CMario : public CGameObject
 {
-	
+
 	int untouchable;
 	DWORD untouchable_start;
 	float StartJump;
@@ -184,7 +184,6 @@ class CMario : public CGameObject
 	float start_y; 
 	float LastVx;
 public:
-
 	int level;
 	int Money;
 	int LastItem;
@@ -222,6 +221,13 @@ public:
 	vector<Effect*> effects;
 	WarpPipe* WP = new WarpPipe();
 public:
+	static CMario* __instance;
+
+	static CMario* CMario::GetInstance()
+	{
+		if (__instance == NULL) __instance = new CMario(0,0);
+		return __instance;
+	}
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
@@ -246,15 +252,15 @@ public:
 	}
 	void IncreaseStack()
 	{
-		if (CounterSpeed < 7 && (GetTickCount64() - TPlusStack >= MARIO_PLUSSTACK_TIME))
+		if (CounterSpeed < 7 && (GetTickCount64() - TPlusStack >= 10000))
 		{
-			TPlusStack = 0;
+			TPlusStack = GetTickCount64();
 			CounterSpeed++;
 		}
 	}
 	void DecreaseStack()
 	{
-		if (CounterSpeed > 0 && (GetTickCount64() - TPlusStack >= 100))
+		if (CounterSpeed > 0 && (GetTickCount64() - TPlusStack >= 500))
 		{
 			TPlusStack = 0;
 			CounterSpeed--;

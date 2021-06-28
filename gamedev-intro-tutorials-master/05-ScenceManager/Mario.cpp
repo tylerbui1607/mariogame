@@ -18,6 +18,8 @@
 #include "FlyingWood.h"
 #include "LastSceenItem.h"
 #include "Hud.h"
+
+CMario* CMario::__instance = NULL;
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_SMALL;
@@ -44,10 +46,9 @@ CMario::CMario(float x, float y) : CGameObject()
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
-	// Simple fall down
-	// Simple fall down
 	if (x <= 0)
 	{
 		x = 0;
@@ -111,26 +112,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		{
 			tail->IsActivated = false;
 			IsAttack = false;
-			tail->Attacking = false;
 		}
 		if (IsKickKoopas)
 		{
-			tail->StopRender = true;
 			if (GetTickCount64() - Kick >= 200)
 			{
 				IsKickKoopas = false;
-				tail->StopRender = false;
 			}
-		}
-		if (nx * vx >= 0 && IsRollBack)
-		{
-			IsEndRollBack = true;
-			tail->StopRender = false;
-			vx = 0;
-		}
-		if (TPlusStack == 0)
-		{
-			TPlusStack = GetTickCount64();
 		}
 		if (IsRunning)
 		{
@@ -155,29 +143,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				TCanFly = GetTickCount64();
 			}
-			if (!IsOnPlatForm)
-				tail->StopRender = true;
-			else
-				tail->StopRender = false;
 
 		}
 		if (GetTickCount64() - TCanFly >= MARIO_CANFLY_TIME)
 		{
 			IsFlying = false;
-			tail->StopRender = false;
 			TCanFly = 0;
-		}
-		if (IsRollBack == true )
-		{
-			if (!IsHoldingKoopas)
-				tail->StopRender = true;
-			if(TRollBack == 0)
-			TRollBack = GetTickCount64();
-		}
-		if (GetTickCount64() - TRollBack >= 200 && IsEndRollBack)
-		{
-			IsRollBack = false;
-			TRollBack = 0;
 		}
 		KP->ChkIsHolding(IsHoldingKoopas);
 		vector<LPCOLLISIONEVENT> coEvents;
@@ -196,7 +167,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		if (EndScene && IsOnPlatForm)
 		{
 			nx = 1;
-			tail->SetState(TAIL_STATE_WALKING);
 			SetSpeed(0.15, 0);
 		}
 		if (EndScene && GetTickCount64() - Endscene >= 1500)
@@ -426,6 +396,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					//Mario jump on the koopas
 					if (e->ny < 0)
 					{
+						
 						if (koopas->IsPara)
 						{
 							koopas->IsPara = false;
@@ -555,7 +526,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 		tail->AdaptMarioPos(x, y, nx);
 		for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-		/*DebugOut(L"currentLEVEL%d\n", level);*/
 	}
 	else
 	{
@@ -585,10 +555,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			StopUpdate = false;
 		}
 		tail->AdaptMarioPos(x, y, nx);
-		if (!IsOnPlatForm && vy > 0 && !IsSitting && !IsFlying)
-		{
-			tail->SetState(TAIL_STATE_FALLING);
-		}
 	}
 	if (KP->IsHolding)
 	{
@@ -596,16 +562,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			KP->AdaptPos(x, y, nx);
 		else
 			KP->AdaptPosSmall(x, y, nx);
-	}
-	if (!IsOnPlatForm && vy > 0 && !IsSitting && !IsFlying&&!IsSlowFalling)
-	{
-		tail->SetState(TAIL_STATE_FALLING);
-	}
-	if (IsSitting)
-		tail->StopRender = true;
-	if (CounterSpeed == MAX_STACK_POWER  && abs(vx) == MARIO_MAX_SPEED * 2)
-	{
-		tail->StopRender = true;
 	}
 	if (x + MARIO_BIG_BBOX_WIDTH >= MAP_MAX_WIDTH)
 	{
@@ -616,18 +572,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 void CMario::Render()
 {
 	int alpha = 255;
-	if (untouchable) { alpha = 128; tail->alpha = 128; }
-	else
-		tail->alpha = 255;
+	if (untouchable) { alpha = 128;}
 	if (!IsAttack && level==MARIO_LEVEL_RACOON)
 	{
 		animation_set->at(MARIO_ANI_RACOON_ATTACKRIGHT)->Reset();
 		animation_set->at(MARIO_ANI_RACOON_ATTACKLEFT)->Reset();
-		tail->animation_set->at(8)->Reset();
-		tail->animation_set->at(9)->Reset();
 	}
-	if (level == MARIO_LEVEL_RACOON)
-		tail->Render();
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
 	else
@@ -825,7 +775,6 @@ void CMario::Render()
 							}
 							else
 							{
-								tail->StopRender = false;
 								ani = MARIO_ANI_RACOON_FALLINGLEFT;
 							}
 						}
@@ -1129,7 +1078,8 @@ void CMario::Render()
 		if (firebullet[i]->Attack)
 		firebullet.at(i)->Render();
 	}
-	//RenderBoundingBox();
+	tail->Render();
+	RenderBoundingBox();
 	for (int i = 0; i < effects.size(); i++)
 		effects[i]->Render();
 }
@@ -1146,16 +1096,20 @@ void CMario::SetState(int state)
 			if (IsSitting)
 				y = y - 9;
 			IsSitting = false;
-			if (vx < -MARIO_ACCLERATION*5)
+			if (vx < 0)
 			{
-				vx += MARIO_DECLERATION;
-				IsRollBack = true;
-				tail->StopRender = true;
-				if (IsEndRollBack)
-					IsEndRollBack = false;
+				if (!IsRollBack)
+				{
+					IsRollBack = true;
+					vx -= MARIO_ACCLERATION;
+				}
+				SetState(MARIO_STATE_IDLE);
 			}
 			else
 			{
+				if (IsRollBack)
+					IsRollBack = false;
+				nx = 1;
 				if (!IsRunning)
 				{
 					if (vx <= MARIO_MAX_SPEED)
@@ -1177,9 +1131,7 @@ void CMario::SetState(int state)
 						vx = MARIO_MAX_SPEED * 2;
 					}
 				}
-				tail->SetState(TAIL_STATE_WALKING);
 			}
-			nx = 1;
 		}
 		break;
 	case MARIO_STATE_WALKING_LEFT:
@@ -1188,15 +1140,20 @@ void CMario::SetState(int state)
 			if (IsSitting)
 				y = y - 9;
 			IsSitting = false;
-			if (vx > MARIO_ACCLERATION*5)
+			if (vx > 0)
 			{
-				vx -= MARIO_DECLERATION;
-				IsRollBack = true;
-				if (IsEndRollBack)
-					IsEndRollBack = false;
+				if (!IsRollBack)
+				{
+					IsRollBack = true;
+					vx += MARIO_ACCLERATION;
+				}
+				SetState(MARIO_STATE_IDLE);
 			}
 			else
 			{
+				if (IsRollBack)
+					IsRollBack = false;
+				nx = -1;
 				if (!IsRunning)
 				{
 					if (vx >= -MARIO_MAX_SPEED)
@@ -1218,31 +1175,21 @@ void CMario::SetState(int state)
 						vx = -MARIO_MAX_SPEED * 2;
 					}
 				}
-
-				tail->SetState(TAIL_STATE_WALKING);
 			}
-			nx = -1;
 		}
 		break;
 	case MARIO_STATE_JUMP:
-
 			if (IsOnPlatForm)
 			{
 				vy = -MARIO_JUMP_SPEED_Y;
 				IsOnPlatForm = false;
-				tail->SetState(TAIL_STATE_JUMPING);
 			}
 		break;
 	case MARIO_STATE_IDLE:
-		if (IsRollBack)
-			vx += min(abs(vx), MARIO_FRICTION) * nx;
-		else
-			vx -= min(abs(vx), MARIO_FRICTION) * nx;
+		vx -= min(abs(vx), MARIO_FRICTION) * nx;
 		if (IsSitting)
 			y = y - MARIO_SET_IDLE_Y;
 		IsSitting = false;
-		if (!IsRollBack && !IsSitting)
-			tail->SetState(TAIL_STATE_IDLING);
 		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
@@ -1253,10 +1200,7 @@ void CMario::SetState(int state)
 			if (!IsSitting)
 				y = y + MARIO_SET_IDLE_Y;
 			IsSitting = true;
-			if (IsRollBack)
-				vx += min(abs(vx), MARIO_FRICTION) * nx;
-			else
-				vx -= min(abs(vx), MARIO_FRICTION) * nx;
+			vx -= min(abs(vx), MARIO_FRICTION) * nx;
 		}
 		break;
 	case MARIO_STATE_RUN:
@@ -1285,7 +1229,6 @@ void CMario::SetState(int state)
 		{
 			vy = 0.005;
 			IsSlowFalling = true;
-			tail->SetState(TAIL_STATE_SLOWFALLING);
 		}
 		break;
 	case MARIO_STATE_ATTACK:
@@ -1294,7 +1237,6 @@ void CMario::SetState(int state)
 		if (level == MARIO_LEVEL_RACOON && !IsSitting)
 		{
 			tail->IsActivated = true;
-			tail->SetState(TAIL_STATE_ATTACKING);
 		}
 		break;
 	case MARIO_STATE_GO_HIDDENMAP:
@@ -1334,16 +1276,35 @@ void CMario::GetBoundingBox(float& left, float& top, float& right, float& bottom
 	top = y;
 	if (level != MARIO_LEVEL_SMALL)
 	{
-
-		if (IsSitting)
+		if (level != MARIO_LEVEL_RACOON)
 		{
-			bottom = y + MARIO_SET_SITTING_Y;
-			right = x + MARIO_BIG_BBOX_WIDTH;
+			if (IsSitting)
+			{
+				bottom = y + MARIO_SET_SITTING_Y;
+				right = x + MARIO_BIG_BBOX_WIDTH;
+			}
+			else
+			{
+				bottom = y + MARIO_BIG_BBOX_HEIGHT;
+				right = x + MARIO_BIG_BBOX_WIDTH;
+			}
 		}
-		else
-		{
-			bottom = y + MARIO_BIG_BBOX_HEIGHT;
-			right = x + MARIO_BIG_BBOX_WIDTH;
+		else {
+			if (IsSitting)
+			{
+				left = x + 6;
+				bottom = y + MARIO_SET_SITTING_Y;
+				right = left + MARIO_BIG_BBOX_WIDTH;
+			}
+			else {
+				if (nx > 0) {
+					left = x + 6;
+				}
+				else
+					left = x + 6.5;
+				right = left + MARIO_BIG_BBOX_WIDTH;
+				bottom = top + MARIO_BIG_BBOX_HEIGHT;
+			}
 		}
 	}
 	else
